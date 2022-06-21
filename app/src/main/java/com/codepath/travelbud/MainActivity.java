@@ -25,12 +25,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
     private AutoCompleteTextView actvLocation;
-    RatingBar rbPost;
-    EditText etDescription;
-    ImageButton btnTakePhoto;
-    Button btnPost;
-    ImageView ivPhoto;
-    ImageView ivProfilePicPost;
+    private RatingBar rbPost;
+    private EditText etDescription;
+    private ImageButton btnTakePhoto;
+    private Button btnPost;
+    private ImageView ivPhoto;
+    private ImageView ivProfilePicPost;
 
     public String photoFileName = "photo.jpg";
     File photoFile;
