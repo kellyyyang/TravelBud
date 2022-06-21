@@ -2,6 +2,7 @@ package com.codepath.travelbud;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,10 +15,13 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 
@@ -31,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btnPost;
     private ImageView ivPhoto;
     private ImageView ivProfilePicPost;
+    private TextView tvUsername;
+    private Button btnMap; // TODO: delete after making bottom nav view
 
     public String photoFileName = "photo.jpg";
     File photoFile;
@@ -45,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         getSupportActionBar().hide();
+
+        tvUsername = findViewById(R.id.tvUsername);
+        tvUsername.setText(ParseUser.getCurrentUser().getUsername());
+        ivProfilePicPost = findViewById(R.id.ivProfilePicPost);
+//        ivProfilePicPost
+
+        // TODO: delete after bottom nav
+        btnMap = findViewById(R.id.btnMap);
 
         actvLocation = findViewById(R.id.actvLocation);
         rbPost = findViewById(R.id.rbPost);
@@ -72,6 +86,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // TODO: delete after making bottom nav
+        btnMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goMapsActivity(v);
+            }
+        });
+
+    }
+
+    private void goMapsActivity(View view) {
+        Intent i = new Intent(this, MapsActivity.class);
+        startActivity(i);
+        finish();
     }
 
     private void savePost(ParseUser currentUser, String description, Integer rating, ParseFile image) {
