@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnTakePhoto;
     private Button btnPost;
     private ImageView ivPhoto;
-//    private ImageView ivProfilePicPost;
+    private ImageView ivProfilePicPost;
 
     public String photoFileName = "photo.jpg";
     File photoFile;
