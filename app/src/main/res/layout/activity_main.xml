@@ -43,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="100dp"
         android:text="New Post"
         android:textSize="18sp"
@@ -56,7 +56,7 @@
         android:id="@+id/divider"
         android:layout_width="409dp"
         android:layout_height="1dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintTop_toBottomOf="@+id/tvCreatePostHeading"
         tools:layout_editor_absoluteX="1dp" />
@@ -65,7 +65,7 @@
         android:id="@+id/btnPost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="16dp"
         android:text="Post"
         app:layout_constraintEnd_toEndOf="parent"
@@ -86,15 +86,13 @@
 
     <AutoCompleteTextView
         android:id="@+id/actvLocation"
-        android:layout_width="wrap_content"
+        android:layout_width="379dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="5dp"
-        android:completionHint="Location"
+        android:hint="location"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvLocation"
-        tools:text="Location" />
+        app:layout_constraintTop_toBottomOf="@+id/tvLocation" />
 
     <RatingBar
         android:id="@+id/rbPost"
