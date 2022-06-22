@@ -3,6 +3,7 @@ package com.codepath.travelbud;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.codepath.travelbud.fragments.ComposeFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -32,6 +34,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
+    final FragmentManager fragmentManager = getSupportFragmentManager();
 
     private BottomNavigationView bottomNavigation;
 
@@ -51,20 +54,27 @@ public class MainActivity extends AppCompatActivity {
                 switch (menuItem.getItemId()) {
                     case R.id.action_home:
                         Toast.makeText(MainActivity.this, "Home!", Toast.LENGTH_SHORT).show();
+                        fragment = new ComposeFragment();  // TODO: update fragment
                         break;
                     case R.id.action_search:
                         Toast.makeText(MainActivity.this, "Search!", Toast.LENGTH_SHORT).show();
+                        fragment = new ComposeFragment();  // TODO: update fragment
                         break;
                     case R.id.action_compose:
                         Toast.makeText(MainActivity.this, "Compose!", Toast.LENGTH_SHORT).show();
+                        fragment = new ComposeFragment();
                         break;
                     case R.id.action_profile:
                     default:
                         Toast.makeText(MainActivity.this, "Profile!", Toast.LENGTH_SHORT).show();
+                        fragment = new ComposeFragment(); // TODO: update fragment
                         break;
                 }
+                fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
                 return true;
             }
         });
+        // Set default selection
+        bottomNavigation.setSelectedItemId(R.id.action_home);
     }
 }
