@@ -47,7 +47,6 @@ public class ComposeFragment extends Fragment {
     private ImageView ivPhoto;
     private ImageView ivProfilePicPost;
     private TextView tvUsername;
-    private Button btnMap; // TODO: delete after making bottom nav view
     private TextView tvRating; // TODO : delete
 
     // camera variables
@@ -86,9 +85,6 @@ public class ComposeFragment extends Fragment {
         ivProfilePicPost = view.findViewById(R.id.ivProfilePicPost);
         tvRating = view.findViewById(R.id.tvRating);
 
-        // TODO: delete after bottom nav
-        btnMap = view.findViewById(R.id.btnMap);
-
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,14 +100,6 @@ public class ComposeFragment extends Fragment {
                 ParseUser currentUser = ParseUser.getCurrentUser();
                 image = new ParseFile(photoFile);
                 savePost(currentUser, description, rating, image); // TODO: check if image == null
-            }
-        });
-
-        // TODO: delete after making bottom nav
-        btnMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goMapsActivity(v);
             }
         });
     }
