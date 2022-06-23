@@ -31,6 +31,7 @@ import com.codepath.travelbud.MapsActivity;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -39,6 +40,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -59,8 +61,9 @@ public class ComposeFragment extends Fragment {
     private ImageView ivPhoto;
     private ImageView ivProfilePicPost;
     private TextView tvUsername;
-    private TextView tvRating; // TODO : delete
+    private TextView tvRating;
     private AutocompleteSupportFragment autocompleteFragment;
+    private LatLng latlong;
 
     // camera variables
     public String photoFileName = "photo.jpg";
@@ -118,7 +121,7 @@ public class ComposeFragment extends Fragment {
 
         // Initialize the AutocompleteSupportFragment
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -129,6 +132,7 @@ public class ComposeFragment extends Fragment {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+                latlong = place.getLatLng();
             }
         });
 
@@ -154,18 +158,18 @@ public class ComposeFragment extends Fragment {
                 } else if (photoFile != null && ivPhoto.getDrawable() != null) {
                     image = new ParseFile(photoFile);
                 }
-                Log.i(TAG, "photo null?" + photoFile);
                 ParseUser currentUser = ParseUser.getCurrentUser();
-                savePost(currentUser, description, rating, image); // TODO: check if image == null
+                savePost(currentUser, description, rating, image, latlong);
             }
         });
     }
 
-    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image) {
+    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image, LatLng latlong) {
         Post post = new Post();
         post.setDescription(description);
         post.setUser(currentUser);
         post.setRating(rating);
+        post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
         if (image != null) {
             post.setImage(image);
         } else if (image == null) {
@@ -184,6 +188,7 @@ public class ComposeFragment extends Fragment {
                     etDescription.setText("");
                     rbPost.setRating(0);
                     ivPhoto.setVisibility(View.INVISIBLE);
+                    autocompleteFragment.setText("");
                 }
                 return;
             }
