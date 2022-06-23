@@ -144,15 +144,18 @@ public class ComposeFragment extends Fragment {
             public void onClick(View v) {
                 String description = etDescription.getText().toString();
                 float rating = rbPost.getRating();
-                ParseFile image;
-                if (description.length() < MIN_DESCRIPTION_LEN) {
-                    Toast.makeText(getContext(), "Your caption must be at least 90 characters.", Toast.LENGTH_LONG).show();
-                    return;
-                } if (photoFile == null || ivPhoto.getDrawable() == null) {
+                ParseFile image = null;
+//                if (description.length() < MIN_DESCRIPTION_LEN) {
+//                    Toast.makeText(getContext(), "Your caption must be at least 90 characters.", Toast.LENGTH_LONG).show();
+//                    return;
+//                }
+                if (photoFile == null || ivPhoto.getDrawable() == null) {
                     image = null;
+                } else if (photoFile != null && ivPhoto.getDrawable() != null) {
+                    image = new ParseFile(photoFile);
                 }
+                Log.i(TAG, "photo null?" + photoFile);
                 ParseUser currentUser = ParseUser.getCurrentUser();
-                image = new ParseFile(photoFile);
                 savePost(currentUser, description, rating, image); // TODO: check if image == null
             }
         });
