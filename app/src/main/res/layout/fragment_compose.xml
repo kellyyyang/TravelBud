@@ -94,23 +94,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvUsername" />
 
-    <AutoCompleteTextView
-        android:id="@+id/actvLocation"
-        android:layout_width="379dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:hint="address"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvLocation" />
-
     <fragment
         android:id="@+id/autocomplete_fragment"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        app:layout_constraintTop_toBottomOf="@+id/ivPhoto" />
+        app:layout_constraintTop_toBottomOf="@+id/tvLocation" />
 
     <RatingBar
         android:id="@+id/rbPost"
@@ -118,11 +108,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="6dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/actvLocation"
+        android:layout_marginTop="5dp"
         android:numStars="5"
-        android:stepSize="0.5" />
+        android:stepSize="1"
+        android:isIndicator="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/autocomplete_fragment" />
 
     <EditText
         android:id="@+id/etDescription"
@@ -169,9 +160,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="3dp"
         app:layout_constraintStart_toEndOf="@+id/rbPost"
-        app:layout_constraintTop_toBottomOf="@+id/actvLocation"
+        app:layout_constraintTop_toBottomOf="@+id/autocomplete_fragment"
         tools:text="Your rating is: " />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -52,7 +52,6 @@ public class ComposeFragment extends Fragment {
 
     public static final String TAG = "ComposeFragment";
 
-    private AutoCompleteTextView actvLocation;
     private RatingBar rbPost;
     private EditText etDescription;
     private ImageButton btnTakePhoto;
@@ -90,7 +89,6 @@ public class ComposeFragment extends Fragment {
         tvUsername.setText(ParseUser.getCurrentUser().getUsername());
         ivProfilePicPost = view.findViewById(R.id.ivProfilePicPost);
 
-        actvLocation = view.findViewById(R.id.actvLocation);
         rbPost = view.findViewById(R.id.rbPost);
         etDescription = view.findViewById(R.id.etDescription);
         btnTakePhoto = view.findViewById(R.id.btnTakePhoto);
@@ -134,11 +132,18 @@ public class ComposeFragment extends Fragment {
             }
         });
 
+        rbPost.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                tvRating.setText("Your rating is: " + rbPost.getRating());
+            }
+        });
+
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String description = etDescription.getText().toString();
-                Integer rating = rbPost.getNumStars();
+                float rating = rbPost.getRating();
                 ParseFile image;
                 if (description.length() < MIN_DESCRIPTION_LEN) {
                     Toast.makeText(getContext(), "Your caption must be at least 90 characters.", Toast.LENGTH_LONG).show();
@@ -153,7 +158,7 @@ public class ComposeFragment extends Fragment {
         });
     }
 
-    private void savePost(ParseUser currentUser, String description, Integer rating, ParseFile image) {
+    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image) {
         Post post = new Post();
         post.setDescription(description);
         post.setUser(currentUser);

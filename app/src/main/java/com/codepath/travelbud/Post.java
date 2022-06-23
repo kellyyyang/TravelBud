@@ -39,6 +39,6 @@ public class Post extends ParseObject {
 
     public Integer getRating() { return getInt(KEY_RATING); }
 
-    public void setRating(Integer rating) { put(KEY_RATING, rating); }
+    public void setRating(Float rating) { put(KEY_RATING, rating); }
 
 }
