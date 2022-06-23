@@ -1,6 +1,12 @@
 package com.codepath.travelbud.fragments;
 
+import static com.codepath.travelbud.BuildConfig.MAPS_API_KEY;
+import static com.parse.Parse.getApplicationContext;
+
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,6 +30,12 @@ import com.codepath.travelbud.MainActivity;
 import com.codepath.travelbud.MapsActivity;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -31,6 +43,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -48,6 +61,7 @@ public class ComposeFragment extends Fragment {
     private ImageView ivProfilePicPost;
     private TextView tvUsername;
     private TextView tvRating; // TODO : delete
+    private AutocompleteSupportFragment autocompleteFragment;
 
     // camera variables
     public String photoFileName = "photo.jpg";
@@ -85,6 +99,41 @@ public class ComposeFragment extends Fragment {
         ivProfilePicPost = view.findViewById(R.id.ivProfilePicPost);
         tvRating = view.findViewById(R.id.tvRating);
 
+        // Initialize the SDK
+        ApplicationInfo appInfo = null;
+        String apiKey = null;
+        if (!Places.isInitialized()) {
+            try {
+                appInfo = getApplicationContext().getPackageManager().getApplicationInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Error with getting meta data: ", e);
+            }
+            if (appInfo != null) {
+                apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
+            }
+
+            Places.initialize(getApplicationContext(), apiKey);
+        }
+
+        // Create a new PlacesClient instance
+        PlacesClient placesClient = Places.createClient(getContext());
+
+        // Initialize the AutocompleteSupportFragment
+        autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "An error occurred: " + status);
+            }
+
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
+            }
+        });
+
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,11 +151,6 @@ public class ComposeFragment extends Fragment {
                 savePost(currentUser, description, rating, image); // TODO: check if image == null
             }
         });
-    }
-
-    private void goMapsActivity(View view) {
-        Intent i = new Intent(getContext(), MapsActivity.class);
-        startActivity(i);
     }
 
     private void savePost(ParseUser currentUser, String description, Integer rating, ParseFile image) {
