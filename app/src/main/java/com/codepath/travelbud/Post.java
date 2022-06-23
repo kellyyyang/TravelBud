@@ -2,6 +2,7 @@ package com.codepath.travelbud;
 
 import com.parse.ParseClassName;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
@@ -12,6 +13,7 @@ public class Post extends ParseObject {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_USER = "user";
     public static final String KEY_RATING = "rating";
+    public static final String KEY_LOCATION = "location";
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
@@ -40,5 +42,9 @@ public class Post extends ParseObject {
     public Integer getRating() { return getInt(KEY_RATING); }
 
     public void setRating(Float rating) { put(KEY_RATING, rating); }
+
+    public ParseGeoPoint getLocation() { return getParseGeoPoint(KEY_LOCATION); }
+
+    public void setLocation(ParseGeoPoint latlong) { put(KEY_LOCATION, latlong); }
 
 }
