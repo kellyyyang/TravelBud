@@ -12,6 +12,7 @@
         <entry key="app/src/main/res/layout/fragment_maps.xml" value="0.241998291015625" />
         <entry key="app/src/main/res/layout/fragment_maps2.xml" value="0.20416666666666666" />
         <entry key="app/src/main/res/menu/menu_bottom_navigation.xml" value="0.2171875" />
+        <entry key="app/src/main/res/xml/fileprovider.xml" value="0.1" />
       </map>
     </option>
   </component>
