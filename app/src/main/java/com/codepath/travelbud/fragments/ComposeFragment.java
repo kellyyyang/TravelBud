@@ -26,7 +26,9 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +41,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.codepath.travelbud.BitmapScaler;
 import com.codepath.travelbud.MainActivity;
 import com.codepath.travelbud.MapsActivity;
 import com.codepath.travelbud.Post;
@@ -57,7 +60,11 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -76,6 +83,7 @@ public class ComposeFragment extends Fragment {
     private TextView tvUsername;
     private TextView tvRating;
     private AutocompleteSupportFragment autocompleteFragment;
+    ActivityResultLauncher<Intent> cameraResultLauncher;
     private LatLng latlong;
 
     // camera variables
@@ -85,6 +93,8 @@ public class ComposeFragment extends Fragment {
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
 
     public static final Integer MIN_DESCRIPTION_LEN = 90;
+
+    Activity activity = new Activity();
 
     public ComposeFragment() {
         // Required empty public constructor
@@ -162,22 +172,55 @@ public class ComposeFragment extends Fragment {
         // Load the taken image into a preview
         // Result was a failure
         // TODO: change
-        ActivityResultLauncher<Intent> cameraResultLauncher = registerForActivityResult(
+        cameraResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
+                result -> {
                         if (result.getResultCode() == RESULT_OK) {
                             // by this point we have the camera photo on disk
-                            Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-                            // RESIZE BITMAP, see section below
-                            // Load the taken image into a preview
 
-                            ivPhoto.setImageBitmap(takenImage);
+                            DisplayMetrics displaymetrics = new DisplayMetrics();
+                            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                            int height = displaymetrics.heightPixels;
+                            int width = displaymetrics.widthPixels;
+
+                            Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
+                            // by this point we have the camera photo on disk
+                            Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+                            Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, width); // TODO: change
+
+                            // Configure byte output stream
+                            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                            // Compress the image further
+                            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+                            // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
+                            File resizedFile = getPhotoFileUri(photoFileName + "_resized");
+                            try {
+                                resizedFile.createNewFile();
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error with creating a new file for resized bitmap: " + e);
+                            }
+                            FileOutputStream fos = null;
+                            try {
+                                fos = new FileOutputStream(resizedFile);
+                            } catch (FileNotFoundException e) {
+                                Log.e(TAG, "Error with FileOutputStream: " + e);
+                            }
+                            // Write the bytes of the bitmap to file
+                            try {
+                                fos.write(bytes.toByteArray());
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error with writing the bytes of the bitmap to file: " + e);
+                            }
+                            try {
+                                fos.close();
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error with closing: " + e);
+                            }
+                            ivPhoto.setImageBitmap(BitmapFactory.decodeFile(resizedFile.getPath()));
+
                         } else { // Result was a failure
                             Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
                         }
-                    }
                 }
         );
 
@@ -225,7 +268,8 @@ public class ComposeFragment extends Fragment {
         // So as long as the result is not null, it's safe to use the intent.
         if (intent.resolveActivity(getContext().getPackageManager()) != null) {
             // Start the image capture intent to take photo
-            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+            cameraResultLauncher.launch(intent);
+//            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
         }
     }
 
