@@ -88,8 +88,8 @@ public class ComposeFragment extends Fragment {
 
     // camera variables
     public String photoFileName = "photo.jpg";
-    File photoFile;
-    public final String APP_TAG = "TravelBud";
+    public File photoFile;
+    public String imageUrl;
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
 
     public static final Integer MIN_DESCRIPTION_LEN = 90;
@@ -167,26 +167,19 @@ public class ComposeFragment extends Fragment {
             }
         });
 
-        // by this point we have the camera photo on disk
-        // RESIZE BITMAP, see section below
-        // Load the taken image into a preview
-        // Result was a failure
-        // TODO: change
         cameraResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                         if (result.getResultCode() == RESULT_OK) {
                             // by this point we have the camera photo on disk
-
                             DisplayMetrics displaymetrics = new DisplayMetrics();
                             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-                            int height = displaymetrics.heightPixels;
+//                            int height = displaymetrics.heightPixels;
                             int width = displaymetrics.widthPixels;
 
                             Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
-                            // by this point we have the camera photo on disk
                             Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
-                            Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, width); // TODO: change
+                            Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, width);
 
                             // Configure byte output stream
                             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
