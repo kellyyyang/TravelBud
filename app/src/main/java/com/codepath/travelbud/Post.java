@@ -14,6 +14,7 @@ public class Post extends ParseObject {
     public static final String KEY_USER = "user";
     public static final String KEY_RATING = "rating";
     public static final String KEY_LOCATION = "location";
+    public static final String KEY_IMAGE_URL = "image_url";
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
@@ -46,5 +47,9 @@ public class Post extends ParseObject {
     public ParseGeoPoint getLocation() { return getParseGeoPoint(KEY_LOCATION); }
 
     public void setLocation(ParseGeoPoint latlong) { put(KEY_LOCATION, latlong); }
+
+    public String getImageUrl() { return getString(KEY_IMAGE_URL); }
+
+    public void setImageUrl(String imageUrl) {put(KEY_IMAGE_URL, imageUrl); }
 
 }
