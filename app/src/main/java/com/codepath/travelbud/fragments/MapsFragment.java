@@ -51,11 +51,8 @@ public class MapsFragment extends Fragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             mMap = googleMap;
-//            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-//            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here I am!");
-//            googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-//            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5));
-//            googleMap.addMarker(markerOptions);
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
     };
 
