@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "Home!", Toast.LENGTH_SHORT).show();
                         fragment = new HomeFragment();
                         break;
-                    case R.id.action_search:
+                    case R.id.action_map:
                         Toast.makeText(MainActivity.this, "Search!", Toast.LENGTH_SHORT).show();
                         fragment = new MapsFragment();
                         break;
