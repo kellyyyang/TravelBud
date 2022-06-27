@@ -13,6 +13,7 @@ import com.codepath.travelbud.fragments.ComposeFragment;
 import com.codepath.travelbud.fragments.HomeFragment;
 import com.codepath.travelbud.fragments.MapsFragment;
 import com.codepath.travelbud.fragments.ProfileFragment;
+import com.codepath.travelbud.fragments.SearchFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,12 +41,16 @@ public class MainActivity extends AppCompatActivity {
                         fragment = new HomeFragment();
                         break;
                     case R.id.action_map:
-                        Toast.makeText(MainActivity.this, "Search!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Map!", Toast.LENGTH_SHORT).show();
                         fragment = new MapsFragment();
                         break;
                     case R.id.action_compose:
                         Toast.makeText(MainActivity.this, "Compose!", Toast.LENGTH_SHORT).show();
                         fragment = new ComposeFragment();
+                        break;
+                    case R.id.action_search:
+                        Toast.makeText(MainActivity.this, "Search!", Toast.LENGTH_SHORT).show();
+                        fragment = new SearchFragment();
                         break;
                     case R.id.action_profile:
                     default:
