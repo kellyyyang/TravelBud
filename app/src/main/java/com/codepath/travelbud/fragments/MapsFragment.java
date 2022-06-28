@@ -49,7 +49,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
     Location currentLocation;
     AutocompleteSupportFragment autocompleteSupportFragment;
     FusedLocationProviderClient fusedLocationProviderClient;
-//    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
+    //    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
 
@@ -63,8 +63,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
-//        private GoogleMap googleMap;
-
         /**
          * Manipulates the map once available.
          * This callback is triggered when the map is ready to be used.
@@ -77,12 +75,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
             mMap = googleMap;
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(true);
-            }
             enableMyLocation();
-//            mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
     };
 
@@ -166,63 +159,56 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestLocationPermission();
         }
-//        else {
-//            checkBackgroundLocation();
-//        }
     }
 
-//    private void checkBackgroundLocation() {
-//    }
-
-    private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_CODE);
-    }
-
-    private void updateCurrentLocation() {
-        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here I am!");
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
-        mMap.addMarker(markerOptions);
-    }
-
-    /**
-     * Enables the My Location layer if the fine location permission has been granted.
-     */
-    @SuppressLint("MissingPermission")
-    private void enableMyLocation() {
-        // 1. Check if permissions are granted, if so, enable the my location layer
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            return;
+        private void requestLocationPermission () {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
         }
 
-        // 2. Otherwise, request location permissions from the user.
-        PermissionUtils.requestPermission((AppCompatActivity) getActivity(), LOCATION_PERMISSION_REQUEST_CODE, Manifest.permission.ACCESS_FINE_LOCATION, true);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
+        private void updateCurrentLocation () {
+            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here I am!");
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+            mMap.addMarker(markerOptions);
         }
 
-        if (PermissionUtils.isPermissionGranted(permissions, grantResults,
-                Manifest.permission.ACCESS_FINE_LOCATION) || PermissionUtils
-                .isPermissionGranted(permissions, grantResults,
-                        Manifest.permission.ACCESS_COARSE_LOCATION)) {
-            // Enable the my location layer if the permission has been granted.
-            enableMyLocation();
-        } else {
-            // Permission was denied. Display an error message
-            // Display the missing permission error dialog when the fragments resume.
-            permissionDenied = true;
+        /**
+         * Enables the My Location layer if the fine location permission has been granted.
+         */
+        @SuppressLint("MissingPermission")
+        private void enableMyLocation () {
+            // 1. Check if permissions are granted, if so, enable the my location layer
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+                return;
+            }
+
+            // 2. Otherwise, request location permissions from the user.
+            PermissionUtils.requestPermission((AppCompatActivity) getActivity(), LOCATION_PERMISSION_REQUEST_CODE, Manifest.permission.ACCESS_FINE_LOCATION, true);
+        }
+
+        @Override
+        public void onRequestPermissionsResult ( int requestCode, @NonNull String[] permissions,
+        @NonNull int[] grantResults){
+            if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                return;
+            }
+
+            if (PermissionUtils.isPermissionGranted(permissions, grantResults,
+                    Manifest.permission.ACCESS_FINE_LOCATION) || PermissionUtils
+                    .isPermissionGranted(permissions, grantResults,
+                            Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                // Enable the my location layer if the permission has been granted.
+                enableMyLocation();
+            } else {
+                // Permission was denied. Display an error message
+                // Display the missing permission error dialog when the fragments resume.
+                permissionDenied = true;
+            }
         }
     }
-
-}
