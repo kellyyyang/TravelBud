@@ -49,7 +49,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
     Location currentLocation;
     AutocompleteSupportFragment autocompleteSupportFragment;
     FusedLocationProviderClient fusedLocationProviderClient;
-    //    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
 
