@@ -4,6 +4,7 @@ import static com.parse.Parse.getApplicationContext;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.codepath.travelbud.PermissionUtils;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -40,15 +42,24 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 
 import java.util.Arrays;
 
-public class MapsFragment extends Fragment {
+public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     public static final String TAG = "MapsFragment";
 
     Location currentLocation;
     AutocompleteSupportFragment autocompleteSupportFragment;
     FusedLocationProviderClient fusedLocationProviderClient;
+    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    /**
+     * Flag indicating whether a requested permission has been denied after returning in {@link
+     * #onRequestPermissionsResult(int, String[], int[])}.
+     */
+    private boolean permissionDenied = false;
+
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -67,8 +78,11 @@ public class MapsFragment extends Fragment {
         public void onMapReady(@NonNull GoogleMap googleMap) {
             mMap = googleMap;
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {mMap.setMyLocationEnabled(true);}
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                    == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            }
+            enableMyLocation();
+//            mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
     };
 
@@ -117,7 +131,7 @@ public class MapsFragment extends Fragment {
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 LatLng placeLatLng = place.getLatLng();
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(placeLatLng));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 5));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 10));
             }
 
         });
@@ -148,11 +162,67 @@ public class MapsFragment extends Fragment {
         });
     }
 
+    private void checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestLocationPermission();
+        }
+//        else {
+//            checkBackgroundLocation();
+//        }
+    }
+
+//    private void checkBackgroundLocation() {
+//    }
+
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_CODE);
+    }
+
     private void updateCurrentLocation() {
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Here I am!");
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 5));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
         mMap.addMarker(markerOptions);
     }
+
+    /**
+     * Enables the My Location layer if the fine location permission has been granted.
+     */
+    @SuppressLint("MissingPermission")
+    private void enableMyLocation() {
+        // 1. Check if permissions are granted, if so, enable the my location layer
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            return;
+        }
+
+        // 2. Otherwise, request location permissions from the user.
+        PermissionUtils.requestPermission((AppCompatActivity) getActivity(), LOCATION_PERMISSION_REQUEST_CODE, Manifest.permission.ACCESS_FINE_LOCATION, true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            return;
+        }
+
+        if (PermissionUtils.isPermissionGranted(permissions, grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION) || PermissionUtils
+                .isPermissionGranted(permissions, grantResults,
+                        Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            // Enable the my location layer if the permission has been granted.
+            enableMyLocation();
+        } else {
+            // Permission was denied. Display an error message
+            // Display the missing permission error dialog when the fragments resume.
+            permissionDenied = true;
+        }
+    }
+
 }
