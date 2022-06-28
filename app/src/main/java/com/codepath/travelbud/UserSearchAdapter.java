@@ -11,20 +11,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.parse.Parse;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.ViewHolder> {
 
     private Context context;
     private List<ParseUser> users;
     private String KEY_PROFILEPIC = "profilePic";
+    private ArrayList<ParseUser> arrayList; //used for the search bar
 
     public UserSearchAdapter(Context context, List<ParseUser> users) {
         this.context = context;
         this.users = users;
+        arrayList = new ArrayList<>();
+        this.arrayList.addAll(users);
     }
 
     @NonNull
@@ -67,4 +74,22 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
             }
         }
     }
+
+    // filter username in Search Bar
+    public void filter(String characterText, List<ParseUser> searchUsers) {
+        characterText = characterText.toLowerCase();
+        users.clear();
+        if (characterText.length() == 0) {
+            users.addAll(searchUsers);
+        } else {
+            users.clear();
+            for (ParseUser user: searchUsers) {
+                if (user.getUsername().toLowerCase(Locale.getDefault()).contains(characterText)) {
+                    users.add(user);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
 }
