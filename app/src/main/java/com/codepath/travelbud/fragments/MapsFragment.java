@@ -49,7 +49,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
     Location currentLocation;
     AutocompleteSupportFragment autocompleteSupportFragment;
     FusedLocationProviderClient fusedLocationProviderClient;
-    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
+//    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
 
@@ -79,7 +79,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             mMap = googleMap;
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+                mMap.setMyLocationEnabled(true);
             }
             enableMyLocation();
 //            mMap.getUiSettings().setMyLocationButtonEnabled(true);
