@@ -45,6 +45,8 @@ import java.util.Locale;
 public class SearchFragment extends Fragment {
 
     public static final String TAG = "SearchFragment";
+
+    private String KEY_USERNAME = "username";
     private RecyclerView rvUsersSearch;
     private UserSearchAdapter adapter;
     private List<ParseUser> allUsers;
@@ -123,6 +125,7 @@ public class SearchFragment extends Fragment {
 
     private void queryUsers() {
         ParseQuery<ParseUser> query = ParseQuery.getQuery("_User");
+        query.addAscendingOrder(KEY_USERNAME);
         query.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> users, ParseException e) {
@@ -135,8 +138,6 @@ public class SearchFragment extends Fragment {
                 }
 
                 allUsers.addAll(users);
-
-                // TODO: make searchUsers the filtered array
 
                 etSearchUsers.addTextChangedListener(new TextWatcher() {
                     @Override
