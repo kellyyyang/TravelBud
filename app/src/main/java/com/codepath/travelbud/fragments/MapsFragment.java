@@ -49,7 +49,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
     Location currentLocation;
     AutocompleteSupportFragment autocompleteSupportFragment;
     FusedLocationProviderClient fusedLocationProviderClient;
-    private static final String[] LOCATION_PERMS={ Manifest.permission.ACCESS_FINE_LOCATION };
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
 
@@ -77,12 +76,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
             mMap = googleMap;
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            }
             enableMyLocation();
-//            mMap.getUiSettings().setMyLocationButtonEnabled(true);
         }
     };
 
@@ -161,18 +155,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             }
         });
     }
-
-    private void checkLocationPermission() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestLocationPermission();
-        }
-//        else {
-//            checkBackgroundLocation();
-//        }
-    }
-
-//    private void checkBackgroundLocation() {
-//    }
 
     private void requestLocationPermission() {
         ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, REQUEST_CODE);
