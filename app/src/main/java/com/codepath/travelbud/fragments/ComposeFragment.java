@@ -12,7 +12,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -57,6 +59,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -82,15 +85,19 @@ public class ComposeFragment extends Fragment {
     private ImageView ivProfilePicPost;
     private TextView tvUsername;
     private TextView tvRating;
+    private ImageButton btnChoosePhoto;
     private AutocompleteSupportFragment autocompleteFragment;
     ActivityResultLauncher<Intent> cameraResultLauncher;
+    ActivityResultLauncher<Intent> galleryResultLauncher;
     private LatLng latlong;
 
     // camera variables
     public String photoFileName = "photo.jpg";
     public File photoFile;
+    public ParseFile galleryPhoto;
     public String imageUrl;
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
+    public final static int PICK_PHOTO_CODE = 1046;
 
     public static final Integer MIN_DESCRIPTION_LEN = 90;
 
@@ -123,6 +130,7 @@ public class ComposeFragment extends Fragment {
         ivPhoto = view.findViewById(R.id.ivPhoto);
         ivProfilePicPost = view.findViewById(R.id.ivProfilePicPost);
         tvRating = view.findViewById(R.id.tvRating);
+        btnChoosePhoto = view.findViewById(R.id.btnChoosePhoto);
 
         // Initialize the SDK
         ApplicationInfo appInfo = null;
@@ -217,6 +225,55 @@ public class ComposeFragment extends Fragment {
                 }
         );
 
+//        galleryResultLauncher = registerForActivityResult(
+//                new ActivityResultContracts.StartActivityForResult(),
+//                result -> {
+//                    if (result.getResultCode() == RESULT_OK) {
+//
+//                        DisplayMetrics displaymetrics = new DisplayMetrics();
+//                        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+//                        int width = displaymetrics.widthPixels;
+//
+//                        Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
+//                        Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+//                        Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, width);
+//
+//                        // Configure byte output stream
+//                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//                        // Compress the image further
+//                        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+//                        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
+//                        File resizedFile = getPhotoFileUri(photoFileName + "_resized");
+//                        try {
+//                            resizedFile.createNewFile();
+//                        } catch (IOException e) {
+//                            Log.e(TAG, "Error with creating a new file for resized bitmap: " + e);
+//                        }
+//                        FileOutputStream fos = null;
+//                        try {
+//                            fos = new FileOutputStream(resizedFile);
+//                        } catch (FileNotFoundException e) {
+//                            Log.e(TAG, "Error with FileOutputStream: " + e);
+//                        }
+//                        // Write the bytes of the bitmap to file
+//                        try {
+//                            fos.write(bytes.toByteArray());
+//                        } catch (IOException e) {
+//                            Log.e(TAG, "Error with writing the bytes of the bitmap to file: " + e);
+//                        }
+//                        try {
+//                            fos.close();
+//                        } catch (IOException e) {
+//                            Log.e(TAG, "Error with closing: " + e);
+//                        }
+//                        ivPhoto.setImageBitmap(BitmapFactory.decodeFile(resizedFile.getPath()));
+//
+//                    } else { // Result was a failure
+//                        Toast.makeText(getContext(), "Picture wasn't chosen!", Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//        );
+
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -228,10 +285,16 @@ public class ComposeFragment extends Fragment {
 //                    return;
 //                }
                 if (photoFile == null || ivPhoto.getDrawable() == null) {
+                    Log.i(TAG, "photoFile is null " + photoFile.toString() + ", " + ivPhoto.toString());
                     image = null;
-                } else if (photoFile != null && ivPhoto.getDrawable() != null) {
+                }
+                else if (photoFile != null && ivPhoto.getDrawable() != null) {
+                    Log.i(TAG, "photoFile is NOT null " + photoFile.toString() + ", " + ivPhoto.toString());
                     image = new ParseFile(photoFile);
                 }
+//                else {
+//                    image = new ParseFile(photoFile);
+//                }
                 ParseUser currentUser = ParseUser.getCurrentUser();
                 savePost(currentUser, description, rating, image, latlong);
             }
@@ -243,6 +306,14 @@ public class ComposeFragment extends Fragment {
                 onLaunchCamera(v);
             }
         });
+
+        btnChoosePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPickPhoto(v);
+            }
+        });
+
     }
 
     public void onLaunchCamera(View view) {
@@ -314,7 +385,7 @@ public class ComposeFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with saving post");
+                    Log.e(TAG, "Issue with saving post " + e);
                     Toast.makeText(getContext(), "Issue with saving post!", Toast.LENGTH_SHORT).show();
                 } else {
                     Log.i(TAG, "Post has been saved");
@@ -327,5 +398,81 @@ public class ComposeFragment extends Fragment {
                 return;
             }
         });
+    }
+
+    // Trigger gallery selection for a photo
+    public void onPickPhoto(View view) {
+        // Create intent for picking a photo from the gallery
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            // Bring up gallery to select a photo
+//            galleryResultLauncher.launch(intent);
+            startActivityForResult(intent, PICK_PHOTO_CODE);
+        }
+    }
+
+    public Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if(Build.VERSION.SDK_INT > 27){
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), photoUri);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if ((data != null) && requestCode == PICK_PHOTO_CODE) {
+            Uri photoUri = data.getData();
+
+            // Load the image located at photoUri into selectedImage
+            Bitmap selectedImage = loadFromUri(photoUri);
+
+            DisplayMetrics displaymetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+            int width = displaymetrics.widthPixels;
+            Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(selectedImage, width);
+
+            // start: upload gallery image to parse
+
+            Bitmap bitmap = selectedImage;
+            // Convert it to byte
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            // Compress image to lower quality scale 1 - 100
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] image = stream.toByteArray();
+
+            // Create the ParseFile
+            galleryPhoto = new ParseFile("androidbegin.png", image);
+            // Upload the image into Parse Cloud
+            galleryPhoto.saveInBackground();
+            try {
+                photoFile = galleryPhoto.getFile();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            Log.i(TAG, "photoFile for chosen picture: " + photoFile);
+
+            // Load the selected image into a preview
+            ivPhoto = getView().findViewById(R.id.ivPhoto);
+            ivPhoto.setImageBitmap(resizedBitmap);
+
+
+
+        }
     }
 }
