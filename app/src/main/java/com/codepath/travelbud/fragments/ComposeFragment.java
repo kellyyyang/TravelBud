@@ -370,7 +370,7 @@ public class ComposeFragment extends Fragment {
         if (image != null) {
             post.setImage(image);
         } else {
-            ivPhoto.setVisibility(View.INVISIBLE);
+            ivPhoto.setVisibility(View.GONE);
         }
 
         post.saveInBackground(new SaveCallback() {
