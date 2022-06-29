@@ -1,12 +1,10 @@
 package com.codepath.travelbud.fragments;
 
 import static android.app.Activity.RESULT_OK;
-import static com.codepath.travelbud.BuildConfig.MAPS_API_KEY;
 import static com.parse.Parse.getApplicationContext;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -17,24 +15,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -44,22 +37,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.codepath.travelbud.BitmapScaler;
-import com.codepath.travelbud.MainActivity;
-import com.codepath.travelbud.MapsActivity;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -90,6 +78,7 @@ public class ComposeFragment extends Fragment {
     ActivityResultLauncher<Intent> cameraResultLauncher;
     ActivityResultLauncher<Intent> galleryResultLauncher;
     private LatLng latlong;
+    String location;
 
     // camera variables
     public String photoFileName = "photo.jpg";
@@ -165,6 +154,7 @@ public class ComposeFragment extends Fragment {
             public void onPlaceSelected(@NonNull Place place) {
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 latlong = place.getLatLng();
+                location = place.getName();
             }
         });
 
@@ -375,10 +365,12 @@ public class ComposeFragment extends Fragment {
         post.setUser(currentUser);
         post.setRating(rating);
         post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
+        post.setLocationString(location);
+
         if (image != null) {
             post.setImage(image);
-        } else if (image == null) {
-            ivPhoto.setVisibility(View.GONE);
+        } else {
+            ivPhoto.setVisibility(View.INVISIBLE);
         }
 
         post.saveInBackground(new SaveCallback() {

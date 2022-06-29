@@ -9,13 +9,14 @@
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/fragment_blank.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/fragment_compose.xml" value="0.44128265380859377" />
+        <entry key="app/src/main/res/layout/fragment_compose.xml" value="0.3634453781512605" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/fragment_maps.xml" value="0.241998291015625" />
         <entry key="app/src/main/res/layout/fragment_maps2.xml" value="0.20416666666666666" />
         <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.1765625" />
         <entry key="app/src/main/res/layout/fragment_search.xml" value="0.3524581909179688" />
         <entry key="app/src/main/res/layout/fragment_viewusers.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/item_post.xml" value="0.5214008305696833" />
         <entry key="app/src/main/res/layout/item_user_search.xml" value="0.37817230224609377" />
         <entry key="app/src/main/res/layout/snippet_search_toolbar.xml" value="0.376409912109375" />
         <entry key="app/src/main/res/layout/snippet_view_user_toolbar.xml" value="0.1" />
