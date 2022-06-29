@@ -4,6 +4,7 @@ import static com.parse.Parse.getApplicationContext;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -25,14 +26,12 @@ import com.codepath.travelbud.PermissionUtils;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -74,6 +73,8 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         @Override
         public void onMapReady(@NonNull GoogleMap googleMap) {
             mMap = googleMap;
+//            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
             enableMyLocation();
         }
     };
@@ -89,6 +90,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        checkLocationPermission();
 
         // initialize Places
         ApplicationInfo appInfo = null;
@@ -185,7 +187,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
                 mMap.setMyLocationEnabled(true);
                 return;
             }
-
             // 2. Otherwise, request location permissions from the user.
             PermissionUtils.requestPermission((AppCompatActivity) getActivity(), LOCATION_PERMISSION_REQUEST_CODE, Manifest.permission.ACCESS_FINE_LOCATION, true);
         }
