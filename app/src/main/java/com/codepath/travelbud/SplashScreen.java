@@ -24,7 +24,7 @@ public class SplashScreen extends AppCompatActivity {
             public void run() {
                 try {
                     synchronized (this) {
-                        wait(3000);
+                        wait(2000);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
