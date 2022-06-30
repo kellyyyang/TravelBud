@@ -1,6 +1,7 @@
 package com.codepath.travelbud;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import com.bumptech.glide.Glide;
 import com.parse.Parse;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
+
+import org.parceler.Parcels;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -52,7 +55,7 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
         return users.size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView tvUsernameSearch;
         private ImageView ivProfilePicSearch;
@@ -63,6 +66,7 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
             tvUsernameSearch = itemView.findViewById(R.id.tvUsernameSearch);
             ivProfilePicSearch = itemView.findViewById(R.id.ivProfilePicSearch);
 
+            itemView.setOnClickListener(this);
         }
 
         public void bind(ParseUser user) {
@@ -71,6 +75,19 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
             ParseFile profilePic = user.getParseFile(KEY_PROFILEPIC);
             if (profilePic != null) {
                 Glide.with(context).load(profilePic.getUrl()).into(ivProfilePicSearch);
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            // get position
+            int position = getAdapterPosition();
+            // make sure the position is valid, i.e. it actually exists in the view
+            if (position != RecyclerView.NO_POSITION) {
+                ParseUser user = users.get(position);
+                Intent intent = new Intent(context, UserDetailsActivity.class);
+                intent.putExtra(ParseUser.class.getSimpleName(), Parcels.wrap(user));
+                context.startActivity(intent);
             }
         }
     }

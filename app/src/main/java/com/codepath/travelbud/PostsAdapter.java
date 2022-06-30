@@ -33,10 +33,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
     private List<Post> posts;
     private boolean isProfile;
 
-    public PostsAdapter(Context context, List<Post> posts, boolean b) {
+    public PostsAdapter(Context context, List<Post> posts, boolean isProfile) {
         this.context = context;
         this.posts = posts;
-        this.isProfile = b;
+        this.isProfile = isProfile;
     }
 
     @NonNull
