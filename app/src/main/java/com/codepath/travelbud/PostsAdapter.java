@@ -1,6 +1,9 @@
 package com.codepath.travelbud;
 
+import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
+
 import android.content.Context;
+import android.media.Image;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -69,6 +72,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         private TextView tvDescriptionFeed;
         private RatingBar rbRatingBarFeed;
         private ImageView ivPhotoFeed;
+        private ImageView ivProfilePicFeed;
 
         private ImageView ivPostProfile;
 
@@ -80,6 +84,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             tvDescriptionFeed = itemView.findViewById(R.id.tvDescriptionFeed);
             rbRatingBarFeed = itemView.findViewById(R.id.rbRatingBarFeed);
             ivPhotoFeed = itemView.findViewById(R.id.ivPhotoFeed);
+            ivProfilePicFeed = itemView.findViewById(R.id.ivProfilePicFeed);
 
             ivPostProfile = itemView.findViewById(R.id.ivPostProfile);
         }
@@ -102,7 +107,11 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             tvLocationFeed.setText(post.getLocationString());
             ParseFile image = post.getImage();
             if (image != null) {
-                Glide.with(context).load(post.getImage().getUrl()).into(ivPhotoFeed);
+                Glide.with(context).load(image.getUrl()).into(ivPhotoFeed);
+            }
+            ParseFile profilePicFeed = post.getUser().getParseFile(KEY_PROFILE_PIC);
+            if (profilePicFeed != null) {
+                Glide.with(context).load(profilePicFeed.getUrl()).into(ivProfilePicFeed);
             }
             Date createdAt = post.getCreatedAt();
             String timeAgo = Post.calculateTimeAgo(createdAt);
