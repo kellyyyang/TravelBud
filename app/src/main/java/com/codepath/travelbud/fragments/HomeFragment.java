@@ -17,7 +17,6 @@ import com.codepath.travelbud.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 
@@ -52,7 +51,7 @@ public class HomeFragment extends Fragment {
         rvHome = view.findViewById(R.id.rvHome);
 
         allPosts = new ArrayList<>();
-        adapter = new PostsAdapter(getContext(), allPosts);
+        adapter = new PostsAdapter(getContext(), allPosts, false);
 
         rvHome.setAdapter(adapter);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
