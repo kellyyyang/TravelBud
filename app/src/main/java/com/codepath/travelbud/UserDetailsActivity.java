@@ -81,21 +81,36 @@ public class UserDetailsActivity extends AppCompatActivity {
             }
         });
 
-        followingList();
+//        followingList();
 //        isFollowing2(user);
-        Log.i(TAG, "setButtonAppearance1");
-        setButtonAppearance();
+//        Log.i(TAG, "setButtonAppearance1");
+        setButtonAppearanceFix();
 
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isFollowing(user)) {
-                    unfollowUser(user);
+                Log.i(TAG, "ONCLICK BABY");
+                if (isFollowing1) {
+                    Log.i(TAG, "isFollowing1 true!");
+                    unfollowUserFix(user);
                 } else {
-                    followUser(user);
+                    Log.i(TAG, "isFollowing1 false!");
+                    followUserFix(user);
                 }
             }
         });
+
+//        btnFollow.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.i(TAG, "ONCLICK BABY");
+//                if (isFollowing(user)) {
+//                    unfollowUser(user);
+//                } else {
+//                    followUser(user);
+//                }
+//            }
+//        });
 
         rvPostsSearch.setAdapter(adapter);
         rvPostsSearch.setLayoutManager(new GridLayoutManager(this, 3));
@@ -103,47 +118,120 @@ public class UserDetailsActivity extends AppCompatActivity {
         queryPosts();
     }
 
-    private void unfollowUser(ParseUser user) {
-        Log.i(TAG, "following, removing user");
-        ParseRelation relation = currentUser.getRelation("following");
-        relation.remove(user);
-        followingUsers = new ArrayList<>();
-        followingList();
-        currentUser.saveInBackground();
-        setButtonAppearance();
-    }
-
-    private void followUser(ParseUser user) {
-        Log.i(TAG, "not following, adding user");
-        ParseRelation relation = currentUser.getRelation("following");
-        relation.add(user);
-        followingUsers = new ArrayList<>();
-        followingList();
-        currentUser.saveInBackground();
-        setButtonAppearance();
-    }
-
-    private void setButtonAppearance() {
-        Log.i(TAG, "button appearance " + isFollowing(user));
-        if (isFollowing(user)) {
+    private void setButtonAppearanceFix() {
+        try {
+            setIsFollowing(user);
+        } catch (ParseException e) {
+            Log.e(TAG, "setIsFollowing exception: " + e);
+//            e.printStackTrace();
+        }
+        Log.i(TAG, "setButtonAppearanceFix + isFollowing1: " + isFollowing1);
+        if (isFollowing1) {
             btnFollow.setBackgroundColor(Color.WHITE);
-            btnFollow.setText("Following");
             btnFollow.setTextColor(Color.MAGENTA);
+            btnFollow.setText("Following");
+//            unfollowUserFix(user);
         } else {
             btnFollow.setBackgroundColor(Color.MAGENTA);
-            btnFollow.setText("Follow");
             btnFollow.setTextColor(Color.WHITE);
+            btnFollow.setText("Follow");
+//            followUserFix(user);
         }
-        return;
     }
 
-    private boolean isFollowing(ParseUser searchUser) {
-        Log.i(TAG, "search for: " + searchUser.getObjectId());
-        if (followingUsers.contains(searchUser.getObjectId())) {
-            return true;
-        }
-        return false;
+    private void followUserFix(ParseUser user) {
+        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+        relation.add(user);
+        btnFollow.setBackgroundColor(Color.WHITE);
+        btnFollow.setTextColor(Color.MAGENTA);
+        btnFollow.setText("Following");
+        currentUser.saveInBackground();
     }
+
+    private void unfollowUserFix(ParseUser user) {
+        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+        relation.remove(user);
+        btnFollow.setBackgroundColor(Color.MAGENTA);
+        btnFollow.setTextColor(Color.WHITE);
+        btnFollow.setText("Follow");
+        currentUser.saveInBackground();
+    }
+
+    private void setIsFollowing(ParseUser searchUser) throws ParseException {
+        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+        ParseQuery<ParseUser> query = relation.getQuery();
+        query.include("following");
+        List<ParseUser> users = query.find();
+        Log.i(TAG, "list of following: " + users);
+        for (ParseUser obj : users) {
+            if (obj.getObjectId().equals(searchUser.getObjectId())) {
+                isFollowing1 = true;
+                Log.i(TAG, "isFollowing1: " + isFollowing1);
+                return;
+            }
+//        query.findInBackground(new FindCallback<ParseUser>() {
+//            @Override
+//            public void done(List<ParseUser> objects, ParseException e) {
+//                Log.i(TAG, "inside done tag");
+//                if (e != null) {
+//                    Log.e(TAG, "parse exception thrown: " + e);
+//                }
+//                for (ParseUser obj : objects) {
+//                    if (obj.getObjectId().equals(searchUser.getObjectId())) {
+//                        isFollowing1 = true;
+//                        Log.i(TAG, "isFollowing1: " + isFollowing1);
+//                        return;
+//                    }
+//                }
+//                setButtonAppearanceFix();
+//            }
+//        });
+        }
+//        isFollowing1 = false;
+    }
+
+//    private void unfollowUser(ParseUser user) {
+//        Log.i(TAG, "following, removing user");
+//        ParseRelation relation = currentUser.getRelation("following");
+//        relation.remove(user);
+//        followingUsers.remove(user.getObjectId());
+//        followingList();
+//        currentUser.saveInBackground();
+//        setButtonAppearance();
+//    }
+//
+//    private void followUser(ParseUser user) {
+//        Log.i(TAG, "not following, adding user");
+//        ParseRelation relation = currentUser.getRelation("following");
+//        relation.add(user);
+//        followingUsers.remove(user.getObjectId());
+//        followingList();
+//        currentUser.saveInBackground();
+//        setButtonAppearance();
+//    }
+
+//    private void setButtonAppearance() {
+//        Log.i(TAG, "button appearance " + isFollowing(user));
+//        if (isFollowing(user)) {
+//            btnFollow.setBackgroundColor(Color.WHITE);
+//            btnFollow.setText("Following");
+//            btnFollow.setTextColor(Color.MAGENTA);
+//        } else {
+//            btnFollow.setBackgroundColor(Color.MAGENTA);
+//            btnFollow.setText("Follow");
+//            btnFollow.setTextColor(Color.WHITE);
+//        }
+//        return;
+//    }
+
+//    private boolean isFollowing(ParseUser searchUser) {
+//        Log.i(TAG, "search for: " + searchUser.getObjectId());
+//        followingList();
+//        if (followingUsers.contains(searchUser.getObjectId())) {
+//            return true;
+//        }
+//        return false;
+//    }
 
 //    private void isFollowing2(ParseUser searchUser) {
 //        Log.i(TAG, "isFollowing2");
@@ -200,28 +288,30 @@ public class UserDetailsActivity extends AppCompatActivity {
 //        return returnVal;
 //    }
 
-    private void followingList() {
-        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-//        Log.i(TAG, "followingList: " + relation);
-        ParseQuery<ParseUser> query = relation.getQuery();
-        query.include("following");
-        query.findInBackground(new FindCallback<ParseUser>() {
-            @Override
-            public void done(List<ParseUser> users, ParseException e) {
-                if (e != null) {
-                    Log.e(TAG, "Issue with getting following", e);
-                    return;
-                }
-                for (ParseUser user : users) {
-                    Log.i(TAG, "User: " + user.getUsername());
-                    followingUsers.add(user.getObjectId());
-                }
-//                followingUsers.addAll(users);
-                Log.i(TAG, "followingUsers: " + followingUsers);
-                setButtonAppearance();
-            }
-        });
-    }
+//    private void followingList() {
+//        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+////        Log.i(TAG, "followingList: " + relation);
+//        ParseQuery<ParseUser> query = relation.getQuery();
+//        query.include("following");
+//        query.findInBackground(new FindCallback<ParseUser>() {
+//            @Override
+//            public void done(List<ParseUser> users, ParseException e) {
+//                if (e != null) {
+//                    Log.e(TAG, "Issue with getting following", e);
+//                    return;
+//                }
+//                for (ParseUser user : users) {
+//                    Log.i(TAG, "User: " + user.getUsername());
+//                    if (!followingUsers.contains(user.getObjectId())) {
+//                        followingUsers.add(user.getObjectId());
+//                    }
+//                }
+////                followingUsers.addAll(users);
+//                Log.i(TAG, "followingUsers: " + followingUsers);
+////                setButtonAppearance();
+//            }
+//        });
+//    }
 
 //    private void followingList() {
 //        ParseQuery<ParseUser> query = ParseQuery.getQuery("_User");
