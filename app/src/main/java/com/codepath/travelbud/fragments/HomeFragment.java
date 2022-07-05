@@ -19,6 +19,8 @@ import com.codepath.travelbud.R;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
+import com.parse.ParseRelation;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView rvHome;
     private PostsAdapter adapter;
     private List<Post> allPosts;
+
+    ParseUser currentUser = ParseUser.getCurrentUser();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -56,12 +60,25 @@ public class HomeFragment extends Fragment {
         rvHome.setAdapter(adapter);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        queryPosts();
+        try {
+            queryPosts();
+        } catch (ParseException e) {
+            Log.e(TAG, "exception with queryPosts: " + e);
+        }
     }
 
-    private void queryPosts() {
+    private void queryPosts() throws ParseException {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
+        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+
+        ParseQuery<ParseUser> followingQuery = relation.getQuery();
+        followingQuery.include("following");
+        List<ParseUser> users = followingQuery.find();
+        Log.i(TAG, "trying to get list of following: " + users);
+
+        query.whereContainedIn("user", users);
+
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback<Post>() {
             @Override
