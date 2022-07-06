@@ -3,19 +3,29 @@ package com.codepath.travelbud;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_BIO;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.codepath.travelbud.fragments.ComposeFragment;
+import com.codepath.travelbud.fragments.HomeFragment;
+import com.codepath.travelbud.fragments.MapsFragment;
+import com.codepath.travelbud.fragments.ProfileFragment;
+import com.codepath.travelbud.fragments.SearchFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -40,6 +50,8 @@ public class UserDetailsActivity extends AppCompatActivity {
     private TextView tvBioSearch;
     private RecyclerView rvPostsSearch;
     private Button btnFollow;
+
+    private BottomNavigationView bottomNavigation;
 
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -67,6 +79,7 @@ public class UserDetailsActivity extends AppCompatActivity {
         isFollowing1 = false;
 
         user = (ParseUser) Parcels.unwrap(getIntent().getParcelableExtra(ParseUser.class.getSimpleName()));
+        Log.i(TAG, "User: " + user);
         Log.d(TAG, "Showing details for " + user.getUsername());
         tvUsernameSearch.setText(user.getUsername());
 
@@ -81,9 +94,6 @@ public class UserDetailsActivity extends AppCompatActivity {
             }
         });
 
-//        followingList();
-//        isFollowing2(user);
-//        Log.i(TAG, "setButtonAppearance1");
         setButtonAppearanceFix();
 
         btnFollow.setOnClickListener(new View.OnClickListener() {
@@ -174,6 +184,18 @@ public class UserDetailsActivity extends AppCompatActivity {
             }
         }
     }
+
+//    private void setIsFollowing1(ParseUser searchUser) {
+//        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+//        ParseQuery<ParseUser> query = relation.getQuery();
+//        query.include("following");
+//        query.findInBackground(new FindCallback<ParseUser>() {
+//            @Override
+//            public void done(List<ParseUser> objects, ParseException e) {
+//
+//            }
+//        });
+//    }
 
 
 //    private void isFollowing2(ParseUser searchUser) {
