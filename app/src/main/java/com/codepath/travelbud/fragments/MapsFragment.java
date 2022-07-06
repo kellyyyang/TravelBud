@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.codepath.travelbud.PermissionUtils;
+import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -38,8 +40,13 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.parse.ParseUser;
 
+import org.parceler.Parcels;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -50,6 +57,8 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
     FusedLocationProviderClient fusedLocationProviderClient;
     private static final int REQUEST_CODE = 101;
     private GoogleMap mMap;
+    private List<Post> allPostsList;
+    private List<LatLng> locationsList;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     /**
@@ -76,8 +85,22 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
 //            mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             enableMyLocation();
+
+            displayLocations();
+
         }
     };
+
+    private void displayLocations() {
+        for (Post post : allPostsList) {
+            double latitude = post.getLocation().getLatitude();
+            double longitude = post.getLocation().getLongitude();
+            LatLng latLng = new LatLng(latitude, longitude);
+            String positionTitle = post.getLocationString();
+
+            mMap.addMarker(new MarkerOptions().position(latLng).title(positionTitle));
+        }
+    }
 
     @Nullable
     @Override
@@ -85,6 +108,20 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_maps, container, false);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        getParentFragmentManager().setFragmentResultListener("home_post_requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                allPostsList = result.getParcelableArrayList("home_post_bundleKey");
+                Log.i(TAG, "allPostsList: " + allPostsList);
+            }
+        });
+
     }
 
     @Override

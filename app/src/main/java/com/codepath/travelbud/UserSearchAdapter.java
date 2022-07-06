@@ -2,6 +2,7 @@ package com.codepath.travelbud;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.ViewHolder> {
+
+    public static final String TAG = "UserSearchAdapter";
 
     private Context context;
     private List<ParseUser> users;
@@ -87,6 +90,7 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
                 ParseUser user = users.get(position);
                 Intent intent = new Intent(context, UserDetailsActivity.class);
                 intent.putExtra(ParseUser.class.getSimpleName(), Parcels.wrap(user));
+                Log.i(TAG, "Look at user: " + user);
                 context.startActivity(intent);
             }
         }
