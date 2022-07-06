@@ -34,12 +34,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 
 import org.parceler.Parcels;
@@ -95,11 +97,21 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         for (Post post : allPostsList) {
             double latitude = post.getLocation().getLatitude();
             double longitude = post.getLocation().getLongitude();
+            ParseGeoPoint geoPoint = post.getLocation();
             LatLng latLng = new LatLng(latitude, longitude);
             String positionTitle = post.getLocationString();
 
-            mMap.addMarker(new MarkerOptions().position(latLng).title(positionTitle));
+            Marker newMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(positionTitle));
+            newMarker.setTag(geoPoint);
         }
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(@NonNull Marker marker) {
+                ParseGeoPoint geoPoint = (ParseGeoPoint) marker.getTag();
+
+                return false;
+            }
+        });
     }
 
     @Nullable
