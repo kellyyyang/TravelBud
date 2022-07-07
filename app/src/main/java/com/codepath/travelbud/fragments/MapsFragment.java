@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.codepath.travelbud.LocationPostsActivity;
+import com.codepath.travelbud.LocationTag;
 import com.codepath.travelbud.PermissionUtils;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
@@ -102,20 +103,27 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             double latitude = post.getLocation().getLatitude();
             double longitude = post.getLocation().getLongitude();
             ParseGeoPoint geoPoint = post.getLocation();
-            LatLng latLng = new LatLng(latitude, longitude);
             String positionTitle = post.getLocationString();
+            Log.i(TAG, "loc string: " + positionTitle);
+            LatLng latLng = new LatLng(latitude, longitude);
+            LocationTag locationTag = new LocationTag();
+            locationTag.setGeoPoint(geoPoint);
+            locationTag.setLocationString(positionTitle);
 
             Marker newMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(positionTitle));
-            newMarker.setTag(geoPoint);
+            newMarker.setTag(locationTag);
         }
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(@NonNull Marker marker) {
-                ParseGeoPoint geoPoint = (ParseGeoPoint) marker.getTag();
+                LocationTag locationTag = (LocationTag) marker.getTag();
+                ParseGeoPoint geoPoint = locationTag.getGeoPoint();
+                String locationString = locationTag.getLocationString();
 
                 Intent intent = new Intent(getActivity(), LocationPostsActivity.class);
                 intent.putExtra("geoPoint", Parcels.wrap(geoPoint));
                 intent.putExtra("allPostsList", Parcels.wrap(allPostsList));
+                intent.putExtra("locationString", Parcels.wrap(locationString));
                 startActivity(intent);
 
 //                Bundle bundle = new Bundle();
