@@ -2,6 +2,7 @@ package com.codepath.travelbud;
 
 import android.util.Log;
 
+import com.parse.FindCallback;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -17,7 +18,9 @@ public class Hashtag extends ParseObject {
     public static final String KEY_HASHTAG = "hashtag";
     public static final String KEY_POSTS = "connected_posts";
 
-    public void setHashtag(String hashtag) { put(KEY_HASHTAG, hashtag); }
+    public void setHashtag(String hashtag) {
+        put(KEY_HASHTAG, hashtag);
+    }
 
     public String getHashtag() { return getString(KEY_HASHTAG); }
 

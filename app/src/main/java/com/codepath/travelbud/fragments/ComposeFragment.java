@@ -48,9 +48,11 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -62,6 +64,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -85,6 +88,7 @@ public class ComposeFragment extends Fragment {
     private ImageButton btnHashtagEnter;
 
     private ArrayList<String> hashtags;
+    private Hashtag matchingTag;
 
     ActivityResultLauncher<Intent> cameraResultLauncher;
     ActivityResultLauncher<Intent> galleryResultLauncher;
@@ -136,6 +140,7 @@ public class ComposeFragment extends Fragment {
         btnHashtagEnter = view.findViewById(R.id.btnHashtagEnter);
 
         hashtags = new ArrayList<>();
+        matchingTag = null;
 
         // Initialize the SDK
         ApplicationInfo appInfo = null;
@@ -324,7 +329,11 @@ public class ComposeFragment extends Fragment {
 //                    image = new ParseFile(photoFile);
 //                }
                 ParseUser currentUser = ParseUser.getCurrentUser();
-                savePost(currentUser, description, rating, image, latlong, hashtags);
+                try {
+                    savePost(currentUser, description, rating, image, latlong, hashtags);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -397,7 +406,7 @@ public class ComposeFragment extends Fragment {
 //        }
 //    }
 
-    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image, LatLng latlong, ArrayList<String> hashtagList) {
+    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image, LatLng latlong, ArrayList<String> hashtagList) throws ParseException {
         Post post = new Post();
         post.setDescription(description);
         post.setUser(currentUser);
@@ -409,22 +418,30 @@ public class ComposeFragment extends Fragment {
 
         // save hashtags
         for (String tag : hashtagList) {
-            Hashtag currTag = new Hashtag();
-            currTag.setHashtag(tag);
-//            currTag.setFollowing(post);
-            currTag.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        Log.e(TAG, "Issue with saving hashtag " + e);
-                        Toast.makeText(getContext(), "Issue with saving hashtag!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Log.i(TAG, "Hashtag has been saved");
-                        hashtagArrayList.add(currTag);
-                    }
-                }
-            });
-            post.setHashtag(currTag);
+            if (!matchesAnotherTag(tag)) {
+                Hashtag currTag = new Hashtag();
+                currTag.setHashtag(tag);
+                Log.i(TAG, "success1");
+                currTag.save();
+                hashtagArrayList.add(currTag);
+//                currTag.saveInBackground(new SaveCallback() {
+//                    @Override
+//                    public void done(ParseException e) {
+//                        if (e != null) {
+//                            Log.e(TAG, "Issue with saving hashtag " + e);
+//                            Toast.makeText(getContext(), "Issue with saving hashtag!", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            Log.i(TAG, "Hashtag has been saved");
+//                            hashtagArrayList.add(currTag);
+//                        }
+//                    }
+//                });
+                post.setHashtag(currTag);
+            } else {
+                hashtagArrayList.add(matchingTag);
+                post.setHashtag(matchingTag);
+            }
+
         }
 
         if (image != null) {
@@ -457,6 +474,20 @@ public class ComposeFragment extends Fragment {
                 return;
             }
         });
+    }
+
+    private boolean matchesAnotherTag(String tag) throws ParseException {
+        ParseQuery<Hashtag> query = ParseQuery.getQuery(Hashtag.class);
+        query.include(Hashtag.KEY_HASHTAG);
+        List<Hashtag> mTags = query.find();
+        Log.i(TAG, "tags: " + mTags);
+        for (Hashtag mTag : mTags) {
+            if (mTag.getHashtag().equalsIgnoreCase(tag)) {
+                matchingTag = mTag;
+                return true;
+            }
+        }
+        return false;
     }
 
     // Trigger gallery selection for a photo
