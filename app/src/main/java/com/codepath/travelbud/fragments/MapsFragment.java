@@ -13,16 +13,20 @@ import androidx.fragment.app.FragmentResultListener;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.codepath.travelbud.LocationPostsActivity;
 import com.codepath.travelbud.PermissionUtils;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
@@ -109,6 +113,19 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             public boolean onMarkerClick(@NonNull Marker marker) {
                 ParseGeoPoint geoPoint = (ParseGeoPoint) marker.getTag();
 
+                Intent intent = new Intent(getActivity(), LocationPostsActivity.class);
+                intent.putExtra("geoPoint", Parcels.wrap(geoPoint));
+                intent.putExtra("allPostsList", Parcels.wrap(allPostsList));
+                startActivity(intent);
+
+//                Bundle bundle = new Bundle();
+//                bundle.putParcelable("marker_location_bundleKey", geoPoint);
+//                getParentFragmentManager().setFragmentResult("marker_location_requestKey", bundle);
+//                LocationPostsFragment nextFrag= new LocationPostsFragment();
+//                getActivity().getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.flContainer, nextFrag, "findThisFragment")
+//                        .addToBackStack(null)
+//                        .commit();
                 return false;
             }
         });
@@ -133,7 +150,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
                 Log.i(TAG, "allPostsList: " + allPostsList);
             }
         });
-
     }
 
     @Override
