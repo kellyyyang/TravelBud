@@ -8,7 +8,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         tools:context=".fragments.ComposeFragment">
 
         <View
@@ -141,11 +141,11 @@
             android:layout_width="180dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etDescription"
+            app:layout_constraintTop_toBottomOf="@+id/etHashtags"
             app:srcCompat="@drawable/ic_baseline_photo_camera_24" />
 
         <ImageView
@@ -175,12 +175,45 @@
             android:layout_width="180dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btnTakePhoto"
-            app:layout_constraintTop_toBottomOf="@+id/etDescription"
+            app:layout_constraintTop_toBottomOf="@+id/etHashtags"
             app:srcCompat="@drawable/ic_baseline_insert_photo_24" />
+
+        <TextView
+            android:id="@+id/tvHashtags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:textColor="@color/purple_700"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etDescription"
+            tools:text="#very_cool #wowza" />
+
+        <EditText
+            android:id="@+id/etHashtags"
+            android:layout_width="333dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="16dp"
+            android:ems="10"
+            android:hint="#add #your #hashtags #here"
+            android:inputType="textPersonName"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvHashtags" />
+
+        <ImageButton
+            android:id="@+id/btnHashtagEnter"
+            android:layout_width="42dp"
+            android:layout_height="39dp"
+            android:layout_marginTop="-2dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvHashtags"
+            app:srcCompat="@drawable/ic_baseline_send_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

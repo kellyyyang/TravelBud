@@ -25,9 +25,11 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -37,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.codepath.travelbud.BitmapScaler;
+import com.codepath.travelbud.Hashtag;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
@@ -48,6 +51,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseRelation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -56,6 +60,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -75,6 +80,12 @@ public class ComposeFragment extends Fragment {
     private TextView tvRating;
     private ImageButton btnChoosePhoto;
     private AutocompleteSupportFragment autocompleteFragment;
+    private TextView tvHashtags;
+    private TextView etHashtags;
+    private ImageButton btnHashtagEnter;
+
+    private ArrayList<String> hashtags;
+
     ActivityResultLauncher<Intent> cameraResultLauncher;
     ActivityResultLauncher<Intent> galleryResultLauncher;
     private LatLng latlong;
@@ -120,6 +131,11 @@ public class ComposeFragment extends Fragment {
         ivProfilePicPost = view.findViewById(R.id.ivProfilePicPost);
         tvRating = view.findViewById(R.id.tvRating);
         btnChoosePhoto = view.findViewById(R.id.btnChoosePhoto);
+        tvHashtags = view.findViewById(R.id.tvHashtags);
+        etHashtags = view.findViewById(R.id.etHashtags);
+        btnHashtagEnter = view.findViewById(R.id.btnHashtagEnter);
+
+        hashtags = new ArrayList<>();
 
         // Initialize the SDK
         ApplicationInfo appInfo = null;
@@ -164,6 +180,28 @@ public class ComposeFragment extends Fragment {
                 tvRating.setText("Your rating is: " + rbPost.getRating());
             }
         });
+
+        btnHashtagEnter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (etHashtags.length() > 0) {
+                    hashtags.add(etHashtags.getText().toString());
+                    tvHashtags.append("#" + etHashtags.getText().toString() + " ");
+                    etHashtags.setText("");
+                }
+            }
+        });
+
+//        etHashtags.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                boolean handled = false;
+//                if (actionId == EditorInfo.IME_ACTION_SEND) {
+//                    handled = true;
+//                }
+//                return handled;
+//            }
+//        });
 
         cameraResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -275,7 +313,7 @@ public class ComposeFragment extends Fragment {
 //                    return;
 //                }
                 if (photoFile == null || ivPhoto.getDrawable() == null) {
-                    Log.i(TAG, "photoFile is null " + photoFile.toString() + ", " + ivPhoto.toString());
+                    Log.i(TAG, "photoFile is null");
                     image = null;
                 }
                 else if (photoFile != null && ivPhoto.getDrawable() != null) {
@@ -286,7 +324,7 @@ public class ComposeFragment extends Fragment {
 //                    image = new ParseFile(photoFile);
 //                }
                 ParseUser currentUser = ParseUser.getCurrentUser();
-                savePost(currentUser, description, rating, image, latlong);
+                savePost(currentUser, description, rating, image, latlong, hashtags);
             }
         });
 
@@ -359,13 +397,35 @@ public class ComposeFragment extends Fragment {
 //        }
 //    }
 
-    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image, LatLng latlong) {
+    private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image, LatLng latlong, ArrayList<String> hashtagList) {
         Post post = new Post();
         post.setDescription(description);
         post.setUser(currentUser);
         post.setRating(rating);
         post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
         post.setLocationString(location);
+
+        ArrayList<Hashtag> hashtagArrayList = new ArrayList<>();
+
+        // save hashtags
+        for (String tag : hashtagList) {
+            Hashtag currTag = new Hashtag();
+            currTag.setHashtag(tag);
+//            currTag.setFollowing(post);
+            currTag.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e != null) {
+                        Log.e(TAG, "Issue with saving hashtag " + e);
+                        Toast.makeText(getContext(), "Issue with saving hashtag!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.i(TAG, "Hashtag has been saved");
+                        hashtagArrayList.add(currTag);
+                    }
+                }
+            });
+            post.setHashtag(currTag);
+        }
 
         if (image != null) {
             post.setImage(image);
@@ -386,6 +446,13 @@ public class ComposeFragment extends Fragment {
                     rbPost.setRating(0);
                     ivPhoto.setVisibility(View.INVISIBLE);
                     autocompleteFragment.setText("");
+//                    etHashtags.setText("");
+                    tvHashtags.setText("");
+                    for (Hashtag tag : hashtagArrayList) {
+                        Log.i(TAG, "following post: " + post);
+                        tag.setFollowing(post);
+                        tag.saveInBackground();
+                    }
                 }
                 return;
             }
