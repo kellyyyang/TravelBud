@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -14,6 +15,7 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class LocationPostsActivity extends AppCompatActivity {
     public static final String TAG = "LocationPostsActivity";
     private List<Post> allPostsList;
     private List<Post> allLocationPosts;
+    private String locationString;
     private ParseGeoPoint currentLocation;
     private PostsAdapter adapter;
 
@@ -44,14 +47,29 @@ public class LocationPostsActivity extends AppCompatActivity {
 
         currentLocation = Parcels.unwrap(getIntent().getParcelableExtra("geoPoint"));
         allPostsList = Parcels.unwrap(getIntent().getParcelableExtra("allPostsList"));
+        locationString = Parcels.unwrap(getIntent().getParcelableExtra("locationString"));
 
         allLocationPosts = new ArrayList<>();
         adapter = new PostsAdapter(this, allLocationPosts, false);
+        tvLocationMarker.setText(locationString);
+//        Log.i(TAG, locationString);
 
         rvLocationPosts.setAdapter(adapter);
         rvLocationPosts.setLayoutManager(new LinearLayoutManager(this));
 
         queryLocationPosts();
+
+        float avgLocRating = avgLocationRating();
+        rbLocationAvg.setRating(avgLocRating);
+        tvRatingAvg.setText(MessageFormat.format("Average rating: {0}", avgLocRating));
+    }
+
+    private float avgLocationRating() {
+        float total = 0;
+        for (Post post : allLocationPosts) {
+            total += post.getRating();
+        }
+        return total / allLocationPosts.size();
     }
 
     private void queryLocationPosts() {
