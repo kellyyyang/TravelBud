@@ -6,6 +6,7 @@ import com.parse.ParseClassName;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
+import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
 import java.util.Date;
@@ -20,6 +21,7 @@ public class Post extends ParseObject {
     public static final String KEY_LOCATION = "location";
     public static final String KEY_IMAGE_URL = "image_url";
     public static final String KEY_LOCATION_STRING = "location_string";
+    public static final String KEY_HASHTAGS = "hashtags";
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
@@ -60,6 +62,13 @@ public class Post extends ParseObject {
     public String getImageUrl() { return getString(KEY_IMAGE_URL); }
 
     public void setImageUrl(String imageUrl) {put(KEY_IMAGE_URL, imageUrl); }
+
+    public ParseRelation getHashtags() { return getRelation(KEY_HASHTAGS); }
+
+    public void setHashtag(Hashtag hashtag) {
+        ParseRelation<Hashtag> relation = this.getRelation(KEY_HASHTAGS);
+        relation.add(hashtag);
+    }
 
     public static String calculateTimeAgo(Date createdAt) {
 

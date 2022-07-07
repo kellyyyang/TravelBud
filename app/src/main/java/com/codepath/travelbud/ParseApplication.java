@@ -13,6 +13,7 @@ public class ParseApplication extends Application {
 
         // Register Parse models
         ParseObject.registerSubclass(Post.class);
+        ParseObject.registerSubclass(Hashtag.class);
 
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId("T8tqcdYvdKQYkJmJrA7uixDd3I6UObmnU6xXd3QH")
