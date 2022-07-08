@@ -2,6 +2,8 @@ package com.codepath.travelbud.fragments;
 
 import static android.app.Activity.RESULT_OK;
 import static com.parse.Parse.getApplicationContext;
+
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
@@ -62,6 +64,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +102,7 @@ public class ComposeFragment extends Fragment {
     public String photoFileName = "photo.jpg";
     public File photoFile;
     public ParseFile galleryPhoto;
+    public ParseFile noPhotoFile;
     public String imageUrl;
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public final static int PICK_PHOTO_CODE = 1046;
@@ -182,7 +186,7 @@ public class ComposeFragment extends Fragment {
         rbPost.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                tvRating.setText("Your rating is: " + rbPost.getRating());
+                tvRating.setText(MessageFormat.format("Your rating is: {0}", rbPost.getRating()));
             }
         });
 
@@ -258,55 +262,6 @@ public class ComposeFragment extends Fragment {
                 }
         );
 
-//        galleryResultLauncher = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    if (result.getResultCode() == RESULT_OK) {
-//
-//                        DisplayMetrics displaymetrics = new DisplayMetrics();
-//                        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-//                        int width = displaymetrics.widthPixels;
-//
-//                        Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
-//                        Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
-//                        Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, width);
-//
-//                        // Configure byte output stream
-//                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-//                        // Compress the image further
-//                        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-//                        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
-//                        File resizedFile = getPhotoFileUri(photoFileName + "_resized");
-//                        try {
-//                            resizedFile.createNewFile();
-//                        } catch (IOException e) {
-//                            Log.e(TAG, "Error with creating a new file for resized bitmap: " + e);
-//                        }
-//                        FileOutputStream fos = null;
-//                        try {
-//                            fos = new FileOutputStream(resizedFile);
-//                        } catch (FileNotFoundException e) {
-//                            Log.e(TAG, "Error with FileOutputStream: " + e);
-//                        }
-//                        // Write the bytes of the bitmap to file
-//                        try {
-//                            fos.write(bytes.toByteArray());
-//                        } catch (IOException e) {
-//                            Log.e(TAG, "Error with writing the bytes of the bitmap to file: " + e);
-//                        }
-//                        try {
-//                            fos.close();
-//                        } catch (IOException e) {
-//                            Log.e(TAG, "Error with closing: " + e);
-//                        }
-//                        ivPhoto.setImageBitmap(BitmapFactory.decodeFile(resizedFile.getPath()));
-//
-//                    } else { // Result was a failure
-//                        Toast.makeText(getContext(), "Picture wasn't chosen!", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//        );
-
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -318,7 +273,6 @@ public class ComposeFragment extends Fragment {
 //                    return;
 //                }
                 if (photoFile == null || ivPhoto.getDrawable() == null) {
-                    Log.i(TAG, "photoFile is null");
                     image = null;
                 }
                 else if (photoFile != null && ivPhoto.getDrawable() != null) {
@@ -415,15 +369,17 @@ public class ComposeFragment extends Fragment {
         post.setLocationString(location);
 
         ArrayList<Hashtag> hashtagArrayList = new ArrayList<>();
-
-        // save hashtags
-        for (String tag : hashtagList) {
-            if (!matchesAnotherTag(tag)) {
-                Hashtag currTag = new Hashtag();
-                currTag.setHashtag(tag);
-                Log.i(TAG, "success1");
-                currTag.save();
-                hashtagArrayList.add(currTag);
+        if (hashtagList.size() == 0) {
+            hashtagList.add("");
+        } else {
+            // save hashtags
+            for (String tag : hashtagList) {
+                if (!matchesAnotherTag(tag)) {
+                    Hashtag currTag = new Hashtag();
+                    currTag.setHashtag(tag);
+                    Log.i(TAG, "success1");
+                    currTag.save();
+                    hashtagArrayList.add(currTag);
 //                currTag.saveInBackground(new SaveCallback() {
 //                    @Override
 //                    public void done(ParseException e) {
@@ -436,17 +392,22 @@ public class ComposeFragment extends Fragment {
 //                        }
 //                    }
 //                });
-                post.setHashtag(currTag);
-            } else {
-                hashtagArrayList.add(matchingTag);
-                post.setHashtag(matchingTag);
-            }
+                    post.setHashtag(currTag);
+                } else {
+                    hashtagArrayList.add(matchingTag);
+                    post.setHashtag(matchingTag);
+                }
 
+            }
         }
 
         if (image != null) {
+            Log.i(TAG, "setting image: " + image);
             post.setImage(image);
-        } else {
+        }
+        else {
+//            post.setImage(ContextCompat.getDrawable(getContext(), R.drawable.transparent));
+            // TODO: set image of post as something
             ivPhoto.setVisibility(View.INVISIBLE);
         }
 
@@ -521,6 +482,40 @@ public class ComposeFragment extends Fragment {
             e.printStackTrace();
         }
         return image;
+    }
+
+    public void noPhoto() throws IOException, ParseException {
+
+        Bitmap bm = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.transparent);
+//        Log.i()
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100 /*ignored for PNG*/, bos);
+        byte[] image = bos.toByteArray();
+
+        Log.i(TAG, "inside noPhoto");
+
+        // create the ParseFile
+        noPhotoFile = new ParseFile("nophotofile.png", image);
+        Log.i(TAG, "noPhotoFile: " + noPhotoFile);
+        // upload image into Parse Cloud
+        noPhotoFile.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e != null) {
+                    ivPhoto.setImageBitmap(bm);
+                }
+            }
+        });
+        photoFile = noPhotoFile.getFile();
+//        noPhotoFile.saveInBackground();
+//        try {
+//            photoFile = noPhotoFile.getFile();
+//            Log.i(TAG, "success with noPhoto " + photoFile);
+//        } catch (ParseException e) {
+//            Log.e(TAG, "error with noPhoto func: " + e);
+//            e.printStackTrace();
+//        }
+        Log.i(TAG, "success with noPhoto " + photoFile);
     }
 
     @Override
