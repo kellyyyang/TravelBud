@@ -14,12 +14,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 
+import com.codepath.travelbud.Hashtag;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.codepath.travelbud.UserDetailsActivity;
 import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
@@ -29,6 +34,7 @@ import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,6 +45,10 @@ public class HomeFragment extends Fragment {
     private RecyclerView rvHome;
     private PostsAdapter adapter;
     private List<Post> allPosts;
+    private List<String> allHashtagsString;
+    private List<Hashtag> allHashtagsObject;
+    private String hashtagSelected;
+    private AutoCompleteTextView actvHashtagFilter;
 
     ParseUser currentUser = ParseUser.getCurrentUser();
 
@@ -58,6 +68,13 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         rvHome = view.findViewById(R.id.rvHome);
+        actvHashtagFilter = view.findViewById(R.id.actvHashtagFilter);
+
+        allHashtagsString = new ArrayList<>();
+        allHashtagsObject = new ArrayList<>();
+        queryHashtags();
+        ArrayAdapter<String> adapterHashtag = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, allHashtagsString);
+        actvHashtagFilter.setAdapter(adapterHashtag);
 
         allPosts = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts, false);
@@ -65,16 +82,112 @@ public class HomeFragment extends Fragment {
         rvHome.setAdapter(adapter);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        actvHashtagFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                hashtagSelected = (String) parent.getItemAtPosition(position);
+                Log.i(TAG, "item selected: " + hashtagSelected);
+                adapter.notifyDataSetChanged();
+                try {
+                    queryPostsHT();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         try {
-            queryPosts();
+//            queryPosts();
+            Log.i(TAG, "attempting to query posts");
+            queryPostsHT();
         } catch (ParseException e) {
             Log.e(TAG, "exception with queryPosts: " + e);
         }
     }
 
+    // get all hashtags
+    private void queryHashtags() {
+        ParseQuery<Hashtag> query = ParseQuery.getQuery(Hashtag.class);
+        query.include("hashtag");
+        query.findInBackground(new FindCallback<Hashtag>() {
+            @Override
+            public void done(List<Hashtag> objects, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Issue with getting hashtags", e);
+                    return;
+                }
+                for (Hashtag tag : objects) {
+                    Log.i(TAG, "Tag string: " + tag.getHashtag());
+                    allHashtagsString.add(tag.getHashtag());
+                }
+                allHashtagsObject.addAll(objects);
+            }
+        });
+    }
+
     private void queryPosts() throws ParseException {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
+        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+
+        ParseQuery<ParseUser> followingQuery = relation.getQuery();
+        followingQuery.include("following");
+        List<ParseUser> users = followingQuery.find();
+        Log.i(TAG, "trying to get list of following: " + users);
+
+        query.whereContainedIn("user", users);
+
+        query.addDescendingOrder("createdAt");
+        query.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> posts, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Issue with getting posts", e);
+                    return;
+                }
+                for (Post post : posts) {
+                    Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
+                }
+                allPosts.addAll(posts);
+                adapter.notifyDataSetChanged();
+
+                Log.i(TAG, "allPosts: " + allPosts);
+
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("home_post_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
+                getParentFragmentManager().setFragmentResult("home_post_requestKey", bundle);
+            }
+        });
+    }
+
+    private void queryPostsHT() throws ParseException {
+
+        allPosts.clear();
+
+        ParseQuery<Post> query;
+        query = null;
+        Log.i(TAG, "in queryPostsHT");
+
+        if (hashtagSelected == null) {
+            Log.i(TAG, "in hashtag is null: " + hashtagSelected);
+            query = ParseQuery.getQuery(Post.class);
+            query.include(Post.KEY_USER);
+        }
+        else {
+            Log.i(TAG, "in hashtag is not null: " + hashtagSelected);
+            ParseQuery<Hashtag> queryHT = ParseQuery.getQuery(Hashtag.class);
+            queryHT.include(Hashtag.KEY_HASHTAG);
+            List<Hashtag> hashtagsQueryList = queryHT.find();
+            for (Hashtag tag : hashtagsQueryList) {
+                if (Objects.equals(tag.getHashtag(), hashtagSelected)) {
+                    ParseRelation<Post> hashtagPostRelation = tag.getRelation(Hashtag.KEY_POSTS);
+                    query = hashtagPostRelation.getQuery();
+                    query.include(Post.KEY_USER);
+                    break;
+                }
+            }
+        }
+
         ParseRelation<ParseUser> relation = currentUser.getRelation("following");
 
         ParseQuery<ParseUser> followingQuery = relation.getQuery();
