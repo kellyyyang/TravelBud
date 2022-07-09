@@ -32,6 +32,7 @@
         <entry key="app/src/main/res/layout/snippet_view_user_toolbar.xml" value="0.1" />
         <entry key="app/src/main/res/layout/snippet_view_users_toolbar.xml" value="0.1" />
         <entry key="app/src/main/res/menu/menu_bottom_navigation.xml" value="0.2171875" />
+        <entry key="app/src/main/res/menu/menu_user_options.xml" value="0.27618865966796874" />
         <entry key="app/src/main/res/menu/search_bar.xml" value="0.505316162109375" />
         <entry key="app/src/main/res/menu/snippet_view_users_toolbar.xml" value="0.1" />
         <entry key="app/src/main/res/xml/fileprovider.xml" value="0.1" />
