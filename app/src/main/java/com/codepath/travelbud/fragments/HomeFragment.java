@@ -1,5 +1,8 @@
 package com.codepath.travelbud.fragments;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -10,14 +13,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Parcelable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 
 import com.codepath.travelbud.Hashtag;
 import com.codepath.travelbud.Post;
@@ -50,6 +58,7 @@ public class HomeFragment extends Fragment {
     private List<Hashtag> allHashtagsObject;
     private String hashtagSelected;
     private AutoCompleteTextView actvHashtagFilter;
+    private String emptyString = "";
 
     ParseUser currentUser = ParseUser.getCurrentUser();
 
@@ -77,11 +86,54 @@ public class HomeFragment extends Fragment {
         ArrayAdapter<String> adapterHashtag = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, allHashtagsString);
         actvHashtagFilter.setAdapter(adapterHashtag);
 
+        final TextWatcher mTextWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                if (s == null || s.equals("")) {
+                    hashtagSelected = null;
+                }
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s == null || s.length() == 0) {
+                    hashtagSelected = null;
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s == null || s.equals("")) {
+                    hashtagSelected = null;
+                }
+            }
+        };
+
+        actvHashtagFilter.addTextChangedListener(mTextWatcher);
+
         allPosts = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts, false);
 
         rvHome.setAdapter(adapter);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        actvHashtagFilter.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER) && (hashtagSelected == null)) {
+                    // Perform action on key press
+                    InputMethodManager mgr = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    mgr.hideSoftInputFromWindow(actvHashtagFilter.getWindowToken(), 0);
+                    try {
+                        queryPostsHT();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
 
         actvHashtagFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -89,6 +141,8 @@ public class HomeFragment extends Fragment {
                 hashtagSelected = (String) parent.getItemAtPosition(position);
                 Log.i(TAG, "item selected: " + hashtagSelected);
                 adapter.notifyDataSetChanged();
+                InputMethodManager mgr = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                mgr.hideSoftInputFromWindow(actvHashtagFilter.getWindowToken(), 0);
                 try {
                     queryPostsHT();
                 } catch (ParseException e) {
@@ -98,7 +152,6 @@ public class HomeFragment extends Fragment {
         });
 
         try {
-//            queryPosts();
             Log.i(TAG, "attempting to query posts");
             queryPostsHT();
         } catch (ParseException e) {
