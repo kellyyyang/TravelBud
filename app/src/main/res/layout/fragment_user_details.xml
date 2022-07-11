@@ -1,14 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.UserDetailsFragment">
+    android:padding="8dp"
+    tools:context=".UserDetailsActivity">
 
-    <!-- TODO: Update blank fragment layout -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvProfilePicSearch"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="10dp"
+        app:cardCornerRadius="60dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivProfilePicSearch"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            tools:srcCompat="@tools:sample/avatars" />
+    </androidx.cardview.widget.CardView>
+
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/tvUsernameSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cvProfilePicSearch"
+        tools:text="Anony Mous" />
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tvBioSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvUsernameSearch"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus rutrum pretium erat ac commodo. Curabitur porttitor eros et odio varius, a vehicula lacus aliquam." />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPostsSearch"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBioSearch" />
+
+    <TextView
+        android:id="@+id/tvNumFollowersSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/cvProfilePicSearch"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="129k" />
+
+    <TextView
+        android:id="@+id/tvFollowersSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="5dp"
+        android:text="followers"
+        app:layout_constraintStart_toEndOf="@+id/cvProfilePicSearch"
+        app:layout_constraintTop_toBottomOf="@+id/tvNumFollowersSearch" />
+
+    <TextView
+        android:id="@+id/tvNumFollowingSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="40dp"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/tvNumPlacesSearch"
+        app:layout_constraintStart_toEndOf="@+id/tvNumFollowersSearch"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="129" />
+
+    <TextView
+        android:id="@+id/tvFollowingSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="15dp"
+        android:text="following"
+        app:layout_constraintEnd_toStartOf="@+id/tvPlaces"
+        app:layout_constraintStart_toEndOf="@+id/tvFollowersSearch"
+        app:layout_constraintTop_toBottomOf="@+id/tvNumFollowingSearch" />
+
+    <TextView
+        android:id="@+id/tvNumPlacesSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="40dp"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="15" />
+
+    <TextView
+        android:id="@+id/tvPlaces"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="30dp"
+        android:text="places"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvNumPlacesSearch" />
+
+    <Button
+        android:id="@+id/btnFollow"
+        android:layout_width="241dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="75dp"
+        android:text="Follow"
+        app:layout_constraintStart_toEndOf="@+id/cvProfilePicSearch"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
