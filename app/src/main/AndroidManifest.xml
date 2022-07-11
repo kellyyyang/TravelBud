@@ -50,9 +50,6 @@
             android:value="${MAPS_API_KEY}" />
 
         <activity
-            android:name=".UserDetailsActivity"
-            android:exported="false" />
-        <activity
             android:name=".SplashScreen"
             android:exported="true">
             <intent-filter>

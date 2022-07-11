@@ -1,8 +1,6 @@
 package com.codepath.travelbud;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.parse.Parse;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
 
-import org.parceler.Parcels;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,10 +26,12 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
     private List<ParseUser> users;
     private String KEY_PROFILEPIC = "profilePic";
     private ArrayList<ParseUser> arrayList; //used for the search bar
+    private SearchAdapterToFragment mCommunicator;
 
-    public UserSearchAdapter(Context context, List<ParseUser> users) {
+    public UserSearchAdapter(Context context, List<ParseUser> users, SearchAdapterToFragment communicator) {
         this.context = context;
         this.users = users;
+        this.mCommunicator = communicator;
         arrayList = new ArrayList<>();
         this.arrayList.addAll(users);
     }
@@ -44,7 +40,7 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_user_search, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, mCommunicator);
     }
 
     @Override
@@ -62,10 +58,12 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
 
         private TextView tvUsernameSearch;
         private ImageView ivProfilePicSearch;
+        private SearchAdapterToFragment mCommunicator1;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, SearchAdapterToFragment communicator1) {
             super(itemView);
 
+            mCommunicator1 = communicator1;
             tvUsernameSearch = itemView.findViewById(R.id.tvUsernameSearch);
             ivProfilePicSearch = itemView.findViewById(R.id.ivProfilePicSearch);
 
@@ -88,10 +86,12 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
             // make sure the position is valid, i.e. it actually exists in the view
             if (position != RecyclerView.NO_POSITION) {
                 ParseUser user = users.get(position);
-                Intent intent = new Intent(context, UserDetailsActivity.class);
-                intent.putExtra(ParseUser.class.getSimpleName(), Parcels.wrap(user));
-                Log.i(TAG, "Look at user: " + user);
-                context.startActivity(intent);
+                mCommunicator1.sendUser(position, user);
+
+//                Intent intent = new Intent(context, UserDetailsActivity.class);
+//                intent.putExtra(ParseUser.class.getSimpleName(), Parcels.wrap(user));
+//                Log.i(TAG, "Look at user: " + user);
+//                context.startActivity(intent);
             }
         }
     }

@@ -5,8 +5,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,19 +15,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SearchView;
 
-import com.bumptech.glide.request.target.ImageViewTargetFactory;
-import com.codepath.travelbud.MainActivity;
 import com.codepath.travelbud.R;
+import com.codepath.travelbud.SearchAdapterToFragment;
 import com.codepath.travelbud.UserSearchAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.parse.FindCallback;
@@ -89,8 +85,7 @@ public class SearchFragment extends Fragment {
 
         allUsers = new ArrayList<>();
         searchUsers = new ArrayList<>();
-//        adapter = new UserSearchAdapter(getContext(), allUsers);
-        adapter = new UserSearchAdapter(getContext(), searchUsers);
+        adapter = new UserSearchAdapter(getContext(), searchUsers, communication);
 
         rvUsersSearch.setAdapter(adapter);
         rvUsersSearch.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -117,6 +112,19 @@ public class SearchFragment extends Fragment {
         queryUsers();
 
     }
+
+    SearchAdapterToFragment communication = new SearchAdapterToFragment() {
+        @Override
+        public void sendUser(int position, ParseUser user) {
+            UserDetailsFragment userDetailsFragment = new UserDetailsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("USER", user);
+            userDetailsFragment.setArguments(bundle);
+            FragmentManager manager=getFragmentManager();
+            FragmentTransaction transaction=manager.beginTransaction();
+            transaction.replace(R.id.flContainer, userDetailsFragment).commit();
+        }
+    };
 
     private void setupUsersList() {
 
