@@ -9,12 +9,14 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -50,6 +52,7 @@ public class UserDetailsFragment extends Fragment {
     private TextView tvBioSearch;
     private RecyclerView rvPostsSearch;
     private Button btnFollow;
+    private Toolbar tbUserDetails;
 
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -81,6 +84,10 @@ public class UserDetailsFragment extends Fragment {
         rvPostsSearch = view.findViewById(R.id.rvPostsSearch);
         btnFollow = view.findViewById(R.id.btnFollow);
 
+        tbUserDetails = view.findViewById(R.id.tbUserDetails);
+        tbUserDetails.getMenu().clear();
+        tbUserDetails.inflateMenu(R.menu.menu_user_details);
+
         allPosts = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts, true);
 
@@ -106,6 +113,18 @@ public class UserDetailsFragment extends Fragment {
         });
 
         setButtonAppearanceFix();
+
+        tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_block:
+                        unfollowUserFix(user);
+                        // TODO: force this user to unfollow you too
+                }
+                return true;
+            }
+        });
 
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
