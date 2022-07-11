@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,6 +51,7 @@ public class UserDetailsFragment extends Fragment {
     private TextView tvBioSearch;
     private RecyclerView rvPostsSearch;
     private Button btnFollow;
+    private Toolbar tbUserDetails;
 
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -80,6 +82,10 @@ public class UserDetailsFragment extends Fragment {
         tvBioSearch = view.findViewById(R.id.tvBioSearch);
         rvPostsSearch = view.findViewById(R.id.rvPostsSearch);
         btnFollow = view.findViewById(R.id.btnFollow);
+
+        tbUserDetails = view.findViewById(R.id.tbUserDetails);
+        tbUserDetails.getMenu().clear();
+        tbUserDetails.inflateMenu(R.menu.menu_user_details);
 
         allPosts = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts, true);
