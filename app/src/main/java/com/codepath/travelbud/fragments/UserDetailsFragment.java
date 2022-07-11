@@ -38,6 +38,7 @@ import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -120,6 +121,11 @@ public class UserDetailsFragment extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.action_block:
                         unfollowUserFix(user);
+                        try {
+                            forceUnfollow(currentUser);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                         // TODO: force this user to unfollow you too
                 }
                 return true;
@@ -144,6 +150,49 @@ public class UserDetailsFragment extends Fragment {
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         queryPosts();
+    }
+
+    private void searchUsers(String searchTerms) {
+        // MVP apps with no experience - minimum viable product = "something that 'just works'"
+        ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
+        query.whereContains("username", searchTerms);
+        // avoid people who have blocked you
+//        query.whereNotContainedIn("username", currentUserBlockList);//  avoid people who you've blocked
+        query.addDescendingOrder("createdAt");
+        query.findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> objects, ParseException e) {
+                // for loop: look through objects.blockedUsers... if the array contains currentUser, remove that from the array before continuing
+            }
+        });
+    }
+
+    private void forceUnfollow(ParseUser currentUser) throws ParseException {
+        ParseRelation<ParseUser> relation = user.getRelation("following");
+        ParseQuery<ParseUser> query = relation.getQuery();
+
+        query.findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> objects, ParseException e) {
+                for (ParseUser pUser : objects) {
+                    if (pUser.getObjectId().equals(currentUser.getObjectId())) {
+                        relation.remove(currentUser);
+                        relation.remove(pUser);
+                        Log.i(TAG, "pUser username: " + pUser.getUsername() + ", " + "currentUser username: " + currentUser.getUsername());
+//                        try {
+//                            Log.i(TAG, "current user: " + currentUser.fetch());
+//                        } catch (ParseException ex) {
+//                            ex.printStackTrace();
+//                        }
+//                        try {
+//                            user.save();
+//                        } catch (ParseException ex) {
+//                            ex.printStackTrace();
+//                        }
+                    }
+                }
+            }
+        });
     }
 
     private void setButtonAppearanceFix() {
@@ -179,6 +228,13 @@ public class UserDetailsFragment extends Fragment {
         isFollowing1 = true;
         currentUser.saveInBackground();
     }
+
+    // userA unfollows userB
+//    private void unfollowUserBoth(ParseUser userA, ParseUser userB) {
+//        ParseRelation<ParseUser> relation = userA.getRelation("following");
+//        relation.remove(userB);
+//        setBtnFollowColor();
+//    }
 
     private void unfollowUserFix(ParseUser user) {
         ParseRelation<ParseUser> relation = currentUser.getRelation("following");
