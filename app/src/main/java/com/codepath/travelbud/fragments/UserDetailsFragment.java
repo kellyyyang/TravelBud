@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -112,6 +113,18 @@ public class UserDetailsFragment extends Fragment {
         });
 
         setButtonAppearanceFix();
+
+        tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_block:
+                        unfollowUserFix(user);
+                        // TODO: force this user to unfollow you too
+                }
+                return true;
+            }
+        });
 
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
