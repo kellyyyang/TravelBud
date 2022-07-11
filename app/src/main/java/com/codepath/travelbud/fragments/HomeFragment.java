@@ -22,11 +22,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
+import com.codepath.travelbud.Follow;
 import com.codepath.travelbud.Hashtag;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
@@ -48,6 +50,7 @@ public class HomeFragment extends Fragment {
     private List<String> allHashtagsString;
     private List<Hashtag> allHashtagsObject;
     private String hashtagSelected;
+    private List<ParseUser> followingUsers;
     private AutoCompleteTextView actvHashtagFilter;
     private String emptyString = "";
 
@@ -73,6 +76,13 @@ public class HomeFragment extends Fragment {
 
         allHashtagsString = new ArrayList<>();
         allHashtagsObject = new ArrayList<>();
+        followingUsers = new ArrayList<>();
+        try {
+            queryGetFollowing();
+            Log.i(TAG, "List of following main: " + followingUsers);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         queryHashtags();
         ArrayAdapter<String> adapterHashtag = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, allHashtagsString);
         actvHashtagFilter.setAdapter(adapterHashtag);
@@ -170,39 +180,22 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void queryPosts() throws ParseException {
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
-        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-
-        ParseQuery<ParseUser> followingQuery = relation.getQuery();
-        followingQuery.include("following");
-        List<ParseUser> users = followingQuery.find();
-        Log.i(TAG, "trying to get list of following: " + users);
-
-        query.whereContainedIn("user", users);
-
-        query.addDescendingOrder("createdAt");
-        query.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> posts, ParseException e) {
-                if (e != null) {
-                    Log.e(TAG, "Issue with getting posts", e);
-                    return;
-                }
-                for (Post post : posts) {
-                    Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
-                }
-                allPosts.addAll(posts);
-                adapter.notifyDataSetChanged();
-
-                Log.i(TAG, "allPosts: " + allPosts);
-
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("home_post_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
-                getParentFragmentManager().setFragmentResult("home_post_requestKey", bundle);
-            }
-        });
+    private void queryGetFollowing() throws ParseException {
+        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
+        query.include(Follow.KEY_FOLLOWER);
+        query.whereEqualTo(Follow.KEY_FOLLOWER, currentUser);
+//        query.findInBackground(new FindCallback<Follow>() {
+//            @Override
+//            public void done(List<Follow> followRelations, ParseException e) {
+//                for (Follow follow : followRelations) {
+//                    followingUsers.add(follow.getFollowing());
+//                }
+//            }
+//        });
+        List<Follow> followRelations = query.find();
+        for (Follow follow : followRelations) {
+            followingUsers.add(follow.getFollowing());
+        }
     }
 
     private void queryPostsHT() throws ParseException {
@@ -233,14 +226,14 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+//        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+//
+//        ParseQuery<ParseUser> followingQuery = relation.getQuery();
+//        followingQuery.include("following");
+//        List<ParseUser> users = followingQuery.find();
+//        Log.i(TAG, "trying to get list of following: " + users);
 
-        ParseQuery<ParseUser> followingQuery = relation.getQuery();
-        followingQuery.include("following");
-        List<ParseUser> users = followingQuery.find();
-        Log.i(TAG, "trying to get list of following: " + users);
-
-        query.whereContainedIn("user", users);
+        query.whereContainedIn("user", followingUsers);
 
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback<Post>() {
