@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.codepath.travelbud.Follow;
 import com.codepath.travelbud.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
@@ -35,6 +36,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,41 +117,82 @@ public class UserDetailsFragment extends Fragment {
 
         setButtonAppearanceFix();
 
-        tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_block:
-                        unfollowUserFix(user);
-                        try {
-                            forceUnfollow(currentUser);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        // TODO: force this user to unfollow you too
-                }
-                return true;
-            }
-        });
+//        tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                switch (item.getItemId()) {
+//                    case R.id.action_block:
+//                        unfollowUserFix(user);
+//                        try {
+//                            forceUnfollow(currentUser);
+//                        } catch (ParseException e) {
+//                            e.printStackTrace();
+//                        }
+//                        // TODO: force this user to unfollow you too
+//                }
+//                return true;
+//            }
+//        });
 
+        // using Follow table
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i(TAG, "ONCLICK BABY");
                 if (isFollowing1) {
-                    Log.i(TAG, "isFollowing1 true!");
-                    unfollowUserFix(user);
+                    unfollowUserBoth(currentUser, user);
                 } else {
-                    Log.i(TAG, "isFollowing1 false!");
-                    followUserFix(user);
+                    followUserBoth(currentUser, user);
                 }
             }
         });
+
+//        btnFollow.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.i(TAG, "ONCLICK BABY");
+//                if (isFollowing1) {
+//                    Log.i(TAG, "isFollowing1 true!");
+//                    unfollowUserFix(user);
+//                } else {
+//                    Log.i(TAG, "isFollowing1 false!");
+//                    followUserFix(user);
+//                }
+//            }
+//        });
 
         rvPostsSearch.setAdapter(adapter);
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         queryPosts();
+    }
+
+    private void followUserBoth(ParseUser userA, ParseUser userB) {
+        Log.i(TAG, "in followUserBoth");
+        Follow newFollow = new Follow();
+        newFollow.setFollower(userA);
+        newFollow.setFollowing(userB);
+        isFollowing1 = true;
+        setBtnUnfollowColor();
+        newFollow.saveInBackground();
+    }
+
+    private void unfollowUserBoth(ParseUser userA, ParseUser userB) {
+        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
+        query.include(Follow.KEY_FOLLOWING);
+        query.include(Follow.KEY_FOLLOWING);
+        query.whereEqualTo(Follow.KEY_FOLLOWER, userA);
+        query.whereEqualTo(Follow.KEY_FOLLOWING, userB);
+        isFollowing1 = false;
+        setBtnFollowColor();
+        query.findInBackground(new FindCallback<Follow>() {
+            @Override
+            public void done(List<Follow> objects, ParseException e) {
+                Log.i(TAG, "hopefully only one: " + objects);
+                for (Follow obj : objects) {
+                    obj.deleteInBackground();
+                }
+            }
+        });
     }
 
     private void searchUsers(String searchTerms) {
@@ -167,37 +210,9 @@ public class UserDetailsFragment extends Fragment {
         });
     }
 
-    private void forceUnfollow(ParseUser currentUser) throws ParseException {
-        ParseRelation<ParseUser> relation = user.getRelation("following");
-        ParseQuery<ParseUser> query = relation.getQuery();
-
-        query.findInBackground(new FindCallback<ParseUser>() {
-            @Override
-            public void done(List<ParseUser> objects, ParseException e) {
-                for (ParseUser pUser : objects) {
-                    if (pUser.getObjectId().equals(currentUser.getObjectId())) {
-                        relation.remove(currentUser);
-                        relation.remove(pUser);
-                        Log.i(TAG, "pUser username: " + pUser.getUsername() + ", " + "currentUser username: " + currentUser.getUsername());
-//                        try {
-//                            Log.i(TAG, "current user: " + currentUser.fetch());
-//                        } catch (ParseException ex) {
-//                            ex.printStackTrace();
-//                        }
-//                        try {
-//                            user.save();
-//                        } catch (ParseException ex) {
-//                            ex.printStackTrace();
-//                        }
-                    }
-                }
-            }
-        });
-    }
-
     private void setButtonAppearanceFix() {
         try {
-            setIsFollowing(user);
+            setIsFollowing(currentUser, user);
         } catch (ParseException e) {
             Log.e(TAG, "setIsFollowing exception: " + e);
         }
@@ -244,19 +259,39 @@ public class UserDetailsFragment extends Fragment {
         currentUser.saveInBackground();
     }
 
-    private void setIsFollowing(ParseUser searchUser) throws ParseException {
-        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-        ParseQuery<ParseUser> query = relation.getQuery();
-        query.include("following");
-        List<ParseUser> users = query.find();
-        Log.i(TAG, "list of following: " + users);
-        for (ParseUser obj : users) {
-            if (obj.getObjectId().equals(searchUser.getObjectId())) {
-                isFollowing1 = true;
-                Log.i(TAG, "isFollowing1: " + isFollowing1);
-                return;
-            }
-        }
+    private void setIsFollowing(ParseUser userA, ParseUser userB) throws ParseException {
+        Log.i(TAG, "in setIsFollowing");
+        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
+        query.include(Follow.KEY_FOLLOWER);
+        query.include(Follow.KEY_FOLLOWING);
+        query.whereEqualTo(Follow.KEY_FOLLOWER, userA);
+        query.whereEqualTo(Follow.KEY_FOLLOWING, userB);
+        List<Follow> follows = query.find();
+        Log.i(TAG, "following list: " + follows);
+        isFollowing1 = follows.size() > 0;
+//        query.findInBackground(new FindCallback<Follow>() {
+//            @Override
+//            public void done(List<Follow> objects, ParseException e) {
+//                if (objects.size() > 0) {
+//                    isFollowing1 = true;
+//                } else {
+//                    isFollowing1 = false;
+//                }
+//            }
+//        });
+
+//        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
+//        ParseQuery<ParseUser> query = relation.getQuery();
+//        query.include("following");
+//        List<ParseUser> users = query.find();
+//        Log.i(TAG, "list of following: " + users);
+//        for (ParseUser obj : users) {
+//            if (obj.getObjectId().equals(searchUser.getObjectId())) {
+//                isFollowing1 = true;
+//                Log.i(TAG, "isFollowing1: " + isFollowing1);
+//                return;
+//            }
+//        }
     }
 
     private void queryPosts() {
