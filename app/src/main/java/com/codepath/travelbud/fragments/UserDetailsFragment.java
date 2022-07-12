@@ -48,6 +48,7 @@ import java.util.Objects;
 public class UserDetailsFragment extends Fragment {
 
     public static final String TAG = "UserDetailsFragment";
+    public static final String KEY_BLOCKEDUSERS = "blockedUsers";
 
     ParseUser user;
     private ImageView ivProfilePicSearch;
@@ -117,22 +118,38 @@ public class UserDetailsFragment extends Fragment {
 
         setButtonAppearanceFix();
 
-//        tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                switch (item.getItemId()) {
-//                    case R.id.action_block:
-//                        unfollowUserFix(user);
-//                        try {
-//                            forceUnfollow(currentUser);
-//                        } catch (ParseException e) {
-//                            e.printStackTrace();
-//                        }
-//                        // TODO: force this user to unfollow you too
-//                }
-//                return true;
-//            }
-//        });
+        tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_block:
+                        Log.i(TAG, "inside block");
+                        if (isFollowing1) {
+                            unfollowUserBoth(currentUser, user);
+                        }
+                        try {
+                            if (isFollowingFunc(user, currentUser)) {
+                                boolean prevIsFollowing = isFollowing1;
+                                unfollowUserBoth(user, currentUser);
+                                isFollowing1 = prevIsFollowing;
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            if (!getBlockedUsers(currentUser).contains(user)) {
+                                ParseRelation<ParseUser> relation = currentUser.getRelation(KEY_BLOCKEDUSERS);
+                                relation.add(user);
+                                currentUser.saveInBackground();
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                }
+                return true;
+            }
+        });
 
         // using Follow table
         btnFollow.setOnClickListener(new View.OnClickListener() {
@@ -146,24 +163,17 @@ public class UserDetailsFragment extends Fragment {
             }
         });
 
-//        btnFollow.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.i(TAG, "ONCLICK BABY");
-//                if (isFollowing1) {
-//                    Log.i(TAG, "isFollowing1 true!");
-//                    unfollowUserFix(user);
-//                } else {
-//                    Log.i(TAG, "isFollowing1 false!");
-//                    followUserFix(user);
-//                }
-//            }
-//        });
-
         rvPostsSearch.setAdapter(adapter);
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         queryPosts();
+    }
+
+    private List<ParseUser> getBlockedUsers(ParseUser pUser) throws ParseException {
+        ParseRelation<ParseUser> relation = pUser.getRelation(KEY_BLOCKEDUSERS);
+        ParseQuery<ParseUser> query = relation.getQuery();
+        query.include(KEY_BLOCKEDUSERS);
+        return query.find();
     }
 
     private void followUserBoth(ParseUser userA, ParseUser userB) {
@@ -257,6 +267,18 @@ public class UserDetailsFragment extends Fragment {
         setBtnFollowColor();
         isFollowing1 = false;
         currentUser.saveInBackground();
+    }
+
+    private boolean isFollowingFunc(ParseUser userA, ParseUser userB) throws ParseException {
+        Log.i(TAG, "in setIsFollowing");
+        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
+        query.include(Follow.KEY_FOLLOWER);
+        query.include(Follow.KEY_FOLLOWING);
+        query.whereEqualTo(Follow.KEY_FOLLOWER, userA);
+        query.whereEqualTo(Follow.KEY_FOLLOWING, userB);
+        List<Follow> follows = query.find();
+        Log.i(TAG, "following list: " + follows);
+        return follows.size() > 0;
     }
 
     private void setIsFollowing(ParseUser userA, ParseUser userB) throws ParseException {
