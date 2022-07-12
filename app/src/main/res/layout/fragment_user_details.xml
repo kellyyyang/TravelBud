@@ -58,6 +58,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBioSearch" />
@@ -138,6 +139,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="20dp"
+        android:paddingRight="10dp"
         android:text="Follow"
         app:layout_constraintStart_toEndOf="@+id/cvProfilePicSearch"
         app:layout_constraintTop_toBottomOf="@+id/tvFollowingSearch" />

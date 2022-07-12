@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
     tools:context=".fragments.ProfileFragment">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvProfilePicProfile"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         app:cardCornerRadius="50dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/tbProfile">
 
         <ImageView
             android:id="@+id/ivProfilePicProfile"
@@ -31,6 +31,7 @@
         android:id="@+id/tvUsernameProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:textSize="16dp"
         android:textStyle="bold"
@@ -42,7 +43,7 @@
         android:id="@+id/tvBioProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:padding="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvUsernameProfile"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus rutrum pretium erat ac commodo. Curabitur porttitor eros et odio varius, a vehicula lacus aliquam." />
@@ -51,7 +52,7 @@
         android:id="@+id/rvPostsFeed"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvBioProfile" />
@@ -65,7 +66,7 @@
         android:textSize="16dp"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/cvProfilePicProfile"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbProfile"
         tools:text="129k" />
 
     <TextView
@@ -89,7 +90,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/tvNumPlaces"
         app:layout_constraintStart_toEndOf="@+id/tvNumFollowers"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbProfile"
         tools:text="129" />
 
     <TextView
@@ -113,7 +114,7 @@
         android:textSize="16dp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbProfile"
         tools:text="15" />
 
     <TextView
@@ -127,13 +128,35 @@
         app:layout_constraintTop_toBottomOf="@+id/tvNumPlaces" />
 
     <Button
-        android:id="@+id/btnLogout"
+        android:id="@+id/action_logout"
         android:layout_width="241dp"
         android:layout_height="38dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="20dp"
         android:text="Logout"
         app:layout_constraintStart_toEndOf="@+id/cvProfilePicProfile"
+        app:layout_constraintTop_toBottomOf="@+id/tvFollowing" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tbProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="Profile"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="17dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
