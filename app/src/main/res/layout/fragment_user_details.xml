@@ -45,8 +45,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvUsernameSearch"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus rutrum pretium erat ac commodo. Curabitur porttitor eros et odio varius, a vehicula lacus aliquam." />
@@ -56,7 +54,7 @@
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="10dp"
         android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -167,6 +165,39 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/tbUserDetails"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivLock"
+        android:layout_width="91dp"
+        android:layout_height="92dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBioSearch"
+        app:srcCompat="@drawable/ic_outline_lock_24" />
+
+    <TextView
+        android:id="@+id/tvPrivateP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="This account is private."
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivLock" />
+
+    <View
+        android:id="@+id/divPrivate"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="20dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintTop_toBottomOf="@+id/tvBioSearch"
+        tools:layout_editor_absoluteX="1dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
