@@ -1,5 +1,7 @@
 package com.codepath.travelbud.fragments;
 
+import static com.codepath.travelbud.fragments.UserDetailsFragment.KEY_BLOCKEDUSERS;
+
 import android.content.Context;
 import android.os.Bundle;
 
@@ -26,8 +28,10 @@ import com.codepath.travelbud.SearchAdapterToFragment;
 import com.codepath.travelbud.UserSearchAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
+import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
@@ -50,6 +54,7 @@ public class SearchFragment extends Fragment {
     private ImageView ivSearchIcon;
     private ImageView ivBackArrow;
     private EditText etSearchUsers;
+    private ParseUser currentUser;
 
     private int mAppBarState;
     private static final int STANDARD_APPBAR = 0;
@@ -83,6 +88,7 @@ public class SearchFragment extends Fragment {
         searchBar = view.findViewById(R.id.searchToolbar);
         etSearchUsers = view.findViewById(R.id.etSearchUsers);
 
+        currentUser = ParseUser.getCurrentUser();
         allUsers = new ArrayList<>();
         searchUsers = new ArrayList<>();
         adapter = new UserSearchAdapter(getContext(), searchUsers, communication);
@@ -131,6 +137,14 @@ public class SearchFragment extends Fragment {
 
     }
 
+    // checks if pUser blocked the current user
+    private List<ParseUser> getBlockedUsers(ParseUser pUser) throws ParseException {
+        ParseRelation<ParseUser> relation = pUser.getRelation(KEY_BLOCKEDUSERS);
+        ParseQuery<ParseUser> query = relation.getQuery();
+        query.include(KEY_BLOCKEDUSERS);
+        return query.find();
+    }
+
     private void queryUsers() {
         ParseQuery<ParseUser> query = ParseQuery.getQuery("_User");
         query.addAscendingOrder(KEY_USERNAME);
@@ -143,9 +157,29 @@ public class SearchFragment extends Fragment {
                 }
                 for (ParseUser user : users ) {
                     Log.i(TAG, "User: " + user.getUsername());
+                    boolean currUserIsBlocked = false;
+
+                    try {
+                        List<ParseUser> blockedUsers = getBlockedUsers(user);
+                        for (ParseUser bUser : blockedUsers) {
+                            if (bUser.getObjectId().equals(currentUser.getObjectId())) {
+                                currUserIsBlocked = true;
+                                break;
+                            }
+                        }
+                        if (!currUserIsBlocked) {
+                            allUsers.add(user);
+                        }
+//                        if (blockedUsers.contains(ParseUser.getCurrentUser())) {
+//                            Log.i(TAG, "blocked users: " + blockedUsers);
+//                            allUsers.add(user);
+//                        }
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
                 }
 
-                allUsers.addAll(users);
+//                allUsers.addAll(users);
 
                 etSearchUsers.addTextChangedListener(new TextWatcher() {
                     @Override
