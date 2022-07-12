@@ -29,7 +29,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etEmailEP" />
+        app:layout_constraintTop_toBottomOf="@+id/etBioEP" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -92,6 +92,22 @@
         app:layout_constraintTop_toBottomOf="@+id/tvEmailEP"
         tools:text="example@example.com" />
 
+    <EditText
+        android:id="@+id/etBioEP"
+        android:layout_width="370dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_weight="2"
+        android:background="@drawable/stroke_box"
+        android:padding="8dp"
+        android:textColor="#6E6C6C"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBioEP"
+        tools:text="example@example.com" />
+
     <TextView
         android:id="@+id/tvFullNameEP"
         android:layout_width="wrap_content"
@@ -130,6 +146,19 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etUsernameEP" />
+
+    <TextView
+        android:id="@+id/tvBioEP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:text="Bio"
+        android:textAllCaps="true"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etEmailEP" />
 
     <View
         android:id="@+id/divider6"
