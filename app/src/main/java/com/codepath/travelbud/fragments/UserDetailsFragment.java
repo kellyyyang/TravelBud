@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.codepath.travelbud.Follow;
@@ -37,11 +38,16 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+// Parse Dependencies
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
+// Java Dependencies
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -127,10 +133,10 @@ public class UserDetailsFragment extends Fragment {
         setButtonAppearanceFix();
 
         try {
-            Log.i(TAG, "bool: " + (isFollowing1 || !currentUser.getBoolean(KEY_IS_PRIVATE)));
+            Log.i(TAG, "bool: " + (isFollowing1 || !user.getBoolean(KEY_IS_PRIVATE)));
             Log.i(TAG, "isFollowing: " + isFollowing1);
-            Log.i(TAG, "private: " + currentUser.getBoolean(KEY_IS_PRIVATE));
-            if (isFollowing1 || !currentUser.getBoolean(KEY_IS_PRIVATE)) {
+            Log.i(TAG, "private: " + user.getBoolean(KEY_IS_PRIVATE));
+            if (isFollowing1 || !user.getBoolean(KEY_IS_PRIVATE)) {
                 Log.i(TAG, "isFollowing: " + isFollowingFunc(currentUser, user) + " " + isFollowing1);
                 ivLock.setVisibility(View.GONE);
                 tvPrivateP.setVisibility(View.GONE);
@@ -179,6 +185,45 @@ public class UserDetailsFragment extends Fragment {
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (user.getBoolean(KEY_IS_PRIVATE) && !isFollowing1) {
+                    // Use this map to send parameters to your Cloud Code function
+                    // Just push the parameters you want into it
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    parameters.put("userA", currentUser.getObjectId());
+                    parameters.put("userB", user.getObjectId());
+
+                    Log.i(TAG, "parameters: " + parameters);
+
+                    ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<String>() {
+                        @Override
+                        public void done(String object, ParseException e) {
+                            if (e == null) {
+                                // Everything is alright
+                                Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                            }
+                            else {
+                                // Something went wrong
+                                Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
+                            }
+                        }
+                    });
+
+                    // This calls the function in the Cloud Code
+//                    ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<Map<String, Object>>() {
+//                        @Override
+//                        public void done(Map<String, Object> mapObject, ParseException e) {
+//                            if (e == null) {
+//                                // Everything is alright
+//                                Toast.makeText(getContext(), "Answer = " + mapObject.get("answer").toString(), Toast.LENGTH_LONG).show();
+//                            }
+//                            else {
+//                                // Something went wrong
+//                                Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
+//                            }
+//                        }
+//                    });
+                }
+
                 if (isFollowing1) {
                     unfollowUserBoth(currentUser, user);
                 } else {
