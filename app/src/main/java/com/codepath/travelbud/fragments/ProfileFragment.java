@@ -5,13 +5,18 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -35,6 +40,7 @@ import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,6 +58,7 @@ public class ProfileFragment extends Fragment {
     private ImageView ivProfilePicProfile;
     private TextView tvUsernameProfile;
     private TextView tvBioProfile;
+    private Toolbar tbProfile;
 
     private Button btnLogout;
 
@@ -67,10 +74,16 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        btnLogout = view.findViewById(R.id.btnLogout);
+        btnLogout = view.findViewById(R.id.action_logout);
 
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,6 +96,31 @@ public class ProfileFragment extends Fragment {
         ivProfilePicProfile = view.findViewById(R.id.ivProfilePicProfile);
         tvUsernameProfile = view.findViewById(R.id.tvUsernameProfile);
         tvBioProfile = view.findViewById(R.id.tvBioProfile);
+        tbProfile = view.findViewById(R.id.tbProfile);
+
+//        tbProfile.getMenu().clear();
+//        tbProfile.inflateMenu(R.menu.menu_user_details);
+        onCreateOptionsMenu(tbProfile.getMenu(), requireActivity().getMenuInflater());
+        tbProfile.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_edit_profile:
+                        Log.i(TAG, "Edit profile");
+                        Fragment fragment = new EditProfileFragment();
+                        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        fragmentTransaction.replace(R.id.flContainer, fragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
+                        break;
+                    case R.id.action_logout:
+                        Log.i(TAG, "Logout called");
+                        break;
+                }
+                return false;
+            }
+        });
 
         allPosts = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts, true);
@@ -104,6 +142,13 @@ public class ProfileFragment extends Fragment {
 
         queryPosts();
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_profile, menu);
+//        getMenuInflater().inflate(R.menu.menu_profile, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     private void queryPosts() {
