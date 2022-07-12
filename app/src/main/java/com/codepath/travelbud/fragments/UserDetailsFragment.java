@@ -186,45 +186,10 @@ public class UserDetailsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (user.getBoolean(KEY_IS_PRIVATE) && !isFollowing1) {
-                    // Use this map to send parameters to your Cloud Code function
-                    // Just push the parameters you want into it
-                    Map<String, String> parameters = new HashMap<String, String>();
-                    parameters.put("userA", currentUser.getObjectId());
-                    parameters.put("userB", user.getObjectId());
-
-                    Log.i(TAG, "parameters: " + parameters);
-
-                    ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<String>() {
-                        @Override
-                        public void done(String object, ParseException e) {
-                            if (e == null) {
-                                // Everything is alright
-                                Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
-                            }
-                            else {
-                                // Something went wrong
-                                Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
-                            }
-                        }
-                    });
-
-                    // This calls the function in the Cloud Code
-//                    ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<Map<String, Object>>() {
-//                        @Override
-//                        public void done(Map<String, Object> mapObject, ParseException e) {
-//                            if (e == null) {
-//                                // Everything is alright
-//                                Toast.makeText(getContext(), "Answer = " + mapObject.get("answer").toString(), Toast.LENGTH_LONG).show();
-//                            }
-//                            else {
-//                                // Something went wrong
-//                                Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
-//                            }
-//                        }
-//                    });
+                    sendFollowRequest();
+                    setBtnRequestColor();
                 }
-
-                if (isFollowing1) {
+                else if (isFollowing1) {
                     unfollowUserBoth(currentUser, user);
                 } else {
                     followUserBoth(currentUser, user);
@@ -236,6 +201,36 @@ public class UserDetailsFragment extends Fragment {
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         queryPosts();
+    }
+
+    private void setBtnRequestColor() {
+        btnFollow.setBackgroundColor(Color.LTGRAY);
+        btnFollow.setTextColor(Color.MAGENTA);
+        btnFollow.setText("Requested");
+    }
+
+    private void sendFollowRequest() {
+        // Use this map to send parameters to your Cloud Code function
+        // Just push the parameters you want into it
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("userA", currentUser.getObjectId());
+        parameters.put("userB", user.getObjectId());
+
+        Log.i(TAG, "parameters: " + parameters);
+
+        ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<String>() {
+            @Override
+            public void done(String object, ParseException e) {
+                if (e == null) {
+                    // Everything is alright
+                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // Something went wrong
+                    Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
+                }
+            }
+        });
     }
 
     private List<ParseUser> getBlockedUsers(ParseUser pUser) throws ParseException {
@@ -270,21 +265,6 @@ public class UserDetailsFragment extends Fragment {
                 for (Follow obj : objects) {
                     obj.deleteInBackground();
                 }
-            }
-        });
-    }
-
-    private void searchUsers(String searchTerms) {
-        // MVP apps with no experience - minimum viable product = "something that 'just works'"
-        ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
-        query.whereContains("username", searchTerms);
-        // avoid people who have blocked you
-//        query.whereNotContainedIn("username", currentUserBlockList);//  avoid people who you've blocked
-        query.addDescendingOrder("createdAt");
-        query.findInBackground(new FindCallback<ParseUser>() {
-            @Override
-            public void done(List<ParseUser> objects, ParseException e) {
-                // for loop: look through objects.blockedUsers... if the array contains currentUser, remove that from the array before continuing
             }
         });
     }
