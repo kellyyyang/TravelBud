@@ -1,6 +1,7 @@
 package com.codepath.travelbud.fragments;
 
 import static com.codepath.travelbud.HideSoftKeyboard.hideSoftKeyboard;
+import static com.codepath.travelbud.fragments.EditProfileFragment.KEY_IS_PRIVATE;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_BIO;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
 
@@ -57,6 +58,9 @@ public class UserDetailsFragment extends Fragment {
     private RecyclerView rvPostsSearch;
     private Button btnFollow;
     private Toolbar tbUserDetails;
+    private ImageView ivLock;
+    private TextView tvPrivateP;
+    private View divPrivate;
 
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -88,6 +92,10 @@ public class UserDetailsFragment extends Fragment {
         rvPostsSearch = view.findViewById(R.id.rvPostsSearch);
         btnFollow = view.findViewById(R.id.btnFollow);
 
+        ivLock = view.findViewById(R.id.ivLock);
+        tvPrivateP = view.findViewById(R.id.tvPrivateP);
+        divPrivate = view.findViewById(R.id.divPrivate);
+
         tbUserDetails = view.findViewById(R.id.tbUserDetails);
         tbUserDetails.getMenu().clear();
         tbUserDetails.inflateMenu(R.menu.menu_user_details);
@@ -117,6 +125,22 @@ public class UserDetailsFragment extends Fragment {
         });
 
         setButtonAppearanceFix();
+
+        try {
+            Log.i(TAG, "bool: " + (isFollowing1 || !currentUser.getBoolean(KEY_IS_PRIVATE)));
+            Log.i(TAG, "isFollowing: " + isFollowing1);
+            Log.i(TAG, "private: " + currentUser.getBoolean(KEY_IS_PRIVATE));
+            if (isFollowing1 || !currentUser.getBoolean(KEY_IS_PRIVATE)) {
+                Log.i(TAG, "isFollowing: " + isFollowingFunc(currentUser, user) + " " + isFollowing1);
+                ivLock.setVisibility(View.GONE);
+                tvPrivateP.setVisibility(View.GONE);
+                divPrivate.setVisibility(View.GONE);
+            } else {
+                rvPostsSearch.setVisibility(View.GONE);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
