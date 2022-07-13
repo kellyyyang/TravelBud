@@ -10,4 +10,10 @@
         android:id="@+id/action_logout"
         android:title="Logout"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_follow_requests"
+        android:orderInCategory="101"
+        android:title="Follow Requests"
+        android:visible="true"
+        app:showAsAction="never" />
 </menu>

@@ -148,6 +148,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
+        app:popupTheme="@style/Theme.PopupOverlay.Menu"
         android:paddingLeft="10dp"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintTop_toTopOf="parent"
