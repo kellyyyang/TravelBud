@@ -117,6 +117,14 @@ public class ProfileFragment extends Fragment {
                     case R.id.action_logout:
                         Log.i(TAG, "Logout called");
                         break;
+                    case R.id.action_follow_requests:
+                        Log.i(TAG, "Follow requests");
+                        Fragment fragmentFR = new FollowRequestsFragment();
+                        FragmentManager fragmentManagerFR = getActivity().getSupportFragmentManager();
+                        FragmentTransaction fragmentTransactionFR = fragmentManagerFR.beginTransaction();
+                        fragmentTransactionFR.replace(R.id.flContainer, fragmentFR);
+                        fragmentTransactionFR.addToBackStack(null);
+                        fragmentTransactionFR.commit();
                 }
                 return false;
             }

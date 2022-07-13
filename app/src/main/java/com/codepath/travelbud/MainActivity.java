@@ -4,12 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.codepath.travelbud.fragments.ComposeFragment;
+import com.codepath.travelbud.fragments.FollowRequestsFragment;
 import com.codepath.travelbud.fragments.HomeFragment;
 import com.codepath.travelbud.fragments.MapsFragment;
 import com.codepath.travelbud.fragments.ProfileFragment;
