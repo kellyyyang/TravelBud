@@ -70,6 +70,7 @@ public class UserDetailsFragment extends Fragment {
 
     private PostsAdapter adapter;
     private List<Post> allPosts;
+    private List<ParseUser> requestedFollowers;
 
     private boolean isFollowing1;
     private List<String> followingUsers;
@@ -107,6 +108,7 @@ public class UserDetailsFragment extends Fragment {
         tbUserDetails.inflateMenu(R.menu.menu_user_details);
 
         allPosts = new ArrayList<>();
+        requestedFollowers = new ArrayList<>();
         adapter = new PostsAdapter(getContext(), allPosts, true);
 
         followingUsers = new ArrayList<>();
@@ -130,7 +132,11 @@ public class UserDetailsFragment extends Fragment {
             }
         });
 
-        setButtonAppearanceFix();
+        try {
+            setButtonAppearanceFix();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         try {
             Log.i(TAG, "bool: " + (isFollowing1 || !user.getBoolean(KEY_IS_PRIVATE)));
@@ -186,45 +192,10 @@ public class UserDetailsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (user.getBoolean(KEY_IS_PRIVATE) && !isFollowing1) {
-                    // Use this map to send parameters to your Cloud Code function
-                    // Just push the parameters you want into it
-                    Map<String, String> parameters = new HashMap<String, String>();
-                    parameters.put("userA", currentUser.getObjectId());
-                    parameters.put("userB", user.getObjectId());
-
-                    Log.i(TAG, "parameters: " + parameters);
-
-                    ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<String>() {
-                        @Override
-                        public void done(String object, ParseException e) {
-                            if (e == null) {
-                                // Everything is alright
-                                Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
-                            }
-                            else {
-                                // Something went wrong
-                                Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
-                            }
-                        }
-                    });
-
-                    // This calls the function in the Cloud Code
-//                    ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<Map<String, Object>>() {
-//                        @Override
-//                        public void done(Map<String, Object> mapObject, ParseException e) {
-//                            if (e == null) {
-//                                // Everything is alright
-//                                Toast.makeText(getContext(), "Answer = " + mapObject.get("answer").toString(), Toast.LENGTH_LONG).show();
-//                            }
-//                            else {
-//                                // Something went wrong
-//                                Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
-//                            }
-//                        }
-//                    });
+                    sendFollowRequest();
+                    setBtnRequestColor();
                 }
-
-                if (isFollowing1) {
+                else if (isFollowing1) {
                     unfollowUserBoth(currentUser, user);
                 } else {
                     followUserBoth(currentUser, user);
@@ -236,6 +207,36 @@ public class UserDetailsFragment extends Fragment {
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         queryPosts();
+    }
+
+    private void setBtnRequestColor() {
+        btnFollow.setBackgroundColor(Color.LTGRAY);
+        btnFollow.setTextColor(Color.MAGENTA);
+        btnFollow.setText("Requested");
+    }
+
+    private void sendFollowRequest() {
+        // Use this map to send parameters to your Cloud Code function
+        // Just push the parameters you want into it
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("userA", currentUser.getObjectId());
+        parameters.put("userB", user.getObjectId());
+
+        Log.i(TAG, "parameters: " + parameters);
+
+        ParseCloud.callFunctionInBackground("sendFollowRequest", parameters, new FunctionCallback<String>() {
+            @Override
+            public void done(String object, ParseException e) {
+                if (e == null) {
+                    // Everything is alright
+                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // Something went wrong
+                    Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
+                }
+            }
+        });
     }
 
     private List<ParseUser> getBlockedUsers(ParseUser pUser) throws ParseException {
@@ -289,18 +290,51 @@ public class UserDetailsFragment extends Fragment {
         });
     }
 
-    private void setButtonAppearanceFix() {
+    private void setButtonAppearanceFix() throws ParseException {
         try {
             setIsFollowing(currentUser, user);
         } catch (ParseException e) {
             Log.e(TAG, "setIsFollowing exception: " + e);
         }
         Log.i(TAG, "setButtonAppearanceFix + isFollowing1: " + isFollowing1);
-        if (isFollowing1) {
+        getRequestedFollowers();
+        if (inRequestedFollowers()) {
+            setBtnRequestColor();
+        }
+        else if (isFollowing1) {
             setBtnUnfollowColor();
         } else {
             setBtnFollowColor();
         }
+    }
+
+    private boolean inRequestedFollowers() {
+        Log.i(TAG, "requested followers: " + requestedFollowers);
+        for (ParseUser pUser : requestedFollowers) {
+            if (pUser.getObjectId().equals(currentUser.getObjectId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void getRequestedFollowers() throws ParseException {
+        ParseRelation<ParseUser> relation = user.getRelation("incoming_follow_requests");
+        ParseQuery<ParseUser> query = relation.getQuery();
+        requestedFollowers.addAll(query.find());
+//        query.findInBackground(new FindCallback<ParseUser>() {
+//            @Override
+//            public void done(List<ParseUser> objects, ParseException e) {
+//                if (e == null) {
+//                    Log.e(TAG, "error occurred: " + e);
+//                } else {
+//                    for (ParseUser user : objects) {
+//                        Log.i(TAG, "requested follow: " + user.getUsername());
+//                    }
+//                }
+//                requestedFollowers.addAll(objects);
+//            }
+//        });
     }
 
     private void setBtnFollowColor() {
