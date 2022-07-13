@@ -114,6 +114,7 @@ public class UserDetailsFragment extends Fragment {
         followingUsers = new ArrayList<>();
         isFollowing1 = false;
 
+        assert getArguments() != null;
         user = getArguments().getParcelable("USER");
 
 //        user = (ParseUser) Parcels.unwrap(getIntent().getParcelableExtra(ParseUser.class.getSimpleName()));
@@ -191,14 +192,24 @@ public class UserDetailsFragment extends Fragment {
         btnFollow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (user.getBoolean(KEY_IS_PRIVATE) && !isFollowing1) {
-                    sendFollowRequest();
-                    setBtnRequestColor();
-                }
-                else if (isFollowing1) {
+                if (isFollowing1) {
                     unfollowUserBoth(currentUser, user);
                 } else {
-                    followUserBoth(currentUser, user);
+                    try {
+                        Log.i(TAG, "in try");
+                        if (user.getBoolean(KEY_IS_PRIVATE) && hasRequested()) {;
+                            removeFollowRequest();
+                            setBtnFollowColor();
+                        } else if (user.getBoolean(KEY_IS_PRIVATE) && !isFollowing1) {
+                            sendFollowRequest();
+                            setBtnRequestColor();
+                        }
+                        else {
+                            followUserBoth(currentUser, user);
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -209,10 +220,42 @@ public class UserDetailsFragment extends Fragment {
         queryPosts();
     }
 
+    private boolean hasRequested() throws ParseException {
+        getRequestedFollowers();
+        for (ParseUser pUser : requestedFollowers) {
+            if (pUser.getObjectId().equals(currentUser.getObjectId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void setBtnRequestColor() {
         btnFollow.setBackgroundColor(Color.LTGRAY);
         btnFollow.setTextColor(Color.MAGENTA);
         btnFollow.setText("Requested");
+    }
+
+    private void removeFollowRequest() {
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("userA", currentUser.getObjectId());
+        parameters.put("userB", user.getObjectId());
+
+        Log.i(TAG, "parameters: " + parameters);
+
+        ParseCloud.callFunctionInBackground("removeFollowRequest", parameters, new FunctionCallback<String>() {
+            @Override
+            public void done(String object, ParseException e) {
+                if (e == null) {
+                    // Everything is alright
+                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // Something went wrong
+                    Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
+                }
+            }
+        });
     }
 
     private void sendFollowRequest() {
@@ -275,21 +318,6 @@ public class UserDetailsFragment extends Fragment {
         });
     }
 
-    private void searchUsers(String searchTerms) {
-        // MVP apps with no experience - minimum viable product = "something that 'just works'"
-        ParseQuery<ParseUser> query = ParseQuery.getQuery(ParseUser.class);
-        query.whereContains("username", searchTerms);
-        // avoid people who have blocked you
-//        query.whereNotContainedIn("username", currentUserBlockList);//  avoid people who you've blocked
-        query.addDescendingOrder("createdAt");
-        query.findInBackground(new FindCallback<ParseUser>() {
-            @Override
-            public void done(List<ParseUser> objects, ParseException e) {
-                // for loop: look through objects.blockedUsers... if the array contains currentUser, remove that from the array before continuing
-            }
-        });
-    }
-
     private void setButtonAppearanceFix() throws ParseException {
         try {
             setIsFollowing(currentUser, user);
@@ -319,6 +347,7 @@ public class UserDetailsFragment extends Fragment {
     }
 
     private void getRequestedFollowers() throws ParseException {
+        requestedFollowers.clear();
         ParseRelation<ParseUser> relation = user.getRelation("incoming_follow_requests");
         ParseQuery<ParseUser> query = relation.getQuery();
         requestedFollowers.addAll(query.find());
@@ -357,13 +386,6 @@ public class UserDetailsFragment extends Fragment {
         currentUser.saveInBackground();
     }
 
-    // userA unfollows userB
-//    private void unfollowUserBoth(ParseUser userA, ParseUser userB) {
-//        ParseRelation<ParseUser> relation = userA.getRelation("following");
-//        relation.remove(userB);
-//        setBtnFollowColor();
-//    }
-
     private void unfollowUserFix(ParseUser user) {
         ParseRelation<ParseUser> relation = currentUser.getRelation("following");
         relation.remove(user);
@@ -394,29 +416,6 @@ public class UserDetailsFragment extends Fragment {
         List<Follow> follows = query.find();
         Log.i(TAG, "following list: " + follows);
         isFollowing1 = follows.size() > 0;
-//        query.findInBackground(new FindCallback<Follow>() {
-//            @Override
-//            public void done(List<Follow> objects, ParseException e) {
-//                if (objects.size() > 0) {
-//                    isFollowing1 = true;
-//                } else {
-//                    isFollowing1 = false;
-//                }
-//            }
-//        });
-
-//        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-//        ParseQuery<ParseUser> query = relation.getQuery();
-//        query.include("following");
-//        List<ParseUser> users = query.find();
-//        Log.i(TAG, "list of following: " + users);
-//        for (ParseUser obj : users) {
-//            if (obj.getObjectId().equals(searchUser.getObjectId())) {
-//                isFollowing1 = true;
-//                Log.i(TAG, "isFollowing1: " + isFollowing1);
-//                return;
-//            }
-//        }
     }
 
     private void queryPosts() {
