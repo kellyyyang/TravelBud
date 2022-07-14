@@ -226,14 +226,9 @@ public class HomeFragment extends Fragment {
             }
         }
 
-//        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-//
-//        ParseQuery<ParseUser> followingQuery = relation.getQuery();
-//        followingQuery.include("following");
-//        List<ParseUser> users = followingQuery.find();
-//        Log.i(TAG, "trying to get list of following: " + users);
-
+        assert query != null;
         query.whereContainedIn("user", followingUsers);
+        query.setLimit(20);
 
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback<Post>() {
