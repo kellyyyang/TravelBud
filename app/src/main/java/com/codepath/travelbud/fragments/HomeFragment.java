@@ -60,10 +60,12 @@ public class HomeFragment extends Fragment {
     private List<Post> myPosts;
     private List<String> allHashtagsString;
     private List<Hashtag> allHashtagsObject;
+    private List<String> postHashtags;
     private String hashtagSelected;
     private List<ParseUser> followingUsers;
     private AutoCompleteTextView actvHashtagFilter;
     private List<Hashtag> myHashtags;
+    private List<String> myHashtagString;
     private String emptyString = "";
     private Map<String, Integer> hMap;
     private List<String> mInterests;
@@ -97,6 +99,8 @@ public class HomeFragment extends Fragment {
         allHashtagsString = new ArrayList<>();
         allHashtagsObject = new ArrayList<>();
         followingUsers = new ArrayList<>();
+        myHashtagString = new ArrayList<>();
+        postHashtags = new ArrayList<>();
         try {
             queryGetFollowing();
             Log.i(TAG, "List of following main: " + followingUsers);
@@ -289,36 +293,57 @@ public class HomeFragment extends Fragment {
         findMyHashtags();
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
+        Log.i(TAG, "MAX_TAGS: " + MAX_TAGS);
+        Log.i(TAG, "MAX_INTS: " + MAX_INTS);
         for (Post post : allPosts) {
             double score = calculateScore(MAX_TAGS, MAX_INTS, post);
-            postTreeMap.put(post, score);
+            postTreeMap.put(post, 10 - score); // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
         }
         Log.i(TAG, "treE: " + postTreeMap);
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Double> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
+            Log.i(TAG, "ranked post: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
         }
     }
 
     private double calculateScore(int max_tags, int max_ints, Post post) throws ParseException {
         double totalScore = 0;
         double totalTags = 0;
+
         ParseRelation<Hashtag> relation = post.getRelation(KEY_HASHTAGS);
-        // calculate hashtag score
-        for (Hashtag mTag : relation.getQuery().find()) {
-            if (myHashtags.contains(mTag)) {
-                totalTags += 1;
+        ParseQuery<Hashtag> query = relation.getQuery();
+        List<Hashtag> hashtagList = query.find();
+        List<String> hashtagListString = new ArrayList<>();
+        for (Hashtag tag : hashtagList) {
+            hashtagListString.add(tag.getHashtag());
+        }
+
+        for (String mTag : hashtagListString) {
+            Log.i(TAG, "checking: " + myHashtagString.contains(mTag));
+            for (String t : myHashtagString) {
+                Log.i(TAG, "LOOK: " + t + " " + mTag);
+                if (t.equals(mTag)) {
+                    totalTags += 1;
+                }
             }
         }
+
+        // calculate hashtag score
+        for (Hashtag mTag : relation.getQuery().find()) {
+            Log.i(TAG, "mTag.getHashtag: " + mTag.getHashtag());
+
+        }
         if (max_tags != 0) {
-            totalScore += (totalTags / max_tags) * 3;
+            totalScore += (totalTags / max_tags) * 5;
+            Log.i(TAG, "tag score: " + totalScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
         }
         // calculate interests score
         if (max_ints != 0) {
-            double intScore = (hMap.get(post.getUser().getObjectId()) / max_ints) * 5;
+            double intScore = (hMap.get(post.getUser().getObjectId()) / max_ints) * 3;
+            Log.i(TAG, "int score: " + intScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
             totalScore += intScore;
         }
-        Log.i(TAG, "score: total " + totalScore);
         // calculate location score
         // TODO
         Log.i(TAG, "score: " + post.getUser().getUsername() + ", " + post.getUser().getObjectId() + ", " + hMap.get(post.getUser().getObjectId()) + ", " + post.getLocationString() + totalScore);
@@ -340,7 +365,7 @@ public class HomeFragment extends Fragment {
             int currMax = 0;
             ParseUser mUser = mPost.getUser();
 
-            List<String> userInterests = currentUser.getList(KEY_INTERESTS);
+            List<String> userInterests = mUser.getList(KEY_INTERESTS);
 
             assert userInterests != null;
             for (String interest : userInterests) {
@@ -367,11 +392,16 @@ public class HomeFragment extends Fragment {
 
     private int findMaxHashtags() throws ParseException {
         int maxTags = 0;
+        Log.i(TAG, "myHashtagString: " + myHashtagString);
         for (Post mPost : allPosts) {
-            List<Hashtag> postHashtags = getPostHashtags(mPost);
+            postHashtags.clear();
+            getPostHashtags(mPost);
+            Log.i(TAG, "postHashtags: " + postHashtags);
             int currTags = 0;
-            for (Hashtag tag : postHashtags) {
-                if (myHashtags.contains(tag)) {
+            Log.i(TAG, "postHashtags: " + postHashtags);
+            for (String tag : postHashtags) {
+                Log.i(TAG, "tag_here: " + tag);
+                if (myHashtagString.contains(tag)) {
                     currTags += 1;
                 }
             }
@@ -382,49 +412,54 @@ public class HomeFragment extends Fragment {
         return maxTags;
     }
 
-    private List<Hashtag> getPostHashtags(Post thisPost) throws ParseException {
+    private void getPostHashtags(Post thisPost) throws ParseException {
         ParseRelation<Hashtag> relation = thisPost.getRelation(KEY_HASHTAGS);
         ParseQuery<Hashtag> query = relation.getQuery();
-        return query.find();
+        List<Hashtag> listHashtags = query.find();
+        for (Hashtag tag : listHashtags) {
+            postHashtags.add(tag.getHashtag());
+        }
+//        return query.find();
     }
 
-    private void queryMyPosts() {
+    private void queryMyPosts() throws ParseException {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
         query.whereEqualTo(Post.KEY_USER, ParseUser.getCurrentUser());
         query.addDescendingOrder("createdAt");
-        query.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> posts, ParseException e) {
-                if (e != null) {
-                    Log.e(TAG, "Issue with getting posts", e);
-                    return;
-                }
-                for (Post post : posts) {
-                    Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
-                }
-                myPosts.addAll(posts);
-
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("my_posts_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
-                getParentFragmentManager().setFragmentResult("my_posts_requestKey", bundle);
-            }
-        });
+        List<Post> myPostsL = query.find();
+        for (Post mPost : myPostsL) {
+            myPosts.add(mPost);
+        }
+//        query.findInBackground(new FindCallback<Post>() {
+//            @Override
+//            public void done(List<Post> posts, ParseException e) {
+//                if (e != null) {
+//                    Log.e(TAG, "Issue with getting posts", e);
+//                    return;
+//                }
+//                for (Post post : posts) {
+//                    Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
+//                }
+//                myPosts.addAll(posts);
+//
+//                Bundle bundle = new Bundle();
+//                bundle.putParcelableArrayList("my_posts_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
+//                getParentFragmentManager().setFragmentResult("my_posts_requestKey", bundle);
+//            }
+//        });
     }
 
-    private void findMyHashtags() {
+    private void findMyHashtags() throws ParseException {
+        Log.i(TAG, "myPosts: " + myPosts);
         for (Post mPost : myPosts) {
             ParseRelation<Hashtag> relation = mPost.getRelation(KEY_HASHTAGS);
             ParseQuery<Hashtag> query = relation.getQuery();
-            query.findInBackground(new FindCallback<Hashtag>() {
-                @Override
-                public void done(List<Hashtag> objects, ParseException e) {
-                    if (e != null) {
-                        Log.e(TAG, "error with findMyHashtags");
-                    }
-                    myHashtags.addAll(objects);
-                }
-            });
+            List<Hashtag> myHashtagsL = query.find();
+            Log.i(TAG, "inFindMyHTs: " + myHashtagsL);
+            for (Hashtag tag : myHashtagsL) {
+                myHashtagString.add(tag.getHashtag());
+            }
         }
     }
 }
