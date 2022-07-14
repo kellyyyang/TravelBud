@@ -7,6 +7,47 @@
     android:layout_margin="16dp"
     tools:context=".SignUpActivity">
 
+    <TextView
+        android:id="@+id/tvInterestsDescr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="15dp"
+        android:text="Input your interests (>3), especially any locations!"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etPasswordSignUp" />
+
+    <EditText
+        android:id="@+id/etInterests"
+        android:layout_width="315dp"
+        android:layout_height="42dp"
+        android:ems="10"
+        android:hint="interest"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvInterestsList" />
+
+    <TextView
+        android:id="@+id/tvInterestsList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:textColor="@color/purple_500"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvInterestsDescr"
+        tools:text="interest1, interest2, interest3" />
+
+    <ImageButton
+        android:id="@+id/btnEnterInterests"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvInterestsList"
+        app:srcCompat="@drawable/ic_baseline_send_24" />
+
     <EditText
         android:id="@+id/etUsernameSignUp"
         android:layout_width="match_parent"
@@ -17,7 +58,7 @@
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etEmailSignUp" />
+        app:layout_constraintTop_toBottomOf="@+id/etFullNameSignUp" />
 
     <EditText
         android:id="@+id/etPasswordSignUp"
@@ -35,13 +76,26 @@
         android:id="@+id/etEmailSignUp"
         android:layout_width="379dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="100dp"
         android:ems="10"
         android:hint="email"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etFullNameSignUp"
+        android:layout_width="379dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:hint="full name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etEmailSignUp" />
 
     <Button
         android:id="@+id/btnSignUpSU"
@@ -53,6 +107,6 @@
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etPasswordSignUp" />
+        app:layout_constraintTop_toBottomOf="@+id/etInterests" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

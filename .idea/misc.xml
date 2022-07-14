@@ -12,7 +12,8 @@
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.20305084228515627" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.28274428274428276" />
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.21822916666666667" />
-        <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.37642466227213545" />
+        <entry key="app/src/main/res/layout/activity_sign_up2.xml" value="0.23088684082031258" />
         <entry key="app/src/main/res/layout/activity_splash_screen.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_user_details.xml" value="0.4216707582826968" />
         <entry key="app/src/main/res/layout/fragment_blank.xml" value="0.1" />
