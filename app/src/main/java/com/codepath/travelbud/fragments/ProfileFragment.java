@@ -38,6 +38,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +61,8 @@ public class ProfileFragment extends Fragment {
     private TextView tvUsernameProfile;
     private TextView tvBioProfile;
     private Toolbar tbProfile;
+    private TextView tvNumFollowers;
+    private TextView tvNumFollowing;
 
     private Button btnLogout;
 
