@@ -67,6 +67,7 @@ public class UserDetailsFragment extends Fragment {
     private ImageView ivLock;
     private TextView tvPrivateP;
     private View divPrivate;
+    private MenuItem blockBtn;
 
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -117,9 +118,23 @@ public class UserDetailsFragment extends Fragment {
         assert getArguments() != null;
         user = getArguments().getParcelable("USER");
 
-//        user = (ParseUser) Parcels.unwrap(getIntent().getParcelableExtra(ParseUser.class.getSimpleName()));
-//        Log.i(TAG, "User: " + user);
-//        Log.d(TAG, "Showing details for " + user.getUsername());
+        // set title of block menu item button
+        blockBtn = tbUserDetails.getMenu().findItem(R.id.action_block);
+        try {
+            Log.i(TAG, "checkBlockedUsersContains: " + checkBlockedUsersContains(user));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            if (checkBlockedUsersContains(user)) {
+                blockBtn.setTitle("Unblock");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         tvUsernameSearch.setText(user.getUsername());
 
         user.fetchInBackground(new GetCallback<ParseObject>() {
@@ -161,27 +176,44 @@ public class UserDetailsFragment extends Fragment {
                 switch (item.getItemId()) {
                     case R.id.action_block:
                         Log.i(TAG, "inside block");
-                        if (isFollowing1) {
-                            unfollowUserBoth(currentUser, user);
-                        }
+
+                        boolean userIsBlocked = false;
+
                         try {
-                            if (isFollowingFunc(user, currentUser)) {
-                                boolean prevIsFollowing = isFollowing1;
-                                unfollowUserBoth(user, currentUser);
-                                isFollowing1 = prevIsFollowing;
-                            }
+                            userIsBlocked = checkBlockedUsersContains(user);
+                            Log.i(TAG, "userIsBlocked: " + userIsBlocked);
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
 
-                        try {
-                            if (!getBlockedUsers(currentUser).contains(user)) {
-                                ParseRelation<ParseUser> relation = currentUser.getRelation(KEY_BLOCKEDUSERS);
-                                relation.add(user);
-                                currentUser.saveInBackground();
+                        if (userIsBlocked) {
+                            unBlockUser(user);
+                            blockBtn.setTitle("Block");
+                        }
+                        else {
+                            if (isFollowing1) {
+                                unfollowUserBoth(currentUser, user);
                             }
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                            try {
+                                if (isFollowingFunc(user, currentUser)) {
+                                    boolean prevIsFollowing = isFollowing1;
+                                    unfollowUserBoth(user, currentUser);
+                                    isFollowing1 = prevIsFollowing;
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+
+                            try {
+                                if (!checkBlockedUsersContains(user)) {
+                                    ParseRelation<ParseUser> relation = currentUser.getRelation(KEY_BLOCKEDUSERS);
+                                    relation.add(user);
+                                    currentUser.saveInBackground();
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            blockBtn.setTitle("Unblock");
                         }
                 }
                 return true;
@@ -218,6 +250,21 @@ public class UserDetailsFragment extends Fragment {
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         queryPosts();
+    }
+
+    private void unBlockUser(ParseUser user) {
+        ParseRelation<ParseUser> relation = currentUser.getRelation(KEY_BLOCKEDUSERS);
+        relation.remove(user);
+        currentUser.saveInBackground();
+    }
+
+    private boolean checkBlockedUsersContains(ParseUser mUser) throws ParseException {
+        for (ParseUser pUser : getBlockedUsers(currentUser)) {
+            if (pUser.getObjectId().equals(mUser.getObjectId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasRequested() throws ParseException {
