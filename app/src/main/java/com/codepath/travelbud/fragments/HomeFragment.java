@@ -168,7 +168,6 @@ public class HomeFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 hashtagSelected = (String) parent.getItemAtPosition(position);
                 Log.i(TAG, "item selected: " + hashtagSelected);
-                adapter.notifyDataSetChanged();
                 InputMethodManager mgr = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 mgr.hideSoftInputFromWindow(actvHashtagFilter.getWindowToken(), 0);
                 try {
@@ -228,6 +227,20 @@ public class HomeFragment extends Fragment {
     private void queryPostsHT() throws ParseException {
 
         allPosts.clear();
+        rankedPosts.clear();
+
+        myPosts.clear();
+        postHashtags.clear();
+        myHashtagString.clear();
+        hMap.clear();
+        postTreeMap.clear();
+
+
+        Log.i(TAG, "querying postsHT: " + allPosts + ", " + rankedPosts);
+        Log.i(TAG, "hashtagSelected: " + hashtagSelected);
+
+        queryMyPosts();
+        findMyHashtags();
 
         ParseQuery<Post> query;
         query = null;
@@ -244,8 +257,8 @@ public class HomeFragment extends Fragment {
             queryHT.include(Hashtag.KEY_HASHTAG);
             List<Hashtag> hashtagsQueryList = queryHT.find();
             for (Hashtag tag : hashtagsQueryList) {
-                if (Objects.equals(tag.getHashtag(), hashtagSelected)) {
-                    ParseRelation<Post> hashtagPostRelation = tag.getRelation(Hashtag.KEY_POSTS);
+                if (tag.getHashtag().equals(hashtagSelected)) {
+                    ParseRelation<Post> hashtagPostRelation = tag.getRelation(Hashtag.KEY_POSTS);  // get all posts with hashtagSelected
                     query = hashtagPostRelation.getQuery();
                     query.include(Post.KEY_USER);
                     break;
@@ -273,6 +286,7 @@ public class HomeFragment extends Fragment {
 
                 try {
                     rankPosts(allPosts);
+                    adapter.notifyDataSetChanged();
                 } catch (ParseException ex) {
                     ex.printStackTrace();
                 }
@@ -289,8 +303,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void rankPosts(List<Post> allPosts) throws ParseException {
-        queryMyPosts();
-        findMyHashtags();
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
         Log.i(TAG, "MAX_TAGS: " + MAX_TAGS);
