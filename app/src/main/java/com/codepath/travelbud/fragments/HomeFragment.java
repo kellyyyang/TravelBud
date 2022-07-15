@@ -50,6 +50,8 @@ import java.util.Map;
 public class HomeFragment extends Fragment {
 
     public static final String TAG = "HomeFragment";
+    public static final String KEY_FOLLOWING = "following";
+
     private RecyclerView rvHome;
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -205,21 +207,34 @@ public class HomeFragment extends Fragment {
     }
 
     private void queryGetFollowing() throws ParseException {
-        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
-        query.include(Follow.KEY_FOLLOWER);
-        query.whereEqualTo(Follow.KEY_FOLLOWER, currentUser);
-//        query.findInBackground(new FindCallback<Follow>() {
+
+        ParseRelation<ParseUser> relation = currentUser.getRelation(KEY_FOLLOWING);
+        ParseQuery<ParseUser> followingQuery = relation.getQuery();
+        List<ParseUser> followingL = followingQuery.find();
+        for (ParseUser pUser : followingL) {
+            followingUsers.add(pUser);
+            Log.i(TAG, "followingUsers: " + pUser.getUsername());
+        }
+//        followingUsers.addAll(followingQuery.find());
+//        followingQuery.findInBackground(new FindCallback<ParseUser>() {
 //            @Override
-//            public void done(List<Follow> followRelations, ParseException e) {
-//                for (Follow follow : followRelations) {
-//                    followingUsers.add(follow.getFollowing());
+//            public void done(List<ParseUser> objects, ParseException e) {
+//                if (e != null) {
+//                    Log.e(TAG, "queryGetFollowing error: " + e);
+//                    return;
 //                }
+//                followingUsers.addAll(objects);
 //            }
 //        });
-        List<Follow> followRelations = query.find();
-        for (Follow follow : followRelations) {
-            followingUsers.add(follow.getFollowing());
-        }
+
+//        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
+//        query.include(Follow.KEY_FOLLOWER);
+//        query.whereEqualTo(Follow.KEY_FOLLOWER, currentUser);
+//
+//        List<Follow> followRelations = query.find();
+//        for (Follow follow : followRelations) {
+//            followingUsers.add(follow.getFollowing());
+//        }
     }
 
     private void queryPostsHT() throws ParseException {
