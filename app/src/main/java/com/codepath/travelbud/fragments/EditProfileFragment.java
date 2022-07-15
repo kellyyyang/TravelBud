@@ -1,5 +1,6 @@
 package com.codepath.travelbud.fragments;
 
+import static com.codepath.travelbud.FollowRequestsAdapter.KEY_FULL_NAME;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_BIO;
 
 import android.os.Bundle;
@@ -75,15 +76,19 @@ public class EditProfileFragment extends Fragment {
         currentUser = ParseUser.getCurrentUser();
         isPrivate = currentUser.getBoolean(KEY_IS_PRIVATE);
 
-        etFullNameEP.setText(""); // TODO: make full name field
+        etFullNameEP.setText(currentUser.getString(KEY_FULL_NAME));
         etUsernameEP.setText(currentUser.getUsername());
         etEmailEP.setText(currentUser.getEmail());
         etBioEP.setText(currentUser.getString(KEY_BIO));
 
-        newFullname = ""; // TODO: full name
+        newFullname = currentUser.getString(KEY_FULL_NAME);
         newUsername = currentUser.getUsername();
         newEmail = currentUser.getEmail();
         newBio = currentUser.getString(KEY_BIO);
+
+        if (currentUser.getBoolean(KEY_IS_PRIVATE)) {
+            switchProfile.setChecked(true);
+        }
 
         switchProfile.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -111,7 +116,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void saveInfo(String newFullname, String newUsername, String  newEmail, String newBio, boolean isPrivate) {
-        // TODO: full name
+        currentUser.put(KEY_FULL_NAME, newFullname);
         currentUser.setEmail(newEmail);
         currentUser.setUsername(newUsername);
         currentUser.put(KEY_BIO, newBio);
