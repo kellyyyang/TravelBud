@@ -47,7 +47,7 @@ public class Post extends ParseObject {
         put(KEY_USER, user);
     }
 
-    public Integer getRating() { return getInt(KEY_RATING); }
+    public float getRating() { return (float) getDouble(KEY_RATING); }
 
     public void setRating(Float rating) { put(KEY_RATING, rating); }
 
