@@ -33,7 +33,6 @@ import com.codepath.travelbud.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -44,8 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -66,11 +63,11 @@ public class HomeFragment extends Fragment {
     private AutoCompleteTextView actvHashtagFilter;
     private List<Hashtag> myHashtags;
     private List<String> myHashtagString;
-    private String emptyString = "";
     private Map<String, Integer> hMap;
     private List<String> mInterests;
     private Map<Post, Double> postTreeMap;
-    private Map<ParseGeoPoint, Integer> myLocations;
+    private Map<ParseGeoPoint, Double> myLocations;  // location, rating
+    private double RADIUS = 6371;
 
     ParseUser currentUser = ParseUser.getCurrentUser();
 
@@ -92,6 +89,7 @@ public class HomeFragment extends Fragment {
         rvHome = view.findViewById(R.id.rvHome);
         actvHashtagFilter = view.findViewById(R.id.actvHashtagFilter);
 
+        myLocations = new HashMap<>();
         postTreeMap = new HashMap<>();
         hMap = new HashMap<String, Integer>();
         myPosts = new ArrayList<>();
@@ -140,7 +138,7 @@ public class HomeFragment extends Fragment {
 
         rankedPosts = new ArrayList<>();
         allPosts = new ArrayList<>();
-        adapter = new PostsAdapter(getContext(), rankedPosts, false); // TODO: check!
+        adapter = new PostsAdapter(getContext(), rankedPosts, false);
 
         rvHome.setAdapter(adapter);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -357,18 +355,55 @@ public class HomeFragment extends Fragment {
             totalScore += intScore;
         }
         // calculate location score
-        // TODO
+        double latitude = post.getLocation().getLatitude();
+        double longitude = post.getLocation().getLongitude();
+        setMyLocations();
+        double[] distRatingL = locationWithinRadiusRating(latitude, longitude);
+        double closestLocRating = distRatingL[1];
+        double closestLocDist = distRatingL[0];
+        if (distRatingL[0] == Double.POSITIVE_INFINITY) {
+            closestLocDist = 20;
+        }
+        double locationScore = ((20 - closestLocDist) / 20) * 2 * (closestLocRating / 5);
+        Log.i(TAG, "location score: " + locationScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
+
+        totalScore += locationScore;
+
         Log.i(TAG, "score: " + post.getUser().getUsername() + ", " + post.getUser().getObjectId() + ", " + hMap.get(post.getUser().getObjectId()) + ", " + post.getLocationString() + totalScore);
         return totalScore;
+    }
+
+    // finds the closest location to given lat and long
+    private double[] locationWithinRadiusRating(double lat, double lon) {
+        double closestDist = Double.POSITIVE_INFINITY;
+        double finalRating = 0;
+        for (Map.Entry<ParseGeoPoint, Double> entry : myLocations.entrySet()) {
+//            rankedPosts.add(entry.getKey());
+            double haversineDist = haversine(entry.getKey().getLatitude(), lat, entry.getKey().getLongitude(), lon);
+            if (haversineDist < closestDist && haversineDist < 20) {
+                closestDist = haversineDist;
+                finalRating = entry.getValue();
+            }
+        }
+        return new double[]{closestDist, finalRating};
+    }
+
+
+    private void setMyLocations() {
+        for (Post mPost : myPosts) {
+            // TODO: maybe someone has two instances of the same location
+            Log.i(TAG, "setMyLocations: " + mPost.getLocation() + ", rating: " + mPost.getRating());
+            myLocations.put(mPost.getLocation(), (double) mPost.getRating());
+        }
     }
 
     // r = radius of sphere
     // a, b = latitudes
     // x, y = longitudes
-    private double haversine(double r, double a, double b, double x, double y) {
+    private double haversine(double a, double b, double x, double y) {
         double arg1 = Math.cos(a) * Math.cos(b) * Math.cos(x - y);
         double arg2 = Math.sin(a) * Math.sin(b);
-        return r * Math.acos(arg1 + arg2);
+        return RADIUS * Math.acos(arg1 + arg2);
     }
 
     private int findMaxInterests() {
