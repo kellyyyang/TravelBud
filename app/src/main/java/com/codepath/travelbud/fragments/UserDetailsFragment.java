@@ -2,6 +2,7 @@ package com.codepath.travelbud.fragments;
 
 import static com.codepath.travelbud.HideSoftKeyboard.hideSoftKeyboard;
 import static com.codepath.travelbud.fragments.EditProfileFragment.KEY_IS_PRIVATE;
+import static com.codepath.travelbud.fragments.HomeFragment.KEY_FOLLOWING;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_BIO;
 import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
 
@@ -56,6 +57,7 @@ public class UserDetailsFragment extends Fragment {
 
     public static final String TAG = "UserDetailsFragment";
     public static final String KEY_BLOCKEDUSERS = "blockedUsers";
+    public static final String KEY_FOLLOWERS = "followers";
 
     ParseUser user;
     private ImageView ivProfilePicSearch;
@@ -237,6 +239,7 @@ public class UserDetailsFragment extends Fragment {
                             setBtnRequestColor();
                         }
                         else {
+                            Log.i(TAG, "trying to follow");
                             followUserBoth(currentUser, user);
                         }
                     } catch (ParseException e) {
@@ -305,6 +308,34 @@ public class UserDetailsFragment extends Fragment {
         });
     }
 
+    private void addOrRemoveFollower(boolean isAdd) {
+        // Use this map to send parameters to your Cloud Code function
+        // Just push the parameters you want into it
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("userA", currentUser.getObjectId());
+        parameters.put("userB", user.getObjectId());
+
+        Log.i(TAG, "parameters: " + parameters);
+        String funcName = "addFollower";
+
+        if (!isAdd) {
+            funcName = "removeFollower";
+        }
+        ParseCloud.callFunctionInBackground(funcName, parameters, new FunctionCallback<String>() {
+            @Override
+            public void done(String object, ParseException e) {
+                if (e == null) {
+                    // Everything is alright
+                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                }
+                else {
+                    // Something went wrong
+                    Log.i(TAG, "Something went wrong with Parse Cloud code: " + e);
+                }
+            }
+        });
+    }
+
     private void sendFollowRequest() {
         // Use this map to send parameters to your Cloud Code function
         // Just push the parameters you want into it
@@ -337,32 +368,23 @@ public class UserDetailsFragment extends Fragment {
     }
 
     private void followUserBoth(ParseUser userA, ParseUser userB) {
-        Log.i(TAG, "in followUserBoth");
-        Follow newFollow = new Follow();
-        newFollow.setFollower(userA);
-        newFollow.setFollowing(userB);
-        isFollowing1 = true;
+        ParseRelation<ParseUser> relationA = userA.getRelation(KEY_FOLLOWING);
+        relationA.add(userB);
+        userA.saveInBackground();
         setBtnUnfollowColor();
-        newFollow.saveInBackground();
+        isFollowing1 = true;
+
+        addOrRemoveFollower(true);
     }
 
     private void unfollowUserBoth(ParseUser userA, ParseUser userB) {
-        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
-        query.include(Follow.KEY_FOLLOWING);
-        query.include(Follow.KEY_FOLLOWING);
-        query.whereEqualTo(Follow.KEY_FOLLOWER, userA);
-        query.whereEqualTo(Follow.KEY_FOLLOWING, userB);
-        isFollowing1 = false;
+        ParseRelation<ParseUser> relationA = userA.getRelation(KEY_FOLLOWING);
+        relationA.remove(userB);
+        userA.saveInBackground();
         setBtnFollowColor();
-        query.findInBackground(new FindCallback<Follow>() {
-            @Override
-            public void done(List<Follow> objects, ParseException e) {
-                Log.i(TAG, "hopefully only one: " + objects);
-                for (Follow obj : objects) {
-                    obj.deleteInBackground();
-                }
-            }
-        });
+        isFollowing1 = false;
+
+        addOrRemoveFollower(false);
     }
 
     private void setButtonAppearanceFix() throws ParseException {
@@ -425,44 +447,29 @@ public class UserDetailsFragment extends Fragment {
         btnFollow.setText("Following");
     }
 
-    private void followUserFix(ParseUser user) {
-        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-        relation.add(user);
-        setBtnUnfollowColor();
-        isFollowing1 = true;
-        currentUser.saveInBackground();
-    }
-
-    private void unfollowUserFix(ParseUser user) {
-        ParseRelation<ParseUser> relation = currentUser.getRelation("following");
-        relation.remove(user);
-        setBtnFollowColor();
-        isFollowing1 = false;
-        currentUser.saveInBackground();
-    }
-
     private boolean isFollowingFunc(ParseUser userA, ParseUser userB) throws ParseException {
-        Log.i(TAG, "in setIsFollowing");
-        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
-        query.include(Follow.KEY_FOLLOWER);
-        query.include(Follow.KEY_FOLLOWING);
-        query.whereEqualTo(Follow.KEY_FOLLOWER, userA);
-        query.whereEqualTo(Follow.KEY_FOLLOWING, userB);
-        List<Follow> follows = query.find();
-        Log.i(TAG, "following list: " + follows);
-        return follows.size() > 0;
+        ParseRelation<ParseUser> relation = userA.getRelation(KEY_FOLLOWING);
+        ParseQuery<ParseUser> query = relation.getQuery();
+        for (ParseUser pUser : query.find()) {
+            if (pUser.getObjectId().equals(userB.getObjectId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
+    // if userA is following userB
     private void setIsFollowing(ParseUser userA, ParseUser userB) throws ParseException {
-        Log.i(TAG, "in setIsFollowing");
-        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
-        query.include(Follow.KEY_FOLLOWER);
-        query.include(Follow.KEY_FOLLOWING);
-        query.whereEqualTo(Follow.KEY_FOLLOWER, userA);
-        query.whereEqualTo(Follow.KEY_FOLLOWING, userB);
-        List<Follow> follows = query.find();
-        Log.i(TAG, "following list: " + follows);
-        isFollowing1 = follows.size() > 0;
+        ParseRelation<ParseUser> relation = userA.getRelation(KEY_FOLLOWING);
+        ParseQuery<ParseUser> query = relation.getQuery();
+        for (ParseUser pUser : query.find()) {
+            Log.i(TAG, "setIsFollowing: " + pUser.getObjectId() + " " + userB.getObjectId() + " " + pUser.getUsername());
+            if (pUser.getObjectId().equals(userB.getObjectId())) {
+                isFollowing1 = true;
+                return;
+            }
+        }
+        isFollowing1 = false;
     }
 
     private void queryPosts() {
