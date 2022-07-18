@@ -41,6 +41,7 @@ import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // Parse Dependencies
@@ -475,6 +476,11 @@ public class UserDetailsFragment extends Fragment {
     private void queryPosts() {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
+        if (isFollowing1) {
+            query.whereContainedIn("visibility", new ArrayList<Integer>(Arrays.asList(null, 0, 1)));
+        } else {
+            query.whereContainedIn("visibility", new ArrayList<Integer>(Arrays.asList(null, 0)));
+        }
         query.whereEqualTo(Post.KEY_USER, user);
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback<Post>() {

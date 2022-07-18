@@ -6,6 +6,7 @@
         <entry key="app/src/main/res/drawable-v24/splash_background.xml" value="0.224" />
         <entry key="app/src/main/res/drawable/bg_gradient.xml" value="0.224" />
         <entry key="app/src/main/res/drawable/grey_border_bottom.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/spinner_background.xml" value="0.153" />
         <entry key="app/src/main/res/drawable/splash_background.xml" value="0.224" />
         <entry key="app/src/main/res/drawable/stroke_box.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_location_posts.xml" value="0.1" />
@@ -40,7 +41,7 @@
         <entry key="app/src/main/res/layout/item_user_search.xml" value="0.37817230224609377" />
         <entry key="app/src/main/res/layout/layout_private.xml" value="0.26447296142578125" />
         <entry key="app/src/main/res/layout/snippet_search_toolbar.xml" value="0.376409912109375" />
-        <entry key="app/src/main/res/layout/snippet_view_user_toolbar.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/snippet_view_user_toolbar.xml" value="0.3821670532226563" />
         <entry key="app/src/main/res/layout/snippet_view_users_toolbar.xml" value="0.1" />
         <entry key="app/src/main/res/menu/menu_bottom_navigation.xml" value="0.2171875" />
         <entry key="app/src/main/res/menu/menu_profile.xml" value="0.29738769531250003" />

@@ -32,6 +32,7 @@ import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -133,8 +134,8 @@ public class ExploreFragment extends Fragment {
             e.printStackTrace();
         }
         queryInterests();
-        Log.i(TAG, "allPosts: " + allPosts);
-        Log.i(TAG, "allUsers: " + users);
+//        Log.i(TAG, "allPosts: " + allPosts);
+//        Log.i(TAG, "allUsers: " + users);
         adapter.notifyDataSetChanged();
     }
 
@@ -157,7 +158,7 @@ public class ExploreFragment extends Fragment {
 //            }
 //        });
         users.addAll(query.find());
-        Log.i(TAG, "users: " + users);
+//        Log.i(TAG, "users: " + users);
     }
 
     private void queryPosts() throws ParseException {
@@ -176,6 +177,7 @@ public class ExploreFragment extends Fragment {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
         query.whereNotContainedIn("user", followingUsers);
+        query.whereContainedIn("visibility", new ArrayList<Integer>(Arrays.asList(null, 0)));
         query.addDescendingOrder("createdAt");
         allPosts.addAll(query.find());
 
@@ -189,19 +191,19 @@ public class ExploreFragment extends Fragment {
         List<ParseUser> followingL = followingQuery.find();
         for (ParseUser pUser : followingL) {
             followingUsers.add(pUser);
-            Log.i(TAG, "followingUsers: " + pUser.getUsername());
+//            Log.i(TAG, "followingUsers: " + pUser.getUsername());
         }
     }
 
     // get the interests of those currentUser is following
     private void queryInterests() {
-        Log.i(TAG, "followingUsers list: " + followingUsers);
+//        Log.i(TAG, "followingUsers list: " + followingUsers);
 
         // fill interestsMap with key:value pairs of interest:count
         for (ParseUser user : followingUsers) {
-            Log.i(TAG, "in list");
+//            Log.i(TAG, "in list");
             List<String> uInts = new ArrayList<>(Objects.requireNonNull(user.getList("interests")));
-            Log.i(TAG, "uInts: " + uInts);
+//            Log.i(TAG, "uInts: " + uInts);
             for (String interest : uInts) {
                 MutableDouble count = interestsMap.get(interest);
                 if (count == null) {
@@ -213,25 +215,25 @@ public class ExploreFragment extends Fragment {
                 totalInterests += 1;
             }
         }
-        Log.i(TAG, "interestsMap: " + interestsMap);
-        Log.i(TAG, "followingUsers, not in bundle: " + followingUsers);
+//        Log.i(TAG, "interestsMap: " + interestsMap);
+//        Log.i(TAG, "followingUsers, not in bundle: " + followingUsers);
 
         // now, weight the counts of each interest
         for (Map.Entry<String, MutableDouble> entry : interestsMap.entrySet()) {
             entry.getValue().divideBy(totalInterests);
-            Log.i(TAG, "new val: " + entry.getValue().get());
+//            Log.i(TAG, "new val: " + entry.getValue().get());
         }
 
         // testing
         for (ParseUser us : users) {
-            Log.i(TAG, "all user: " + us.getObjectId() + ", " + us.getUsername());
+//            Log.i(TAG, "all user: " + us.getObjectId() + ", " + us.getUsername());
         }
         for (ParseUser us : followingUsers) {
-            Log.i(TAG, "followed user: " + us.getObjectId() + ", " + us.getUsername());
+//            Log.i(TAG, "followed user: " + us.getObjectId() + ", " + us.getUsername());
         }
 
         for (ParseUser pUser : users) {
-            Log.i(TAG, "pUser: " + pUser + ", " + pUser.getUsername() + ", " + pUser.getObjectId());
+//            Log.i(TAG, "pUser: " + pUser + ", " + pUser.getUsername() + ", " + pUser.getObjectId());
             if (!containsName(followingUsers, pUser.getObjectId())) {
                 List<String> pInts = new ArrayList<>(Objects.requireNonNull(pUser.getList("interests")));
                 rankingMap.put(pUser, 0.0);
@@ -247,7 +249,7 @@ public class ExploreFragment extends Fragment {
         rankingMap = MapUtil.sortByValue(rankingMap);
         for (Map.Entry<ParseUser, Double> entry : rankingMap.entrySet()) {
             rankedUsers.add(entry.getKey());
-            Log.i(TAG, "ranked user: " + entry.getKey() + ", " + entry.getKey().getUsername() + ", " + entry.getValue());
+//            Log.i(TAG, "ranked user: " + entry.getKey() + ", " + entry.getKey().getUsername() + ", " + entry.getValue());
         }
         Collections.reverse(rankedUsers);
     }
@@ -255,17 +257,13 @@ public class ExploreFragment extends Fragment {
     private void rankPosts(List<Post> allPosts) throws ParseException {
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
-        Log.i(TAG, "MAX_TAGS: " + MAX_TAGS);
-        Log.i(TAG, "MAX_INTS: " + MAX_INTS);
         for (Post post : allPosts) {
             double score = calculateScore(MAX_TAGS, MAX_INTS, post);
             postTreeMap.put(post, 10 - score); // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
         }
-        Log.i(TAG, "treE: " + postTreeMap);
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Double> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
-            Log.i(TAG, "ranked post: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
         }
     }
 
@@ -282,28 +280,19 @@ public class ExploreFragment extends Fragment {
         }
 
         for (String mTag : hashtagListString) {
-            Log.i(TAG, "checking: " + myHashtagString.contains(mTag));
             for (String t : myHashtagString) {
-                Log.i(TAG, "LOOK: " + t + " " + mTag);
                 if (t.equals(mTag)) {
                     totalTags += 1;
                 }
             }
         }
 
-        // calculate hashtag score
-        for (Hashtag mTag : relation.getQuery().find()) {
-            Log.i(TAG, "mTag.getHashtag: " + mTag.getHashtag());
-
-        }
         if (max_tags != 0) {
             totalScore += (totalTags / max_tags) * 5;
-            Log.i(TAG, "tag score: " + totalScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
         }
         // calculate interests score
         if (max_ints != 0) {
             double intScore = (hMap.get(post.getUser().getObjectId()) / max_ints) * 3;
-            Log.i(TAG, "int score: " + intScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
             totalScore += intScore;
         }
         // calculate location score
@@ -317,11 +306,11 @@ public class ExploreFragment extends Fragment {
             closestLocDist = 20;
         }
         double locationScore = ((20 - closestLocDist) / 20) * 2 * (closestLocRating / 5);
-        Log.i(TAG, "location score: " + locationScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
+//        Log.i(TAG, "location score: " + locationScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
 
         totalScore += locationScore;
 
-        Log.i(TAG, "score: " + post.getUser().getUsername() + ", " + post.getUser().getObjectId() + ", " + hMap.get(post.getUser().getObjectId()) + ", " + post.getLocationString() + totalScore);
+//        Log.i(TAG, "score: " + post.getUser().getUsername() + ", " + post.getUser().getObjectId() + ", " + hMap.get(post.getUser().getObjectId()) + ", " + post.getLocationString() + totalScore);
         return totalScore;
     }
 
@@ -344,7 +333,7 @@ public class ExploreFragment extends Fragment {
     private void setMyLocations() {
         for (Post mPost : myPosts) {
             // TODO: maybe someone has two instances of the same location
-            Log.i(TAG, "setMyLocations: " + mPost.getLocation() + ", rating: " + mPost.getRating());
+//            Log.i(TAG, "setMyLocations: " + mPost.getLocation() + ", rating: " + mPost.getRating());
             myLocations.put(mPost.getLocation(), (double) mPost.getRating());
         }
     }
@@ -385,21 +374,21 @@ public class ExploreFragment extends Fragment {
                 maxInts = currMax;
             }
         }
-        Log.i(TAG, "findMaxInterests: " + hMap);
+//        Log.i(TAG, "findMaxInterests: " + hMap);
         return maxInts;
     }
 
     private int findMaxHashtags() throws ParseException {
         int maxTags = 0;
-        Log.i(TAG, "myHashtagString: " + myHashtagString);
+//        Log.i(TAG, "myHashtagString: " + myHashtagString);
         for (Post mPost : allPosts) {
             postHashtags.clear();
             getPostHashtags(mPost);
-            Log.i(TAG, "postHashtags: " + postHashtags);
+//            Log.i(TAG, "postHashtags: " + postHashtags);
             int currTags = 0;
-            Log.i(TAG, "postHashtags: " + postHashtags);
+//            Log.i(TAG, "postHashtags: " + postHashtags);
             for (String tag : postHashtags) {
-                Log.i(TAG, "tag_here: " + tag);
+//                Log.i(TAG, "tag_here: " + tag);
                 if (myHashtagString.contains(tag)) {
                     currTags += 1;
                 }
@@ -450,12 +439,12 @@ public class ExploreFragment extends Fragment {
     }
 
     private void findMyHashtags() throws ParseException {
-        Log.i(TAG, "myPosts: " + myPosts);
+//        Log.i(TAG, "myPosts: " + myPosts);
         for (Post mPost : myPosts) {
             ParseRelation<Hashtag> relation = mPost.getRelation(KEY_HASHTAGS);
             ParseQuery<Hashtag> query = relation.getQuery();
             List<Hashtag> myHashtagsL = query.find();
-            Log.i(TAG, "inFindMyHTs: " + myHashtagsL);
+//            Log.i(TAG, "inFindMyHTs: " + myHashtagsL);
             for (Hashtag tag : myHashtagsL) {
                 myHashtagString.add(tag.getHashtag());
             }
