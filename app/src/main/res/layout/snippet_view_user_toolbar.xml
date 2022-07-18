@@ -1,4 +1,5 @@
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_height="50dp"
@@ -23,12 +24,21 @@
 
 
                 <ImageView
+                    android:id="@+id/ivSearchIcon"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:src="@drawable/ic_search_button"
-                    android:layout_marginEnd="15dp"
-                    android:id="@+id/ivSearchIcon"
-                    android:layout_alignParentRight="true"/>
+                    android:layout_alignParentRight="true"
+                    android:layout_marginEnd="50dp"
+                    android:layout_toStartOf="@id/ivExploreIcon"
+                    android:src="@drawable/ic_search_button" />
+
+                <ImageView
+                    android:id="@+id/ivExploreIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="12dp"
+                    app:srcCompat="@drawable/ic_baseline_explore_24" />
 
             </RelativeLayout>
 
