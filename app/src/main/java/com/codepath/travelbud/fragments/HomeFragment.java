@@ -215,6 +215,9 @@ public class HomeFragment extends Fragment {
             followingUsers.add(pUser);
             Log.i(TAG, "followingUsers: " + pUser.getUsername());
         }
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList("following_users_bundleKey", (ArrayList<? extends Parcelable>) followingUsers);
+        getParentFragmentManager().setFragmentResult("following_users_requestKey", bundle);
 //        followingUsers.addAll(followingQuery.find());
 //        followingQuery.findInBackground(new FindCallback<ParseUser>() {
 //            @Override
