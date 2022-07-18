@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_search:
                         Toast.makeText(MainActivity.this, "Search!", Toast.LENGTH_SHORT).show();
 //                        fragment = new SearchFragment();
-                        fragment = new ExploreFragment();
+                        fragment = new SearchFragment();
                         break;
                     case R.id.action_profile:
                     default:
