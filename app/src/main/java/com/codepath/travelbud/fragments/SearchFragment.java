@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import com.codepath.travelbud.R;
 import com.codepath.travelbud.SearchAdapterToFragment;
 import com.codepath.travelbud.UserSearchAdapter;
+import com.codepath.travelbud.fragments.viewpager_fragments.ExploreFragment;
 import com.google.android.material.appbar.AppBarLayout;
 import com.parse.FindCallback;
 import com.parse.Parse;
@@ -55,6 +56,7 @@ public class SearchFragment extends Fragment {
     private ImageView ivBackArrow;
     private EditText etSearchUsers;
     private ParseUser currentUser;
+    private ImageView ivExploreIcon;
 
     private int mAppBarState;
     private static final int STANDARD_APPBAR = 0;
@@ -87,6 +89,7 @@ public class SearchFragment extends Fragment {
         viewUsersBar = view.findViewById(R.id.viewContactsToolbar);
         searchBar = view.findViewById(R.id.searchToolbar);
         etSearchUsers = view.findViewById(R.id.etSearchUsers);
+        ivExploreIcon = view.findViewById(R.id.ivExploreIcon);
 
         currentUser = ParseUser.getCurrentUser();
         allUsers = new ArrayList<>();
@@ -101,6 +104,19 @@ public class SearchFragment extends Fragment {
             public void onClick(View v) {
                 Log.d(TAG, "onClick: clicked searched icon");
                 toggleToolBarState();
+            }
+        });
+
+        ivExploreIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: clicked explore icon");
+                Fragment fragment = new ExploreFragment();
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.flContainer, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
             }
         });
 
