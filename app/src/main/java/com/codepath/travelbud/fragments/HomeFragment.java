@@ -40,6 +40,7 @@ import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -284,6 +285,7 @@ public class HomeFragment extends Fragment {
 
         assert query != null;
         query.whereContainedIn("user", followingUsers);
+        query.whereContainedIn("visibility", new ArrayList<Integer>(Arrays.asList(null, 0, 1)));
         query.setLimit(20);
 
         query.addDescendingOrder("createdAt");

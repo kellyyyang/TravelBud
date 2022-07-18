@@ -221,6 +221,9 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         task.addOnSuccessListener(location -> {
             if (location != null) {
                 currentLocation = location;
+                ParseGeoPoint currentLocationGeo = new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+                ParseUser.getCurrentUser().put("last_location", currentLocationGeo);
+                ParseUser.getCurrentUser().saveInBackground();
                 updateCurrentLocation();
                 Toast.makeText(getContext(), currentLocation.getLatitude() + ", " + currentLocation.getLongitude(), Toast.LENGTH_SHORT).show();
                 SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);

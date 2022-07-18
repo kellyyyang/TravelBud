@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -32,11 +33,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +62,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -89,6 +94,8 @@ public class ComposeFragment extends Fragment {
     private TextView tvHashtags;
     private TextView etHashtags;
     private ImageButton btnHashtagEnter;
+    private Spinner spinVisibility;
+    private int visibility = 0;
 
     private ArrayList<String> hashtags;
     private Hashtag matchingTag;
@@ -142,6 +149,7 @@ public class ComposeFragment extends Fragment {
         tvHashtags = view.findViewById(R.id.tvHashtags);
         etHashtags = view.findViewById(R.id.etHashtags);
         btnHashtagEnter = view.findViewById(R.id.btnHashtagEnter);
+        spinVisibility = view.findViewById(R.id.spinVisibility);
 
         hashtags = new ArrayList<>();
         matchingTag = null;
@@ -168,6 +176,17 @@ public class ComposeFragment extends Fragment {
         // Initialize the AutocompleteSupportFragment
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
         autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+
+        ParseFile image = ParseUser.getCurrentUser().getParseFile("profilePic");
+        if (image != null) {
+            Picasso
+                    .with(getContext())
+                    .load(image.getUrl())
+                    .resize((int) convertDpToPixel(80, getContext()), (int) convertDpToPixel(80, getContext()))
+                    .onlyScaleDown() // the image will only be resized if it's bigger than 6000x2000 pixels.
+                    .centerCrop()
+                    .into(ivProfilePicPost);
+        }
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -198,6 +217,35 @@ public class ComposeFragment extends Fragment {
                     tvHashtags.append("#" + etHashtags.getText().toString() + " ");
                     etHashtags.setText("");
                 }
+            }
+        });
+
+        // set spinner items
+        String[] arraySpinner = new String[] {"Everyone", "Followers", "Only You"};
+        ArrayAdapter<String> adapterSpinner = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, arraySpinner);
+        adapterSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinVisibility.setAdapter(adapterSpinner);
+        spinVisibility.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                visibility = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinVisibility.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.i(TAG, "item selected pos: " + position);
+                visibility = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 
@@ -307,6 +355,10 @@ public class ComposeFragment extends Fragment {
 
     }
 
+    public float convertDpToPixel(float dp, Context context){
+        return Math.round(dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
     public void onLaunchCamera(View view) {
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -367,6 +419,7 @@ public class ComposeFragment extends Fragment {
         post.setRating(rating);
         post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
         post.setLocationString(location);
+        post.setVisibility(visibility);
 
         ArrayList<Hashtag> hashtagArrayList = new ArrayList<>();
         if (hashtagList.size() == 0) {

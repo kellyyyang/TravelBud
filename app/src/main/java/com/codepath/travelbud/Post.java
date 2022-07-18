@@ -22,6 +22,7 @@ public class Post extends ParseObject {
     public static final String KEY_IMAGE_URL = "image_url";
     public static final String KEY_LOCATION_STRING = "location_string";
     public static final String KEY_HASHTAGS = "hashtags";
+    public static final String KEY_VISIBILITY = "visibility";
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
@@ -58,6 +59,10 @@ public class Post extends ParseObject {
     public String getLocationString() { return getString(KEY_LOCATION_STRING); }
 
     public void setLocationString(String location) { put(KEY_LOCATION_STRING, location); }
+
+    public int getVisibility() { return getInt(KEY_VISIBILITY); }
+
+    public void setVisibility(int visibility) { put(KEY_VISIBILITY, visibility); }
 
     public String getImageUrl() { return getString(KEY_IMAGE_URL); }
 
