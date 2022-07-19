@@ -1,4 +1,4 @@
-package com.codepath.travelbud;
+package com.codepath.travelbud.helper_classes;
 
 import com.parse.ParseGeoPoint;
 

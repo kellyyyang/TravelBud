@@ -1,4 +1,4 @@
-package com.codepath.travelbud;
+package com.codepath.travelbud.helper_classes;
 
 // Copyright 2020 Google LLC
 //
@@ -25,6 +25,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import android.widget.Toast;
+
+import com.codepath.travelbud.R;
 
 /**
  * Utility class for access to runtime permissions.

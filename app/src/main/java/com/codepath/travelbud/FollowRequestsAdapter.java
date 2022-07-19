@@ -1,6 +1,6 @@
 package com.codepath.travelbud;
 
-import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
+import static com.codepath.travelbud.fragments.profile_fragments.ProfileFragment.KEY_PROFILE_PIC;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -15,8 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.codepath.travelbud.parse_classes.Follow;
 import com.parse.ParseFile;
-import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 

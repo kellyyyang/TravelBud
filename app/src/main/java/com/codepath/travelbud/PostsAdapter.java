@@ -1,18 +1,15 @@
 package com.codepath.travelbud;
 
 import static android.view.View.GONE;
-import static com.codepath.travelbud.Post.KEY_HASHTAGS;
-import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
+import static com.codepath.travelbud.parse_classes.Post.KEY_HASHTAGS;
+import static com.codepath.travelbud.fragments.profile_fragments.ProfileFragment.KEY_PROFILE_PIC;
 
 import android.content.Context;
-import android.media.Image;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -21,19 +18,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.parse.FindCallback;
-import com.parse.Parse;
+import com.codepath.travelbud.parse_classes.Hashtag;
+import com.codepath.travelbud.parse_classes.Post;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
-import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> {
 

@@ -1,7 +1,8 @@
-package com.codepath.travelbud;
+package com.codepath.travelbud.parse_classes;
 
 import android.util.Log;
 
+import com.codepath.travelbud.parse_classes.Hashtag;
 import com.parse.ParseClassName;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;

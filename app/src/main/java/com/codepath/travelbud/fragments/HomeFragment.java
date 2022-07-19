@@ -1,6 +1,6 @@
 package com.codepath.travelbud.fragments;
 
-import static com.codepath.travelbud.Post.KEY_HASHTAGS;
+import static com.codepath.travelbud.parse_classes.Post.KEY_HASHTAGS;
 import static com.codepath.travelbud.SignUpActivity.KEY_INTERESTS;
 
 import android.content.Context;
@@ -26,10 +26,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
-import com.codepath.travelbud.Follow;
-import com.codepath.travelbud.Hashtag;
-import com.codepath.travelbud.MapUtil;
-import com.codepath.travelbud.Post;
+import com.codepath.travelbud.parse_classes.Hashtag;
+import com.codepath.travelbud.helper_classes.MapUtil;
+import com.codepath.travelbud.parse_classes.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;

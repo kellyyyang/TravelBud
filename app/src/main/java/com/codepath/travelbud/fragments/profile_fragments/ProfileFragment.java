@@ -1,4 +1,4 @@
-package com.codepath.travelbud.fragments;
+package com.codepath.travelbud.fragments.profile_fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,7 +26,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.codepath.travelbud.LoginActivity;
-import com.codepath.travelbud.Post;
+import com.codepath.travelbud.parse_classes.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;
@@ -39,11 +38,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.

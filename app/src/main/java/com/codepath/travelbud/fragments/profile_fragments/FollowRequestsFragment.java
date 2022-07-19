@@ -1,6 +1,4 @@
-package com.codepath.travelbud.fragments;
-
-import static com.codepath.travelbud.Post.KEY_USER;
+package com.codepath.travelbud.fragments.profile_fragments;
 
 import android.os.Bundle;
 
@@ -18,7 +16,6 @@ import android.view.ViewGroup;
 import com.codepath.travelbud.FollowRequestsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;

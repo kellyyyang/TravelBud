@@ -4,7 +4,6 @@ import static com.parse.Parse.getApplicationContext;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -18,8 +17,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,9 +24,9 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.codepath.travelbud.LocationPostsActivity;
-import com.codepath.travelbud.LocationTag;
-import com.codepath.travelbud.PermissionUtils;
-import com.codepath.travelbud.Post;
+import com.codepath.travelbud.helper_classes.LocationTag;
+import com.codepath.travelbud.helper_classes.PermissionUtils;
+import com.codepath.travelbud.parse_classes.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -51,7 +48,6 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

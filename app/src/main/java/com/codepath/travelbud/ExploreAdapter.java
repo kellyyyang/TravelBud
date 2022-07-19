@@ -1,24 +1,30 @@
 package com.codepath.travelbud;
 
 import android.content.Context;
-import android.media.Image;
+import android.content.Intent;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextClock;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
+import com.codepath.travelbud.fragments.search_and_explore.ExploreFragment;
+import com.codepath.travelbud.parse_classes.Post;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
+import org.parceler.Parcels;
+
 import java.util.List;
+import java.util.Locale;
 
 public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -105,16 +111,26 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         private TextView tvUsernameExplore;
         private ImageView ivUserExplore;
+        private TextView tvDistanceAway;
 
         public ViewHolder0(@NonNull View itemView) {
             super(itemView);
 
             tvUsernameExplore = itemView.findViewById(R.id.tvUsernameExplore);
             ivUserExplore = itemView.findViewById(R.id.ivUserExplore);
+            tvDistanceAway = itemView.findViewById(R.id.tvDistanceAway);
         }
 
         public void bindUser(ParseUser user) {
             tvUsernameExplore.setText(String.format("@%s", user.getUsername()));
+            if (user.getParseGeoPoint("last_location") != null && ParseUser.getCurrentUser().getParseGeoPoint("last_location") != null) {
+                double distAway = distanceAway(ParseUser.getCurrentUser(), user);
+                if (distAway > 50) {
+                    tvDistanceAway.setText(">50 km away");
+                } else {
+                    tvDistanceAway.setText(String.format(Locale.US, "%.1f km away", distAway));
+                }
+            }
             ParseFile image = user.getParseFile("profilePic");
             if (image != null) {
                 Picasso
@@ -125,6 +141,17 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         .centerCrop()
                         .into(ivUserExplore);
             }
+        }
+
+        private double distanceAway(ParseUser currentUser, ParseUser user) {
+            ParseGeoPoint pUserLastLoc = user.getParseGeoPoint("last_location");
+            double userLat = pUserLastLoc.getLatitude();
+            double userLong = pUserLastLoc.getLongitude();
+            ParseGeoPoint mLocation = currentUser.getParseGeoPoint("last_location");
+            double mLat = mLocation.getLatitude();
+            double mLong = mLocation.getLongitude();
+            double distBetween = ExploreFragment.haversine(userLat, mLat, userLong, mLong);
+            return distBetween;
         }
     }
 
