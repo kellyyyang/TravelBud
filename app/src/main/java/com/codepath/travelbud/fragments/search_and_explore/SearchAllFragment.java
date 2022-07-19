@@ -25,6 +25,8 @@ import android.widget.ImageView;
 
 import com.codepath.travelbud.R;
 import com.codepath.travelbud.SearchAdapterToFragment;
+import com.codepath.travelbud.SearchAllAdapter;
+import com.codepath.travelbud.UserPostArray;
 import com.codepath.travelbud.UserSearchAdapter;
 import com.codepath.travelbud.parse_classes.Post;
 import com.google.android.material.appbar.AppBarLayout;
@@ -42,15 +44,18 @@ import java.util.Locale;
  * A simple {@link Fragment} subclass.
  */
 
-public class SearchFragment extends Fragment {
+public class SearchAllFragment extends Fragment {
 
-    public static final String TAG = "SearchFragment";
-
+    public static final String TAG = "SearchAllFragment";
     private String KEY_USERNAME = "username";
+
     private RecyclerView rvUsersSearch;
-    private UserSearchAdapter adapter;
+    private SearchAllAdapter adapter;
+    private List<UserPostArray> allUsersPosts;
+    private List<UserPostArray> searchUsersPosts;
     private List<ParseUser> allUsers;
     private List<ParseUser> searchUsers;
+
     private ImageView ivSearchIcon;
     private ImageView ivBackArrow;
     private EditText etSearchUsers;
@@ -62,7 +67,7 @@ public class SearchFragment extends Fragment {
     private static final int SEARCH_APPBAR = 1;
     private AppBarLayout viewUsersBar, searchBar;
 
-    public SearchFragment() {
+    public SearchAllFragment() {
         // Required empty public constructor
     }
 
@@ -90,10 +95,13 @@ public class SearchFragment extends Fragment {
         etSearchUsers = view.findViewById(R.id.etSearchUsers);
         ivExploreIcon = view.findViewById(R.id.ivExploreIcon);
 
+
+
         currentUser = ParseUser.getCurrentUser();
-        allUsers = new ArrayList<>();
-        searchUsers = new ArrayList<>();
-        adapter = new UserSearchAdapter(getContext(), searchUsers, communication);
+
+        allUsersPosts = new ArrayList<>();
+        searchUsersPosts = new ArrayList<>();
+        adapter = new SearchAllAdapter(getContext(), searchUsersPosts, communication);
 
         rvUsersSearch.setAdapter(adapter);
         rvUsersSearch.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -106,19 +114,6 @@ public class SearchFragment extends Fragment {
             }
         });
 
-        ivExploreIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked explore icon");
-                Fragment fragment = new ExploreFragment();
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.flContainer, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        });
-
         ivBackArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,8 +122,6 @@ public class SearchFragment extends Fragment {
 
             }
         });
-
-        setupUsersList();
 
         queryUsers();
 
@@ -148,14 +141,9 @@ public class SearchFragment extends Fragment {
 
         @Override
         public void sendPost(int position, Post post) {
-            // TODO: delete if SearchAll works
+            // TODO: implement
         }
     };
-
-    private void setupUsersList() {
-
-
-    }
 
     // checks if pUser blocked the current user
     private List<ParseUser> getBlockedUsers(ParseUser pUser) throws ParseException {
@@ -163,6 +151,59 @@ public class SearchFragment extends Fragment {
         ParseQuery<ParseUser> query = relation.getQuery();
         query.include(KEY_BLOCKEDUSERS);
         return query.find();
+    }
+
+    private void queryPosts() {
+        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
+        query.include(Post.KEY_USER);
+        query.addDescendingOrder(Post.KEY_CREATED_AT);
+        query.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> posts, ParseException e) {
+                if (e != null) {
+                    Log.e(TAG, "Issue with getting posts", e);
+                    return;
+                }
+                for (Post post : posts ) {
+                    Log.i(TAG, "User: " + post.getUser().getUsername());
+                    boolean currUserIsBlocked = false;
+
+                    try {
+                        List<ParseUser> blockedUsers = getBlockedUsers(post.getUser());
+                        for (ParseUser bUser : blockedUsers) {
+                            if (bUser.getObjectId().equals(currentUser.getObjectId())) {
+                                currUserIsBlocked = true;
+                                break;
+                            }
+                        }
+                        if (!currUserIsBlocked) {
+                            UserPostArray mPost = new UserPostArray();
+                            mPost.setPost(post);
+                            allUsersPosts.add(mPost);
+                        }
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                etSearchUsers.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        String text = etSearchUsers.getText().toString().toLowerCase(Locale.getDefault());
+                        adapter.filter(text, allUsersPosts);
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                });
+
+            }
+        });
     }
 
     private void queryUsers() {
@@ -188,40 +229,21 @@ public class SearchFragment extends Fragment {
                             }
                         }
                         if (!currUserIsBlocked) {
-                            allUsers.add(user);
+                            UserPostArray mUser = new UserPostArray();
+                            mUser.setUser(user);
+                            allUsersPosts.add(mUser);
                         }
-//                        if (blockedUsers.contains(ParseUser.getCurrentUser())) {
-//                            Log.i(TAG, "blocked users: " + blockedUsers);
-//                            allUsers.add(user);
-//                        }
                     } catch (ParseException ex) {
                         ex.printStackTrace();
                     }
                 }
 
-//                allUsers.addAll(users);
-
-                etSearchUsers.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        String text = etSearchUsers.getText().toString().toLowerCase(Locale.getDefault());
-                        adapter.filter(text, allUsers);
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                    }
-                });
-
-                adapter.notifyDataSetChanged();
-//                rvUsersSearch.setAdapter(adapter);
+                queryPosts();
             }
         });
     }
+
+
 
     // Initiate toggle (it means when you click the search icon it pops up the editText and clicking the back button goes to the search icon again)
     private void toggleToolBarState() {

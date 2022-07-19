@@ -13,6 +13,7 @@ import com.codepath.travelbud.fragments.ComposeFragment;
 import com.codepath.travelbud.fragments.HomeFragment;
 import com.codepath.travelbud.fragments.MapsFragment;
 import com.codepath.travelbud.fragments.profile_fragments.ProfileFragment;
+import com.codepath.travelbud.fragments.search_and_explore.SearchAllFragment;
 import com.codepath.travelbud.fragments.search_and_explore.SearchFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_search:
                         Toast.makeText(MainActivity.this, "Search!", Toast.LENGTH_SHORT).show();
 //                        fragment = new SearchFragment();
-                        fragment = new SearchFragment();
+                        fragment = new SearchAllFragment();
                         break;
                     case R.id.action_profile:
                     default:
