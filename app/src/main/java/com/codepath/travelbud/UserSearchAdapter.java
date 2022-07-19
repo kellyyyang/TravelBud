@@ -87,11 +87,6 @@ public class UserSearchAdapter extends RecyclerView.Adapter<UserSearchAdapter.Vi
             if (position != RecyclerView.NO_POSITION) {
                 ParseUser user = users.get(position);
                 mCommunicator1.sendUser(position, user);
-
-//                Intent intent = new Intent(context, UserDetailsActivity.class);
-//                intent.putExtra(ParseUser.class.getSimpleName(), Parcels.wrap(user));
-//                Log.i(TAG, "Look at user: " + user);
-//                context.startActivity(intent);
             }
         }
     }

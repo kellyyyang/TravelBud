@@ -60,8 +60,6 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.i(TAG, "users: " + users);
-        Log.i(TAG, "posts: " + allPosts);
         switch (viewType) {
             case 0:
                 View view0 = LayoutInflater.from(context).inflate(R.layout.item_user_explore, parent, false);
