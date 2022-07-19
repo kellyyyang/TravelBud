@@ -201,7 +201,8 @@ public class SearchAllAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                         usersPosts.add(user);
                     }
                 } else {
-                    if (item.getPost().getDescription().toLowerCase(Locale.getDefault()).contains(characterText)) {
+                    if (item.getPost().getDescription().toLowerCase(Locale.getDefault()).contains(characterText) ||
+                            item.getPost().getLocationString().toLowerCase(Locale.getDefault()).contains(characterText)) {
                         UserPostArray post = new UserPostArray();
                         post.setPost(item.getPost());
                         usersPosts.add(post);
