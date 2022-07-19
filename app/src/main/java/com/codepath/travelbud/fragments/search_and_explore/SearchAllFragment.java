@@ -141,7 +141,13 @@ public class SearchAllFragment extends Fragment {
 
         @Override
         public void sendPost(int position, Post post) {
-            // TODO: implement
+            PostDetailsFragment postDetailsFragment = new PostDetailsFragment();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("POST", post);
+            postDetailsFragment.setArguments(bundle);
+            FragmentManager manager=getFragmentManager();
+            FragmentTransaction transaction=manager.beginTransaction();
+            transaction.replace(R.id.flContainer, postDetailsFragment).commit();
         }
     };
 

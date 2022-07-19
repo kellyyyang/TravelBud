@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="8dp"
+tools:context=".fragments.search_and_explore.PostDetailsFragment">
+
+<androidx.cardview.widget.CardView
+    android:id="@+id/cvProfilePicPD"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_marginStart="2dp"
+    android:layout_marginTop="5dp"
+    app:cardCornerRadius="25dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <ImageView
+        android:id="@+id/ivProfilePicPD"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        tools:srcCompat="@tools:sample/avatars" />
+</androidx.cardview.widget.CardView>
+
+<TextView
+    android:id="@+id/tvUsernamePD"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    android:layout_marginTop="5dp"
+    android:textStyle="bold"
+    app:layout_constraintStart_toEndOf="@+id/cvProfilePicPD"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="User Name" />
+
+<RatingBar
+    android:id="@+id/rbRatingBarPD"
+    style="@style/Widget.AppCompat.RatingBar.Small"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="10dp"
+    android:isIndicator="true"
+    android:numStars="5"
+    android:stepSize="1"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvLocationPD" />
+
+<TextView
+    android:id="@+id/tvIsAt"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    android:layout_marginTop="2dp"
+    android:text="is at"
+    app:layout_constraintStart_toEndOf="@+id/cvProfilePicPD"
+    app:layout_constraintTop_toBottomOf="@+id/tvUsernamePD" />
+
+<TextView
+    android:id="@+id/tvLocationPD"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="4dp"
+    android:layout_marginTop="2dp"
+    android:textStyle="bold"
+    app:layout_constraintStart_toEndOf="@+id/tvIsAt"
+    app:layout_constraintTop_toBottomOf="@+id/tvUsernamePD"
+    tools:text="Location, Location" />
+
+<TextView
+    android:id="@+id/tvDescriptionPD"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/rbRatingBarPD"
+    tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc quis purus nec sapien imperdiet dictum eget ac nulla. Lorem ipsum dolor sit amet, consectetur adipiscing elit. " />
+
+    <ImageView
+        android:id="@+id/ivPhotoPD"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvHashtagsOnPostPD"
+        tools:srcCompat="@tools:sample/avatars" />
+
+<TextView
+    android:id="@+id/tvDot"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="5dp"
+    android:layout_marginTop="5dp"
+    android:text="·"
+    android:textStyle="bold"
+    app:layout_constraintStart_toEndOf="@+id/tvUsernamePD"
+    app:layout_constraintTop_toTopOf="parent" />
+
+<TextView
+    android:id="@+id/tvTimeAgoPD"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="5dp"
+    android:layout_marginTop="5dp"
+    app:layout_constraintStart_toEndOf="@+id/tvDot"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="CreatedAt" />
+
+    <TextView
+    android:id="@+id/tvHashtagsOnPostPD"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:textColor="@color/purple_700"
+    android:textSize="12sp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvDescriptionPD"
+    tools:text="#hashtags #are #here" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
