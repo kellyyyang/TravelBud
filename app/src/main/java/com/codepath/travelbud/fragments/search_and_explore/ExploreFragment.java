@@ -219,14 +219,6 @@ public class ExploreFragment extends Fragment {
             entry.getValue().divideBy(totalInterests);
         }
 
-        // testing
-        for (ParseUser us : users) {
-//            Log.i(TAG, "all user: " + us.getObjectId() + ", " + us.getUsername());
-        }
-        for (ParseUser us : followingUsers) {
-//            Log.i(TAG, "followed user: " + us.getObjectId() + ", " + us.getUsername());
-        }
-
         // fill rankingMap with key:value pairs of ParseUser:score, where score is calculated by
         // the weights of the interests the user has in common with the currentUser's following
         for (ParseUser pUser : users) {
@@ -261,17 +253,21 @@ public class ExploreFragment extends Fragment {
         rankingMap = MapUtil.sortByValue(rankingMap);
         for (Map.Entry<ParseUser, Double> entry : rankingMap.entrySet()) {
             rankedUsers.add(entry.getKey());
-//            Log.i(TAG, "ranked user: " + entry.getKey() + ", " + entry.getKey().getUsername() + ", " + entry.getValue());
         }
         Collections.reverse(rankedUsers);
     }
 
+    /**
+     * Takes a list of all posts and ranks them
+     * @param allPosts The list of all posts
+     */
     private void rankPosts(List<Post> allPosts) throws ParseException {
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
         for (Post post : allPosts) {
             double score = calculateScore(MAX_TAGS, MAX_INTS, post);
-            postTreeMap.put(post, 10 - score); // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
+            // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
+            postTreeMap.put(post, 10 - score);
         }
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Double> entry : postTreeMap.entrySet()) {
@@ -279,10 +275,18 @@ public class ExploreFragment extends Fragment {
         }
     }
 
+    /**
+     * Takes a list of factors and a post and calculates the post's score.
+     * @param max_tags The maximum number of tags across all posts.
+     * @param max_ints The maximum number of interests across all users.
+     * @param post The post whose score will be calculated.
+     * @return The score of the post.
+     */
     private double calculateScore(int max_tags, int max_ints, Post post) throws ParseException {
         double totalScore = 0;
         double totalTags = 0;
 
+        // query all hashtags in the post
         ParseRelation<Hashtag> relation = post.getRelation(KEY_HASHTAGS);
         ParseQuery<Hashtag> query = relation.getQuery();
         List<Hashtag> hashtagList = query.find();
@@ -291,6 +295,7 @@ public class ExploreFragment extends Fragment {
             hashtagListString.add(tag.getHashtag());
         }
 
+        // count the total number of hashtags in common with one of the currentUser's hashtags
         for (String mTag : hashtagListString) {
             for (String t : myHashtagString) {
                 if (t.equals(mTag)) {
@@ -299,15 +304,21 @@ public class ExploreFragment extends Fragment {
             }
         }
 
+        // the total score is 10 and hashtags are weighted 0.5
+        // find the total weight of the tags in common
         if (max_tags != 0) {
             totalScore += (totalTags / max_tags) * 5;
         }
-        // calculate interests score
+
+        // calculate interests score (weighted 0.3)
         if (max_ints != 0) {
             double intScore = (hMap.get(post.getUser().getObjectId()) / max_ints) * 3;
             totalScore += intScore;
         }
-        // calculate location score
+
+        // calculate location score (weighted 0.2)
+        // if there is a location that currentUser has visited that is within 20 km of the user,
+        // find the closest location and its rating, then calculate the location score
         double latitude = post.getLocation().getLatitude();
         double longitude = post.getLocation().getLongitude();
         setMyLocations();
@@ -318,20 +329,22 @@ public class ExploreFragment extends Fragment {
             closestLocDist = 20;
         }
         double locationScore = ((20 - closestLocDist) / 20) * 2 * (closestLocRating / 5);
-//        Log.i(TAG, "location score: " + locationScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
-
         totalScore += locationScore;
 
-//        Log.i(TAG, "score: " + post.getUser().getUsername() + ", " + post.getUser().getObjectId() + ", " + hMap.get(post.getUser().getObjectId()) + ", " + post.getLocationString() + totalScore);
         return totalScore;
     }
 
-    // finds the closest location to given lat and long
+    /**
+     * Takes in latitude and longitude of the user's post's location and finds the closest location
+     * that the currentUser has been to and its rating.
+     * @param lat The latitude of the user's post.
+     * @param lon The longitude of the user's post.
+     * @return An array containing [closest distance, rating of closest distance].
+     */
     private double[] locationWithinRadiusRating(double lat, double lon) {
         double closestDist = Double.POSITIVE_INFINITY;
         double finalRating = 0;
         for (Map.Entry<ParseGeoPoint, Double> entry : myLocations.entrySet()) {
-//            rankedPosts.add(entry.getKey());
             double haversineDist = haversine(entry.getKey().getLatitude(), lat, entry.getKey().getLongitude(), lon);
             if (haversineDist < closestDist && haversineDist < 20) {
                 closestDist = haversineDist;
@@ -341,18 +354,24 @@ public class ExploreFragment extends Fragment {
         return new double[]{closestDist, finalRating};
     }
 
-
+    /**
+     * Finds the rating of each of the currentUser's visited locations
+     */
     private void setMyLocations() {
         for (Post mPost : myPosts) {
             // TODO: maybe someone has two instances of the same location
-//            Log.i(TAG, "setMyLocations: " + mPost.getLocation() + ", rating: " + mPost.getRating());
             myLocations.put(mPost.getLocation(), (double) mPost.getRating());
         }
     }
 
-    // r = radius of sphere
-    // a, b = latitudes
-    // x, y = longitudes
+    /**
+     * Finds the Haversine distance between two points on the Earth in kilometers.
+     * @param a The latitude of the first location.
+     * @param b The latitude of the second location.
+     * @param x The longitude of the first location.
+     * @param y The longitude of the second location.
+     * @return The Haversine distance between two points on the Earth in kilometers.
+     */
     public static double haversine(double a, double b, double x, double y) {
         double RADIUS = 6371;
         double arg1 = Math.cos(a) * Math.cos(b) * Math.cos(x - y);
@@ -360,8 +379,13 @@ public class ExploreFragment extends Fragment {
         return RADIUS * Math.acos(arg1 + arg2);
     }
 
+    /**
+     * Finds the maximum number of interests between a single user and the currentUser.
+     * @return The maximum number of interests between a single user and the currentUser.
+     */
     private int findMaxInterests() {
         int maxInts = 0;
+        // query all posts to find their creators/users
         for (Post mPost : allPosts) {
             int currMax = 0;
             ParseUser mUser = mPost.getUser();
@@ -387,7 +411,6 @@ public class ExploreFragment extends Fragment {
                 maxInts = currMax;
             }
         }
-//        Log.i(TAG, "findMaxInterests: " + hMap);
         return maxInts;
     }
 

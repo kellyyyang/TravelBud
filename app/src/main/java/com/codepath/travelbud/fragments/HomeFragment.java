@@ -186,7 +186,9 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // get all hashtags
+    /**
+     * Finds all hashtags in the database.
+     */
     private void queryHashtags() {
         ParseQuery<Hashtag> query = ParseQuery.getQuery(Hashtag.class);
         query.include("hashtag");
@@ -206,6 +208,10 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Finds the users that the currentUser is following.
+     * @throws ParseException
+     */
     private void queryGetFollowing() throws ParseException {
 
         ParseRelation<ParseUser> relation = currentUser.getRelation(KEY_FOLLOWING);
@@ -240,6 +246,11 @@ public class HomeFragment extends Fragment {
 //        }
     }
 
+    /**
+     * Finds all the posts that contain the hashtagSelected (i.e., the hashtag entered
+     * into the Filter bar.
+     * @throws ParseException
+     */
     private void queryPostsHT() throws ParseException {
 
         allPosts.clear();
@@ -251,24 +262,19 @@ public class HomeFragment extends Fragment {
         hMap.clear();
         postTreeMap.clear();
 
-
-        Log.i(TAG, "querying postsHT: " + allPosts + ", " + rankedPosts);
-        Log.i(TAG, "hashtagSelected: " + hashtagSelected);
-
         queryMyPosts();
         findMyHashtags();
 
         ParseQuery<Post> query;
         query = null;
-        Log.i(TAG, "in queryPostsHT");
 
+        // if there is no hashtag in the filter bar, query all posts of followed users
+        // otherwise, only query posts that are relations of the hashtag selected
         if (hashtagSelected == null) {
-            Log.i(TAG, "in hashtag is null: " + hashtagSelected);
             query = ParseQuery.getQuery(Post.class);
             query.include(Post.KEY_USER);
         }
         else {
-            Log.i(TAG, "in hashtag is not null: " + hashtagSelected);
             ParseQuery<Hashtag> queryHT = ParseQuery.getQuery(Hashtag.class);
             queryHT.include(Hashtag.KEY_HASHTAG);
             List<Hashtag> hashtagsQueryList = queryHT.find();
@@ -282,9 +288,11 @@ public class HomeFragment extends Fragment {
             }
         }
 
+        // only look through posts of the users that currentUser is following
+        // only look through posts that are labelled as visible to all followers or everyone
         assert query != null;
         query.whereContainedIn("user", followingUsers);
-        query.whereContainedIn("visibility", new ArrayList<Integer>(Arrays.asList(null, 0, 1)));
+        query.whereContainedIn("visibility", new ArrayList<>(Arrays.asList(null, 0, 1)));
         query.setLimit(20);
 
         query.addDescendingOrder("createdAt");
@@ -302,6 +310,7 @@ public class HomeFragment extends Fragment {
                 allPosts.addAll(posts);
 
                 try {
+                    // rank the posts based on the ranking algorithm
                     rankPosts(allPosts);
                     adapter.notifyDataSetChanged();
                 } catch (ParseException ex) {
@@ -310,8 +319,6 @@ public class HomeFragment extends Fragment {
 
                 adapter.notifyDataSetChanged();
 
-                Log.i(TAG, "allPosts: " + allPosts);
-
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList("home_post_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
                 getParentFragmentManager().setFragmentResult("home_post_requestKey", bundle);
@@ -319,6 +326,10 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Takes a list of all posts and ranks them
+     * @param allPosts The list of all posts
+     */
     private void rankPosts(List<Post> allPosts) throws ParseException {
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
@@ -336,10 +347,18 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    /**
+     * Takes a list of factors and a post and calculates the post's score.
+     * @param max_tags The maximum number of tags across all posts.
+     * @param max_ints The maximum number of interests across all users.
+     * @param post The post whose score will be calculated.
+     * @return The score of the post.
+     */
     private double calculateScore(int max_tags, int max_ints, Post post) throws ParseException {
         double totalScore = 0;
         double totalTags = 0;
 
+        // query all hashtags in the post
         ParseRelation<Hashtag> relation = post.getRelation(KEY_HASHTAGS);
         ParseQuery<Hashtag> query = relation.getQuery();
         List<Hashtag> hashtagList = query.find();
@@ -348,6 +367,7 @@ public class HomeFragment extends Fragment {
             hashtagListString.add(tag.getHashtag());
         }
 
+        // count the total number of hashtags in common with one of the currentUser's hashtags
         for (String mTag : hashtagListString) {
             Log.i(TAG, "checking: " + myHashtagString.contains(mTag));
             for (String t : myHashtagString) {
@@ -358,22 +378,21 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        // calculate hashtag score
-        for (Hashtag mTag : relation.getQuery().find()) {
-            Log.i(TAG, "mTag.getHashtag: " + mTag.getHashtag());
-
-        }
+        // the total score is 10 and hashtags are weighted 0.5
+        // find the total weight of the tags in common
         if (max_tags != 0) {
             totalScore += (totalTags / max_tags) * 5;
-            Log.i(TAG, "tag score: " + totalScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
         }
-        // calculate interests score
+
+        // calculate interests score (weighted 0.3)
         if (max_ints != 0) {
             double intScore = (hMap.get(post.getUser().getObjectId()) / max_ints) * 3;
-            Log.i(TAG, "int score: " + intScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
             totalScore += intScore;
         }
-        // calculate location score
+
+        // calculate location score (weighted 0.2)
+        // if there is a location that currentUser has visited that is within 20 km of the user,
+        // find the closest location and its rating, then calculate the location score
         double latitude = post.getLocation().getLatitude();
         double longitude = post.getLocation().getLongitude();
         setMyLocations();
@@ -384,20 +403,24 @@ public class HomeFragment extends Fragment {
             closestLocDist = 20;
         }
         double locationScore = ((20 - closestLocDist) / 20) * 2 * (closestLocRating / 5);
-        Log.i(TAG, "location score: " + locationScore + ", " + post.getUser().getUsername() + ", " + post.getLocationString());
-
         totalScore += locationScore;
 
-        Log.i(TAG, "score: " + post.getUser().getUsername() + ", " + post.getUser().getObjectId() + ", " + hMap.get(post.getUser().getObjectId()) + ", " + post.getLocationString() + totalScore);
         return totalScore;
     }
 
-    // finds the closest location to given lat and long
+    /**
+     * Takes in latitude and longitude of the user's post's location and finds the closest location
+     * that the currentUser has been to and its rating.
+     * @param lat The latitude of the user's post.
+     * @param lon The longitude of the user's post.
+     * @return An array containing [closest distance, rating of closest distance].
+     */
     private double[] locationWithinRadiusRating(double lat, double lon) {
         double closestDist = Double.POSITIVE_INFINITY;
         double finalRating = 0;
+        // calculate the Haversine distance from the user's post's location to each of the
+        // currentUser's locations
         for (Map.Entry<ParseGeoPoint, Double> entry : myLocations.entrySet()) {
-//            rankedPosts.add(entry.getKey());
             double haversineDist = haversine(entry.getKey().getLatitude(), lat, entry.getKey().getLongitude(), lon);
             if (haversineDist < closestDist && haversineDist < 20) {
                 closestDist = haversineDist;
@@ -408,27 +431,40 @@ public class HomeFragment extends Fragment {
     }
 
 
+    /**
+     * Finds the rating of each of the currentUser's visited locations
+     */
     private void setMyLocations() {
         for (Post mPost : myPosts) {
             // TODO: maybe someone has two instances of the same location
-            Log.i(TAG, "setMyLocations: " + mPost.getLocation() + ", rating: " + mPost.getRating());
             myLocations.put(mPost.getLocation(), (double) mPost.getRating());
         }
     }
 
-    // r = radius of sphere
-    // a, b = latitudes
-    // x, y = longitudes
+    /**
+     * Finds the Haversine distance between two points on the Earth in kilometers.
+     * @param a The latitude of the first location.
+     * @param b The latitude of the second location.
+     * @param x The longitude of the first location.
+     * @param y The longitude of the second location.
+     * @return The Haversine distance between two points on the Earth in kilometers.
+     */
     private double haversine(double a, double b, double x, double y) {
         double arg1 = Math.cos(a) * Math.cos(b) * Math.cos(x - y);
         double arg2 = Math.sin(a) * Math.sin(b);
         return RADIUS * Math.acos(arg1 + arg2);
     }
 
+    /**
+     * Finds the maximum number of interests between a single user and the currentUser.
+     * @return The maximum number of interests between a single user and the currentUser.
+     */
     private int findMaxInterests() {
         int maxInts = 0;
+        // iterate through allPosts and find the number of interests the post's user has in
+        // common with currentUser
         for (Post mPost : allPosts) {
-            int currMax = 0;
+            int currMax = 0;  // the current, updating maximum number of interests
             ParseUser mUser = mPost.getUser();
 
             List<String> userInterests = mUser.getList(KEY_INTERESTS);
@@ -439,7 +475,7 @@ public class HomeFragment extends Fragment {
                     currMax += 1;
                 }
             }
-            // update user max tags in hash map
+            // update user max tags in hMap (hashmap) for later use
             if (hMap.containsKey(mUser.getObjectId())) {
                 if (currMax > hMap.get(mUser.getObjectId())) {
                     hMap.put(mUser.getObjectId(), currMax);
@@ -452,21 +488,25 @@ public class HomeFragment extends Fragment {
                 maxInts = currMax;
             }
         }
-        Log.i(TAG, "findMaxInterests: " + hMap);
         return maxInts;
     }
 
+    /**
+     * Finds the maximum number of hashtags in common between a post and the currentUser's
+     * hashtags.
+     * @return The maximum number of hashtags in common a post and the currentUser's
+     * hashtags.
+     * @throws ParseException
+     */
     private int findMaxHashtags() throws ParseException {
         int maxTags = 0;
-        Log.i(TAG, "myHashtagString: " + myHashtagString);
+        // iterate through allPosts and find the number of hashtags each post has in
+        // common with currentUser's total hashtags
         for (Post mPost : allPosts) {
             postHashtags.clear();
             getPostHashtags(mPost);
-            Log.i(TAG, "postHashtags: " + postHashtags);
             int currTags = 0;
-            Log.i(TAG, "postHashtags: " + postHashtags);
             for (String tag : postHashtags) {
-                Log.i(TAG, "tag_here: " + tag);
                 if (myHashtagString.contains(tag)) {
                     currTags += 1;
                 }
@@ -478,6 +518,11 @@ public class HomeFragment extends Fragment {
         return maxTags;
     }
 
+    /**
+     * Finds the hashtags in a post.
+     * @param thisPost The post that we're getting hashtags from.
+     * @throws ParseException
+     */
     private void getPostHashtags(Post thisPost) throws ParseException {
         ParseRelation<Hashtag> relation = thisPost.getRelation(KEY_HASHTAGS);
         ParseQuery<Hashtag> query = relation.getQuery();
@@ -485,9 +530,12 @@ public class HomeFragment extends Fragment {
         for (Hashtag tag : listHashtags) {
             postHashtags.add(tag.getHashtag());
         }
-//        return query.find();
     }
 
+    /**
+     * Queries the posts that the currentUser created.
+     * @throws ParseException
+     */
     private void queryMyPosts() throws ParseException {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
@@ -516,6 +564,10 @@ public class HomeFragment extends Fragment {
 //        });
     }
 
+    /**
+     * Finds all the hashtags that the currentUser has created.
+     * @throws ParseException
+     */
     private void findMyHashtags() throws ParseException {
         Log.i(TAG, "myPosts: " + myPosts);
         for (Post mPost : myPosts) {
