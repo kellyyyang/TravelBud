@@ -19,9 +19,22 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|bottom"
         android:shadowColor="@color/black"
+        android:shadowDx="2"
+        android:shadowDy="1"
+        android:shadowRadius="10"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        tools:text="UserNameHere" />
+
+    <TextView
+        android:id="@+id/tvDistanceAway"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|top|right"
+        android:shadowColor="@color/black"
         android:shadowDx="1"
         android:shadowDy="1"
-        android:shadowRadius="5"
+        android:shadowRadius="10"
         android:textColor="@color/white"
         android:textStyle="bold"
         tools:text="UserNameHere" />

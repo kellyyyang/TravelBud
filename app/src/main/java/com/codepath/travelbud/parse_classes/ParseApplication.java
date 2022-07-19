@@ -1,7 +1,10 @@
-package com.codepath.travelbud;
+package com.codepath.travelbud.parse_classes;
 
 import android.app.Application;
 
+import com.codepath.travelbud.parse_classes.Follow;
+import com.codepath.travelbud.parse_classes.Hashtag;
+import com.codepath.travelbud.parse_classes.Post;
 import com.parse.Parse;
 import com.parse.ParseObject;
 

@@ -1,10 +1,10 @@
-package com.codepath.travelbud.fragments;
+package com.codepath.travelbud.fragments.search_and_explore;
 
-import static com.codepath.travelbud.HideSoftKeyboard.hideSoftKeyboard;
-import static com.codepath.travelbud.fragments.EditProfileFragment.KEY_IS_PRIVATE;
+import static com.codepath.travelbud.helper_classes.HideSoftKeyboard.hideSoftKeyboard;
+import static com.codepath.travelbud.fragments.profile_fragments.EditProfileFragment.KEY_IS_PRIVATE;
 import static com.codepath.travelbud.fragments.HomeFragment.KEY_FOLLOWING;
-import static com.codepath.travelbud.fragments.ProfileFragment.KEY_BIO;
-import static com.codepath.travelbud.fragments.ProfileFragment.KEY_PROFILE_PIC;
+import static com.codepath.travelbud.fragments.profile_fragments.ProfileFragment.KEY_BIO;
+import static com.codepath.travelbud.fragments.profile_fragments.ProfileFragment.KEY_PROFILE_PIC;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -27,8 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.codepath.travelbud.Follow;
-import com.codepath.travelbud.Post;
+import com.codepath.travelbud.parse_classes.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
 import com.parse.FindCallback;

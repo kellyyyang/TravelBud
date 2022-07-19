@@ -1,4 +1,4 @@
-package com.codepath.travelbud;
+package com.codepath.travelbud.helper_classes;
 
 public class MutableDouble {
     double value = 1.0; // note that we start at 1 since we're counting

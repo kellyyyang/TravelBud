@@ -1,6 +1,6 @@
-package com.codepath.travelbud.fragments;
+package com.codepath.travelbud.fragments.search_and_explore;
 
-import static com.codepath.travelbud.fragments.UserDetailsFragment.KEY_BLOCKEDUSERS;
+import static com.codepath.travelbud.fragments.search_and_explore.UserDetailsFragment.KEY_BLOCKEDUSERS;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -26,10 +26,8 @@ import android.widget.ImageView;
 import com.codepath.travelbud.R;
 import com.codepath.travelbud.SearchAdapterToFragment;
 import com.codepath.travelbud.UserSearchAdapter;
-import com.codepath.travelbud.fragments.viewpager_fragments.ExploreFragment;
 import com.google.android.material.appbar.AppBarLayout;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;

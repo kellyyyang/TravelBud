@@ -1,13 +1,12 @@
-package com.codepath.travelbud.fragments;
+package com.codepath.travelbud.fragments.profile_fragments;
 
 import static com.codepath.travelbud.FollowRequestsAdapter.KEY_FULL_NAME;
-import static com.codepath.travelbud.fragments.ProfileFragment.KEY_BIO;
+import static com.codepath.travelbud.fragments.profile_fragments.ProfileFragment.KEY_BIO;
 
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -23,7 +22,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.codepath.travelbud.R;
-import com.codepath.travelbud.SignUpActivity;
+import com.codepath.travelbud.fragments.profile_fragments.ProfileFragment;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;

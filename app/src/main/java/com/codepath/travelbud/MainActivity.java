@@ -4,20 +4,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.codepath.travelbud.fragments.ComposeFragment;
-import com.codepath.travelbud.fragments.FollowRequestsFragment;
 import com.codepath.travelbud.fragments.HomeFragment;
 import com.codepath.travelbud.fragments.MapsFragment;
-import com.codepath.travelbud.fragments.ProfileFragment;
-import com.codepath.travelbud.fragments.SearchFragment;
-import com.codepath.travelbud.fragments.viewpager_fragments.ExploreFragment;
+import com.codepath.travelbud.fragments.profile_fragments.ProfileFragment;
+import com.codepath.travelbud.fragments.search_and_explore.SearchFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {

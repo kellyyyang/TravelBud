@@ -1,6 +1,6 @@
-package com.codepath.travelbud.fragments.viewpager_fragments;
+package com.codepath.travelbud.fragments.search_and_explore;
 
-import static com.codepath.travelbud.Post.KEY_HASHTAGS;
+import static com.codepath.travelbud.parse_classes.Post.KEY_HASHTAGS;
 import static com.codepath.travelbud.SignUpActivity.KEY_INTERESTS;
 import static com.codepath.travelbud.fragments.HomeFragment.KEY_FOLLOWING;
 
@@ -9,22 +9,19 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.codepath.travelbud.ExploreAdapter;
-import com.codepath.travelbud.Hashtag;
-import com.codepath.travelbud.MapUtil;
-import com.codepath.travelbud.MutableDouble;
-import com.codepath.travelbud.Post;
+import com.codepath.travelbud.parse_classes.Hashtag;
+import com.codepath.travelbud.helper_classes.MapUtil;
+import com.codepath.travelbud.helper_classes.MutableDouble;
+import com.codepath.travelbud.parse_classes.Post;
 import com.codepath.travelbud.R;
-import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -65,8 +62,9 @@ public class ExploreFragment extends Fragment {
     private List<Post> myPosts;
     private List<String> postHashtags;
 
+    private ParseGeoPoint mLocation;
+
     private ParseUser currentUser;
-    private double RADIUS = 6371;
 
     public ExploreFragment() {
         // Required empty public constructor
@@ -102,6 +100,8 @@ public class ExploreFragment extends Fragment {
         mInterests = currentUser.getList(KEY_INTERESTS);
         myPosts = new ArrayList<>();
         postHashtags = new ArrayList<>();
+
+        mLocation = currentUser.getParseGeoPoint("last_location");
 
         adapter = new ExploreAdapter(getContext(), rankedUsers, rankedPosts);
 
@@ -146,6 +146,9 @@ public class ExploreFragment extends Fragment {
     private void queryUsers() throws ParseException {
         ParseQuery<ParseUser> query = ParseQuery.getQuery("_User");
         query.include("username");
+        ArrayList<String> me = new ArrayList<>();
+        me.add(currentUser.getObjectId());
+        query.whereNotContainedIn("objectId", me);
         query.addAscendingOrder("username");
 //        query.findInBackground(new FindCallback<ParseUser>() {
 //            @Override
@@ -162,7 +165,6 @@ public class ExploreFragment extends Fragment {
     }
 
     private void queryPosts() throws ParseException {
-//        allPosts.clear();
         rankedPosts.clear();
 
         myPosts.clear();
@@ -184,6 +186,7 @@ public class ExploreFragment extends Fragment {
         rankPosts(allPosts);
     }
 
+    // find the users that currentUser is following
     private void queryGetFollowing() throws ParseException {
 
         ParseRelation<ParseUser> relation = ParseUser.getCurrentUser().getRelation(KEY_FOLLOWING);
@@ -191,19 +194,14 @@ public class ExploreFragment extends Fragment {
         List<ParseUser> followingL = followingQuery.find();
         for (ParseUser pUser : followingL) {
             followingUsers.add(pUser);
-//            Log.i(TAG, "followingUsers: " + pUser.getUsername());
         }
     }
 
     // get the interests of those currentUser is following
     private void queryInterests() {
-//        Log.i(TAG, "followingUsers list: " + followingUsers);
-
         // fill interestsMap with key:value pairs of interest:count
         for (ParseUser user : followingUsers) {
-//            Log.i(TAG, "in list");
             List<String> uInts = new ArrayList<>(Objects.requireNonNull(user.getList("interests")));
-//            Log.i(TAG, "uInts: " + uInts);
             for (String interest : uInts) {
                 MutableDouble count = interestsMap.get(interest);
                 if (count == null) {
@@ -215,13 +213,10 @@ public class ExploreFragment extends Fragment {
                 totalInterests += 1;
             }
         }
-//        Log.i(TAG, "interestsMap: " + interestsMap);
-//        Log.i(TAG, "followingUsers, not in bundle: " + followingUsers);
 
         // now, weight the counts of each interest
         for (Map.Entry<String, MutableDouble> entry : interestsMap.entrySet()) {
             entry.getValue().divideBy(totalInterests);
-//            Log.i(TAG, "new val: " + entry.getValue().get());
         }
 
         // testing
@@ -232,8 +227,9 @@ public class ExploreFragment extends Fragment {
 //            Log.i(TAG, "followed user: " + us.getObjectId() + ", " + us.getUsername());
         }
 
+        // fill rankingMap with key:value pairs of ParseUser:score, where score is calculated by
+        // the weights of the interests the user has in common with the currentUser's following
         for (ParseUser pUser : users) {
-//            Log.i(TAG, "pUser: " + pUser + ", " + pUser.getUsername() + ", " + pUser.getObjectId());
             if (!containsName(followingUsers, pUser.getObjectId())) {
                 List<String> pInts = new ArrayList<>(Objects.requireNonNull(pUser.getList("interests")));
                 rankingMap.put(pUser, 0.0);
@@ -246,6 +242,22 @@ public class ExploreFragment extends Fragment {
             }
         }
 
+        // now, we add location to each user's score, based on how close their last registered
+        // location is to the currentUser's
+        for (Map.Entry<ParseUser, Double> entry : rankingMap.entrySet()) {
+            ParseUser pUser = entry.getKey();
+            ParseGeoPoint pUserLastLoc = pUser.getParseGeoPoint("last_location");
+            if (mLocation != null && pUserLastLoc != null) {
+                double userLat = pUserLastLoc.getLatitude();
+                double userLong = pUserLastLoc.getLongitude();
+                double mLat = mLocation.getLatitude();
+                double mLong = mLocation.getLongitude();
+                double distBetween = haversine(userLat, mLat, userLong, mLong);
+                rankingMap.put(entry.getKey(), entry.getValue() + 1/(distBetween + 5)); // scale the second val to be 0.2 when distBetween == 0
+            }
+        }
+
+        // sort rankingMap by value so that those with the lowest value come first
         rankingMap = MapUtil.sortByValue(rankingMap);
         for (Map.Entry<ParseUser, Double> entry : rankingMap.entrySet()) {
             rankedUsers.add(entry.getKey());
@@ -341,7 +353,8 @@ public class ExploreFragment extends Fragment {
     // r = radius of sphere
     // a, b = latitudes
     // x, y = longitudes
-    private double haversine(double a, double b, double x, double y) {
+    public static double haversine(double a, double b, double x, double y) {
+        double RADIUS = 6371;
         double arg1 = Math.cos(a) * Math.cos(b) * Math.cos(x - y);
         double arg2 = Math.sin(a) * Math.sin(b);
         return RADIUS * Math.acos(arg1 + arg2);

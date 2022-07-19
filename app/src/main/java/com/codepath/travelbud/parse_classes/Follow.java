@@ -1,4 +1,4 @@
-package com.codepath.travelbud;
+package com.codepath.travelbud.parse_classes;
 
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
