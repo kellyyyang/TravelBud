@@ -1,9 +1,11 @@
 package com.codepath.travelbud.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.codepath.travelbud.parse_classes.Post.KEY_HASHTAGS;
 import static com.codepath.travelbud.SignUpActivity.KEY_INTERESTS;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import java.lang.Math;
 
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -32,6 +35,7 @@ import com.codepath.travelbud.helper_classes.MapUtil;
 import com.codepath.travelbud.parse_classes.Post;
 import com.codepath.travelbud.PostsAdapter;
 import com.codepath.travelbud.R;
+import com.google.gson.Gson;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -53,6 +57,8 @@ public class HomeFragment extends Fragment {
     public static final String TAG = "HomeFragment";
     public static final String KEY_FOLLOWING = "following";
 
+    SharedPreferences sharedPreferences; // create an object of SharedPreferences
+
     private RecyclerView rvHome;
     private PostsAdapter adapter;
     private List<Post> allPosts;
@@ -68,8 +74,10 @@ public class HomeFragment extends Fragment {
     private List<String> myHashtagString;
     private Map<String, Integer> hMap;
     private List<String> mInterests;
-    private Map<Post, Double> postTreeMap;
+    private Map<Post, Float> postTreeMap;
     private Map<ParseGeoPoint, Double> myLocations;  // location, rating
+    private int SWIPE_REFRESH;
+//    PostDatabase db;
 
     private SwipeRefreshLayout swipeContainer;
     private double RADIUS = 6371;
@@ -91,6 +99,15 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+//        db = Room.databaseBuilder(requireActivity().getApplicationContext(), PostDatabase.class, "post-database").allowMainThreadQueries().build();
+
+//        List<Post> postListDB = db.postDao().getAllPosts();
+
+//        for (Post list : postListDB) {
+//            Log.i("personsposts: ", list.getUser().getUsername() + " " + list.getLocationString());
+//        }
+        SWIPE_REFRESH = 0;
+
         rvHome = view.findViewById(R.id.rvHome);
         actvHashtagFilter = view.findViewById(R.id.actvHashtagFilter);
 
@@ -109,7 +126,6 @@ public class HomeFragment extends Fragment {
         // queryGetFollowing -> queryHashtags -> actvHashtagFilter.setAdapter ->
         try {
             queryGetFollowing();
-            Log.i(TAG, "List of following main: " + followingUsers);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -155,10 +171,7 @@ public class HomeFragment extends Fragment {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                // Your code to refresh the list here.
-                // Make sure you call swipeContainer.setRefreshing(false)
-                // once the network request has completed successfully.
-                Log.i(TAG, "onRefresh from swipe to refresh");
+                SWIPE_REFRESH = 1;  // completely re-query posts
                 adapter.clear();
                 try {
                     queryPostsHT();
@@ -191,7 +204,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 hashtagSelected = (String) parent.getItemAtPosition(position);
-                Log.i(TAG, "item selected: " + hashtagSelected);
                 InputMethodManager mgr = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 mgr.hideSoftInputFromWindow(actvHashtagFilter.getWindowToken(), 0);
                 try {
@@ -203,11 +215,66 @@ public class HomeFragment extends Fragment {
         });
 
         try {
-            Log.i(TAG, "attempting to query posts");
             queryPostsHT();
         } catch (ParseException e) {
             Log.e(TAG, "exception with queryPosts: " + e);
         }
+    }
+
+    public void loadData() {
+        SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getContext());
+        Log.i(TAG, "in loadData: " + sh);
+
+//        Gson gson = new Gson();
+//        String json = mPrefs.getString("MyObject", "");
+//        MyObject obj = gson.fromJson(json, MyObject.class);
+
+//        Map<String,?> keys = sh.getAll();
+//
+//        for(Map.Entry<String,?> entry : keys.entrySet()) {
+//            Gson gson = new Gson();
+//            String json = entry.getKey();
+//            Post post = gson.fromJson(json, Post.class);
+//            postTreeMap.put(post, (Float) entry.getValue());
+//        }
+
+        for (Post post : allPosts) {
+            float s1 = sh.getFloat(post.getObjectId(), 0);
+            Log.i(TAG, "in loadData loop: " + post.getLocationString() + ", " + s1);
+            postTreeMap.put(post, s1);
+        }
+
+        postTreeMap = MapUtil.sortByValue(postTreeMap);
+        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
+            rankedPosts.add(entry.getKey());
+            Log.i(TAG, "ranked post load: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
+        }
+        adapter.notifyDataSetChanged();
+    }
+
+    public void saveData() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext()); // TODO: maybe change to Activity.getApplicationContext()
+//        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE);
+        SharedPreferences.Editor myEdit = sharedPreferences.edit();
+
+//        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
+//            Gson gson = new Gson();
+//            String json = gson.toJson(entry.getKey());
+//            myEdit.putFloat(json, entry.getValue());
+//        }
+
+        // write all the data entered by the user in SharedPreference and apply
+        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
+            myEdit.putFloat(entry.getKey().getObjectId(), entry.getValue());
+        }
+        myEdit.apply();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveData();
     }
 
     /**
@@ -224,7 +291,6 @@ public class HomeFragment extends Fragment {
                     return;
                 }
                 for (Hashtag tag : objects) {
-                    Log.i(TAG, "Tag string: " + tag.getHashtag());
                     allHashtagsString.add(tag.getHashtag());
                 }
                 allHashtagsObject.addAll(objects);
@@ -243,7 +309,6 @@ public class HomeFragment extends Fragment {
         List<ParseUser> followingL = followingQuery.find();
         for (ParseUser pUser : followingL) {
             followingUsers.add(pUser);
-            Log.i(TAG, "followingUsers: " + pUser.getUsername());
         }
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("following_users_bundleKey", (ArrayList<? extends Parcelable>) followingUsers);
@@ -327,21 +392,20 @@ public class HomeFragment extends Fragment {
                     Log.e(TAG, "Issue with getting posts", e);
                     return;
                 }
-                for (Post post : posts) {
-                    Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
-                }
 
                 allPosts.addAll(posts);
 
-                try {
-                    // rank the posts based on the ranking algorithm
-                    rankPosts(allPosts);
-                    adapter.notifyDataSetChanged();
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
+                loadData();
 
-                adapter.notifyDataSetChanged();
+                if (SWIPE_REFRESH == 1) {
+                    try {
+                        // rank the posts based on the ranking algorithm
+                        rankPosts(allPosts);
+                        adapter.notifyDataSetChanged();
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                }
 
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList("home_post_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
@@ -357,16 +421,14 @@ public class HomeFragment extends Fragment {
     private void rankPosts(List<Post> allPosts) throws ParseException {
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
-        Log.i(TAG, "MAX_TAGS: " + MAX_TAGS);
-        Log.i(TAG, "MAX_INTS: " + MAX_INTS);
         for (Post post : allPosts) {
-            double score = calculateScore(MAX_TAGS, MAX_INTS, post);
+            float score = (float) calculateScore(MAX_TAGS, MAX_INTS, post);
             postTreeMap.put(post, 10 - score); // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
         }
-        Log.i(TAG, "treE: " + postTreeMap);
         postTreeMap = MapUtil.sortByValue(postTreeMap);
-        for (Map.Entry<Post, Double> entry : postTreeMap.entrySet()) {
+        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
+//            db.postDao().insertAll(entry.getKey())
             Log.i(TAG, "ranked post: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
         }
     }
@@ -393,9 +455,7 @@ public class HomeFragment extends Fragment {
 
         // count the total number of hashtags in common with one of the currentUser's hashtags
         for (String mTag : hashtagListString) {
-            Log.i(TAG, "checking: " + myHashtagString.contains(mTag));
             for (String t : myHashtagString) {
-                Log.i(TAG, "LOOK: " + t + " " + mTag);
                 if (t.equals(mTag)) {
                     totalTags += 1;
                 }
@@ -593,12 +653,10 @@ public class HomeFragment extends Fragment {
      * @throws ParseException
      */
     private void findMyHashtags() throws ParseException {
-        Log.i(TAG, "myPosts: " + myPosts);
         for (Post mPost : myPosts) {
             ParseRelation<Hashtag> relation = mPost.getRelation(KEY_HASHTAGS);
             ParseQuery<Hashtag> query = relation.getQuery();
             List<Hashtag> myHashtagsL = query.find();
-            Log.i(TAG, "inFindMyHTs: " + myHashtagsL);
             for (Hashtag tag : myHashtagsL) {
                 myHashtagString.add(tag.getHashtag());
             }

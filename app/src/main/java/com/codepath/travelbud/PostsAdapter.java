@@ -79,7 +79,7 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
-    // Add a list of items -- change to type used
+    // Add a list of items
     public void addAll(List<Post> list) {
         posts.addAll(list);
         notifyDataSetChanged();

@@ -2,6 +2,10 @@ package com.codepath.travelbud.parse_classes;
 
 import android.util.Log;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import com.codepath.travelbud.parse_classes.Hashtag;
 import com.parse.ParseClassName;
 import com.parse.ParseFile;
@@ -15,6 +19,9 @@ import java.util.Date;
 @ParseClassName("Post")
 public class Post extends ParseObject {
 
+//    @PrimaryKey(autoGenerate = true)
+//    public int uid;
+
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_USER = "user";
@@ -24,6 +31,17 @@ public class Post extends ParseObject {
     public static final String KEY_LOCATION_STRING = "location_string";
     public static final String KEY_HASHTAGS = "hashtags";
     public static final String KEY_VISIBILITY = "visibility";
+
+//    @ColumnInfo(name = "description")
+//    private String description;
+//
+//    @ColumnInfo(name = "location_string")
+//    private String location_string;
+//
+//    public Post() {
+//        this.description = getString(KEY_DESCRIPTION);
+//        this.location_string = getString(KEY_LOCATION_STRING);
+//    }
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
