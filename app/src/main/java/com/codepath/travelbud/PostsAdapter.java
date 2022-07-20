@@ -36,18 +36,12 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
     private Context context;
     private List<Post> posts;
-    private List<Hashtag> hashtags;
-    private List<Post> postsFull;
-    private List<Hashtag> hashtagListFilter;
-    private List<Hashtag> allHashtags;
-    private ParseRelation<Post> allHashtagPosts;
     private boolean isProfile;
 
     public PostsAdapter(Context context, List<Post> posts, boolean isProfile) {
         this.context = context;
         this.posts = posts;
         this.isProfile = isProfile;
-        postsFull = new ArrayList<>(posts);
     }
 
     @NonNull
@@ -79,61 +73,17 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         return posts.size();
     }
 
-    // filter hashtags
-    // allHashtagFilterList is a list of all hashtags in the database
-    public void hashtagFilter(String characterText, List<Hashtag> allHashtagFilterList) {
-        characterText = characterText.toLowerCase();
-        hashtags.clear();
-        if (characterText.length() > 0) {
-            hashtags.clear();
-            for (Hashtag tag : allHashtagFilterList) {
-                if (tag.getHashtag().toLowerCase().contains(characterText)) {
-                    hashtags.add(tag);
-                }
-            }
-        }
+    // Clean all elements of the recycler
+    public void clear() {
+        posts.clear();
+        notifyDataSetChanged();
     }
 
-//    @Override
-//    public Filter getFilter() {
-//        return postsFilter;
-//    }
-//
-//    private Filter postsFilter = new Filter() {
-//        @Override
-//        protected FilterResults performFiltering(CharSequence constraint) {
-//            List<Post> filteredList = new ArrayList<>();
-//            if (constraint == null || constraint.length() == 0) {
-//                filteredList.addAll(postsFull);
-//            } else {
-//                String filterPattern = constraint.toString().toLowerCase().trim();
-//
-//                ParseQuery<Hashtag> hashtagParseQuery = ParseQuery.getQuery(Hashtag.class);
-//                hashtagParseQuery.include("hashtag");
-//                try {
-//                    allHashtags = hashtagParseQuery.find();
-//                } catch (ParseException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                for (Hashtag tag : allHashtags) {
-//                    if (tag.getHashtag().toLowerCase().contains(filterPattern)) {
-//                        hashtagListFilter.add(tag);
-//                    }
-//                }
-//
-//            }
-//
-//            FilterResults results = new FilterResults();
-//
-//
-//        }
-//
-//        @Override
-//        protected void publishResults(CharSequence constraint, FilterResults results) {
-//
-//        }
-//    };
+    // Add a list of items -- change to type used
+    public void addAll(List<Post> list) {
+        posts.addAll(list);
+        notifyDataSetChanged();
+    }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
