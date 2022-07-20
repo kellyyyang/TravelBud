@@ -23,6 +23,7 @@
         <entry key="app/src/main/res/layout/fragment_explore.xml" value="0.29483642578125" />
         <entry key="app/src/main/res/layout/fragment_follow_requests.xml" value="0.33243408203125" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3576594034830729" />
+        <entry key="app/src/main/res/layout/fragment_home_fast.xml" value="0.23072916666666668" />
         <entry key="app/src/main/res/layout/fragment_location_posts.xml" value="0.36501312255859386" />
         <entry key="app/src/main/res/layout/fragment_maps.xml" value="0.241998291015625" />
         <entry key="app/src/main/res/layout/fragment_maps2.xml" value="0.20416666666666666" />
