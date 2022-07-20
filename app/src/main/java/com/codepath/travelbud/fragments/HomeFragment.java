@@ -101,6 +101,7 @@ public class HomeFragment extends Fragment {
         followingUsers = new ArrayList<>();
         myHashtagString = new ArrayList<>();
         postHashtags = new ArrayList<>();
+        // queryGetFollowing -> queryHashtags -> actvHashtagFilter.setAdapter ->
         try {
             queryGetFollowing();
             Log.i(TAG, "List of following main: " + followingUsers);
