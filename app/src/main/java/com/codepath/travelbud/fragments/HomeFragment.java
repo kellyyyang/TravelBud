@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Parcelable;
 import android.text.Editable;
@@ -69,6 +70,8 @@ public class HomeFragment extends Fragment {
     private List<String> mInterests;
     private Map<Post, Double> postTreeMap;
     private Map<ParseGeoPoint, Double> myLocations;  // location, rating
+
+    private SwipeRefreshLayout swipeContainer;
     private double RADIUS = 6371;
 
     ParseUser currentUser = ParseUser.getCurrentUser();
@@ -90,6 +93,8 @@ public class HomeFragment extends Fragment {
 
         rvHome = view.findViewById(R.id.rvHome);
         actvHashtagFilter = view.findViewById(R.id.actvHashtagFilter);
+
+        swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
 
         myLocations = new HashMap<>();
         postTreeMap = new HashMap<>();
@@ -145,6 +150,24 @@ public class HomeFragment extends Fragment {
 
         rvHome.setAdapter(adapter);
         rvHome.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Your code to refresh the list here.
+                // Make sure you call swipeContainer.setRefreshing(false)
+                // once the network request has completed successfully.
+                Log.i(TAG, "onRefresh from swipe to refresh");
+                adapter.clear();
+                try {
+                    queryPostsHT();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                swipeContainer.setRefreshing(false);
+            }
+        });
 
         actvHashtagFilter.setOnKeyListener(new View.OnKeyListener() {
             @Override
