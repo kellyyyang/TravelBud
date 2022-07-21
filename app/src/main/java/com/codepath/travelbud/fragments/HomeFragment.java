@@ -1,8 +1,7 @@
 package com.codepath.travelbud.fragments;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.codepath.travelbud.parse_classes.Post.KEY_HASHTAGS;
-import static com.codepath.travelbud.SignUpActivity.KEY_INTERESTS;
+import static com.codepath.travelbud.models.Post.KEY_HASHTAGS;
+import static com.codepath.travelbud.activities.SignUpActivity.KEY_INTERESTS;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -30,12 +29,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
-import com.codepath.travelbud.parse_classes.Hashtag;
-import com.codepath.travelbud.helper_classes.MapUtil;
-import com.codepath.travelbud.parse_classes.Post;
-import com.codepath.travelbud.PostsAdapter;
+import com.codepath.travelbud.models.Hashtag;
+import com.codepath.travelbud.utils.MapUtil;
+import com.codepath.travelbud.models.Post;
+import com.codepath.travelbud.adapters.PostsAdapter;
 import com.codepath.travelbud.R;
-import com.google.gson.Gson;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -56,8 +54,6 @@ public class HomeFragment extends Fragment {
 
     public static final String TAG = "HomeFragment";
     public static final String KEY_FOLLOWING = "following";
-
-    SharedPreferences sharedPreferences; // create an object of SharedPreferences
 
     private RecyclerView rvHome;
     private PostsAdapter adapter;
@@ -99,13 +95,6 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        db = Room.databaseBuilder(requireActivity().getApplicationContext(), PostDatabase.class, "post-database").allowMainThreadQueries().build();
-
-//        List<Post> postListDB = db.postDao().getAllPosts();
-
-//        for (Post list : postListDB) {
-//            Log.i("personsposts: ", list.getUser().getUsername() + " " + list.getLocationString());
-//        }
         SWIPE_REFRESH = 0;
 
         rvHome = view.findViewById(R.id.rvHome);
@@ -223,20 +212,8 @@ public class HomeFragment extends Fragment {
 
     public void loadData() {
         SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getContext());
+//        SharedPreferences sh = requireActivity().getSharedPreferences("PostSharedPrefs", MODE_PRIVATE);
         Log.i(TAG, "in loadData: " + sh);
-
-//        Gson gson = new Gson();
-//        String json = mPrefs.getString("MyObject", "");
-//        MyObject obj = gson.fromJson(json, MyObject.class);
-
-//        Map<String,?> keys = sh.getAll();
-//
-//        for(Map.Entry<String,?> entry : keys.entrySet()) {
-//            Gson gson = new Gson();
-//            String json = entry.getKey();
-//            Post post = gson.fromJson(json, Post.class);
-//            postTreeMap.put(post, (Float) entry.getValue());
-//        }
 
         for (Post post : allPosts) {
             float s1 = sh.getFloat(post.getObjectId(), 0);
@@ -254,14 +231,7 @@ public class HomeFragment extends Fragment {
 
     public void saveData() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext()); // TODO: maybe change to Activity.getApplicationContext()
-//        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MySharedPref", MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
-
-//        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
-//            Gson gson = new Gson();
-//            String json = gson.toJson(entry.getKey());
-//            myEdit.putFloat(json, entry.getValue());
-//        }
 
         // write all the data entered by the user in SharedPreference and apply
         for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
@@ -313,26 +283,6 @@ public class HomeFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("following_users_bundleKey", (ArrayList<? extends Parcelable>) followingUsers);
         getParentFragmentManager().setFragmentResult("following_users_requestKey", bundle);
-//        followingUsers.addAll(followingQuery.find());
-//        followingQuery.findInBackground(new FindCallback<ParseUser>() {
-//            @Override
-//            public void done(List<ParseUser> objects, ParseException e) {
-//                if (e != null) {
-//                    Log.e(TAG, "queryGetFollowing error: " + e);
-//                    return;
-//                }
-//                followingUsers.addAll(objects);
-//            }
-//        });
-
-//        ParseQuery<Follow> query = ParseQuery.getQuery(Follow.class);
-//        query.include(Follow.KEY_FOLLOWER);
-//        query.whereEqualTo(Follow.KEY_FOLLOWER, currentUser);
-//
-//        List<Follow> followRelations = query.find();
-//        for (Follow follow : followRelations) {
-//            followingUsers.add(follow.getFollowing());
-//        }
     }
 
     /**
@@ -514,7 +464,6 @@ public class HomeFragment extends Fragment {
         return new double[]{closestDist, finalRating};
     }
 
-
     /**
      * Finds the rating of each of the currentUser's visited locations
      */
@@ -629,23 +578,6 @@ public class HomeFragment extends Fragment {
         for (Post mPost : myPostsL) {
             myPosts.add(mPost);
         }
-//        query.findInBackground(new FindCallback<Post>() {
-//            @Override
-//            public void done(List<Post> posts, ParseException e) {
-//                if (e != null) {
-//                    Log.e(TAG, "Issue with getting posts", e);
-//                    return;
-//                }
-//                for (Post post : posts) {
-//                    Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
-//                }
-//                myPosts.addAll(posts);
-//
-//                Bundle bundle = new Bundle();
-//                bundle.putParcelableArrayList("my_posts_bundleKey", (ArrayList<? extends Parcelable>) allPosts);
-//                getParentFragmentManager().setFragmentResult("my_posts_requestKey", bundle);
-//            }
-//        });
     }
 
     /**

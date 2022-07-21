@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.search_and_explore.SearchFragment">
+    tools:context=".fragments.search.SearchFragment">
 
     <include layout="@layout/snippet_search_toolbar"
         android:id="@+id/layout_search_toolbar" />
