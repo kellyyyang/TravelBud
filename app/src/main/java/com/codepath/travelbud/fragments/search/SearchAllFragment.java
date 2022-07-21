@@ -52,8 +52,6 @@ public class SearchAllFragment extends Fragment {
     private SearchAllAdapter adapter;
     private List<UserPostArray> allUsersPosts;
     private List<UserPostArray> searchUsersPosts;
-    private List<ParseUser> allUsers;
-    private List<ParseUser> searchUsers;
 
     private ImageView ivSearchIcon;
     private ImageView ivBackArrow;
@@ -108,7 +106,6 @@ public class SearchAllFragment extends Fragment {
         ivSearchIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked searched icon");
                 toggleToolBarState();
             }
         });
@@ -116,7 +113,6 @@ public class SearchAllFragment extends Fragment {
         ivExploreIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked explore icon");
                 Fragment fragment = new ExploreFragment();
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -129,7 +125,6 @@ public class SearchAllFragment extends Fragment {
         ivBackArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked back arrow.");
                 toggleToolBarState();
 
             }
@@ -139,6 +134,7 @@ public class SearchAllFragment extends Fragment {
 
     }
 
+    // sends the user or post selected to the adapter
     SearchAdapterToFragment communication = new SearchAdapterToFragment() {
         @Override
         public void sendUser(int position, ParseUser user) {
@@ -163,7 +159,12 @@ public class SearchAllFragment extends Fragment {
         }
     };
 
-    // checks if pUser blocked the current user
+    /**
+     * Retrieves the users that a user has blocked.
+     * @param pUser The user whose blockedUsers column we want to check.
+     * @return A list of ParseUsers that pUser has blocked.
+     * @throws ParseException
+     */
     private List<ParseUser> getBlockedUsers(ParseUser pUser) throws ParseException {
         ParseRelation<ParseUser> relation = pUser.getRelation(KEY_BLOCKEDUSERS);
         ParseQuery<ParseUser> query = relation.getQuery();
@@ -179,18 +180,17 @@ public class SearchAllFragment extends Fragment {
             @Override
             public void done(List<Post> posts, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with getting posts", e);
+                    e.printStackTrace();
                     return;
                 }
                 for (Post post : posts ) {
-                    Log.i(TAG, "User: " + post.getUser().getUsername());
                     boolean currUserIsBlocked = false;
-
                     try {
                         List<ParseUser> blockedUsers = getBlockedUsers(post.getUser());
                         for (ParseUser bUser : blockedUsers) {
                             if (bUser.getObjectId().equals(currentUser.getObjectId())) {
                                 currUserIsBlocked = true;
+                                // the currentUser is blocked, so we shouldn't query this user's posts
                                 break;
                             }
                         }
@@ -201,6 +201,16 @@ public class SearchAllFragment extends Fragment {
                         }
                     } catch (ParseException ex) {
                         ex.printStackTrace();
+                    }
+                    if (post.getVisibility() != 2) {
+                        UserPostArray mPost = new UserPostArray();
+                        mPost.setPost(post);
+                        allUsersPosts.add(mPost);
+                    }
+                    else if (!post.getUser().getBoolean("isPrivate")) {
+                        UserPostArray mPost = new UserPostArray();
+                        mPost.setPost(post);
+                        allUsersPosts.add(mPost);
                     }
                 }
 
@@ -231,11 +241,10 @@ public class SearchAllFragment extends Fragment {
             @Override
             public void done(List<ParseUser> users, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with getting users", e);
+                    e.printStackTrace();
                     return;
                 }
                 for (ParseUser user : users ) {
-                    Log.i(TAG, "User: " + user.getUsername());
                     boolean currUserIsBlocked = false;
 
                     try {
@@ -243,6 +252,7 @@ public class SearchAllFragment extends Fragment {
                         for (ParseUser bUser : blockedUsers) {
                             if (bUser.getObjectId().equals(currentUser.getObjectId())) {
                                 currUserIsBlocked = true;
+                                // this user is blocked, so they shouldn't show up in the search bar
                                 break;
                             }
                         }
@@ -261,11 +271,11 @@ public class SearchAllFragment extends Fragment {
         });
     }
 
-
-
-    // Initiate toggle (it means when you click the search icon it pops up the editText and clicking the back button goes to the search icon again)
+    /**
+     * Initiate toggle: when you click the search icon it pops up the editText and
+     * clicking the back button goes to the search icon again
+     */
     private void toggleToolBarState() {
-        Log.d(TAG, "toggleToolBarState: toggling AppBarState.");
         if (mAppBarState == STANDARD_APPBAR) {
             setAppBarState(SEARCH_APPBAR);
         } else {
@@ -273,10 +283,11 @@ public class SearchAllFragment extends Fragment {
         }
     }
 
-    // Sets the appbar state for either search mode or standard mode.
+    /**
+     * Sets the appbar state for either search mode or standard mode.
+     * @param state An integer that describes the state (search or standard) of the app bar.
+     */
     private void setAppBarState(int state) {
-
-        Log.d(TAG, "setAppBaeState: changing app bar state to: " + state);
 
         mAppBarState = state;
         if (mAppBarState == STANDARD_APPBAR) {
@@ -288,14 +299,13 @@ public class SearchAllFragment extends Fragment {
             try {
                 im.hideSoftInputFromWindow(view.getWindowToken(), 0); // make keyboard hide
             } catch (NullPointerException e) {
-                Log.d(TAG, "setAppBaeState: NullPointerException: " + e);
+                e.printStackTrace();
             }
         } else if (mAppBarState == SEARCH_APPBAR) {
             viewUsersBar.setVisibility(View.GONE);
             searchBar.setVisibility(View.VISIBLE);
             InputMethodManager im = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             im.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0); // make keyboard popup
-
         }
     }
 

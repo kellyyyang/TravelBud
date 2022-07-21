@@ -112,7 +112,6 @@ public class ProfileFragment extends Fragment {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_edit_profile:
-                        Log.i(TAG, "Edit profile");
                         Fragment fragment = new EditProfileFragment();
                         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -121,10 +120,8 @@ public class ProfileFragment extends Fragment {
                         fragmentTransaction.commit();
                         break;
                     case R.id.action_logout:
-                        Log.i(TAG, "Logout called");
                         break;
                     case R.id.action_follow_requests:
-                        Log.i(TAG, "Follow requests");
                         Fragment fragmentFR = new FollowRequestsFragment();
                         FragmentManager fragmentManagerFR = getActivity().getSupportFragmentManager();
                         FragmentTransaction fragmentTransactionFR = fragmentManagerFR.beginTransaction();
@@ -161,7 +158,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_profile, menu);
-//        getMenuInflater().inflate(R.menu.menu_profile, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -182,8 +178,6 @@ public class ProfileFragment extends Fragment {
                 }
                 allPosts.addAll(posts);
                 adapter.notifyDataSetChanged();
-
-                // TODO: use Bundle to get from Home Fragment instead
             }
         });
     }

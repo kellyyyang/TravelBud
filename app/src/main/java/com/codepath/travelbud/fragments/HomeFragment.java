@@ -112,8 +112,9 @@ public class HomeFragment extends Fragment {
         followingUsers = new ArrayList<>();
         myHashtagString = new ArrayList<>();
         postHashtags = new ArrayList<>();
-        // queryGetFollowing -> queryHashtags -> actvHashtagFilter.setAdapter ->
+
         try {
+            // get all the users that currentUser is following
             queryGetFollowing();
         } catch (ParseException e) {
             e.printStackTrace();
@@ -210,27 +211,29 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    /**
+     * Gets posts and their scores from local cache SharedPreferences and loads them.
+     */
     public void loadData() {
         SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getContext());
-//        SharedPreferences sh = requireActivity().getSharedPreferences("PostSharedPrefs", MODE_PRIVATE);
-        Log.i(TAG, "in loadData: " + sh);
 
         for (Post post : allPosts) {
             float s1 = sh.getFloat(post.getObjectId(), 0);
-            Log.i(TAG, "in loadData loop: " + post.getLocationString() + ", " + s1);
             postTreeMap.put(post, s1);
         }
 
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
-            Log.i(TAG, "ranked post load: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
         }
         adapter.notifyDataSetChanged();
     }
 
+    /**
+     * Saves the current posts and their scores
+     */
     public void saveData() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext()); // TODO: maybe change to Activity.getApplicationContext()
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
         // write all the data entered by the user in SharedPreference and apply
@@ -373,13 +376,13 @@ public class HomeFragment extends Fragment {
         int MAX_INTS = findMaxInterests();
         for (Post post : allPosts) {
             float score = (float) calculateScore(MAX_TAGS, MAX_INTS, post);
-            postTreeMap.put(post, 10 - score); // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
+            // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high,
+            // then this post is not very relevant
+            postTreeMap.put(post, 10 - score);
         }
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
-//            db.postDao().insertAll(entry.getKey())
-            Log.i(TAG, "ranked post: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
         }
     }
 
@@ -469,7 +472,6 @@ public class HomeFragment extends Fragment {
      */
     private void setMyLocations() {
         for (Post mPost : myPosts) {
-            // TODO: maybe someone has two instances of the same location
             myLocations.put(mPost.getLocation(), (double) mPost.getRating());
         }
     }

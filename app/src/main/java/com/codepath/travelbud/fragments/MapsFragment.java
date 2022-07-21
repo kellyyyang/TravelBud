@@ -122,14 +122,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
                 intent.putExtra("locationString", Parcels.wrap(locationString));
                 startActivity(intent);
 
-//                Bundle bundle = new Bundle();
-//                bundle.putParcelable("marker_location_bundleKey", geoPoint);
-//                getParentFragmentManager().setFragmentResult("marker_location_requestKey", bundle);
-//                LocationPostsFragment nextFrag= new LocationPostsFragment();
-//                getActivity().getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.flContainer, nextFrag, "findThisFragment")
-//                        .addToBackStack(null)
-//                        .commit();
                 return false;
             }
         });

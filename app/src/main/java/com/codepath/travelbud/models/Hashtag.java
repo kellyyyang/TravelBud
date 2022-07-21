@@ -20,13 +20,6 @@ public class Hashtag extends ParseObject {
         relation.add(post);
     }
 
-//    public ArrayList<Post> getFollowing() throws ParseException {
-//        ParseRelation<Post> relation = getRelation(KEY_POSTS);
-//        ParseQuery<Post> query = relation.getQuery();
-//        query.include(KEY_POSTS);
-//        List<Post> followingPosts = query.find();
-//        return (ArrayList<Post>) followingPosts;
-//    }
     public ParseRelation<Post> getFollowing() {
         return getRelation(KEY_POSTS);
     }

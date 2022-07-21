@@ -156,7 +156,7 @@ public class ComposeFragment extends Fragment {
             try {
                 appInfo = getApplicationContext().getPackageManager().getApplicationInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
             } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Error with getting meta data: ", e);
+                e.printStackTrace();
             }
             if (appInfo != null) {
                 apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
@@ -164,9 +164,6 @@ public class ComposeFragment extends Fragment {
 
             Places.initialize(getApplicationContext(), apiKey);
         }
-
-        // Create a new PlacesClient instance
-//        PlacesClient placesClient = Places.createClient(getContext());
 
         // Initialize the AutocompleteSupportFragment
         autocompleteFragment = (AutocompleteSupportFragment) getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
@@ -186,12 +183,10 @@ public class ComposeFragment extends Fragment {
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onError(@NonNull Status status) {
-                Log.i(TAG, "An error occurred: " + status);
             }
 
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 latlong = place.getLatLng();
                 location = place.getName();
             }
@@ -234,7 +229,6 @@ public class ComposeFragment extends Fragment {
         spinVisibility.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.i(TAG, "item selected pos: " + position);
                 visibility = position;
             }
 
@@ -244,17 +238,6 @@ public class ComposeFragment extends Fragment {
             }
         });
 
-//        etHashtags.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                boolean handled = false;
-//                if (actionId == EditorInfo.IME_ACTION_SEND) {
-//                    handled = true;
-//                }
-//                return handled;
-//            }
-//        });
-
         cameraResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -262,7 +245,6 @@ public class ComposeFragment extends Fragment {
                             // by this point we have the camera photo on disk
                             DisplayMetrics displaymetrics = new DisplayMetrics();
                             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-//                            int height = displaymetrics.heightPixels;
                             int width = displaymetrics.widthPixels;
 
                             Uri takenPhotoUri = Uri.fromFile(getPhotoFileUri(photoFileName));
@@ -278,24 +260,24 @@ public class ComposeFragment extends Fragment {
                             try {
                                 resizedFile.createNewFile();
                             } catch (IOException e) {
-                                Log.e(TAG, "Error with creating a new file for resized bitmap: " + e);
+                                e.printStackTrace();
                             }
                             FileOutputStream fos = null;
                             try {
                                 fos = new FileOutputStream(resizedFile);
                             } catch (FileNotFoundException e) {
-                                Log.e(TAG, "Error with FileOutputStream: " + e);
+                                e.printStackTrace();
                             }
                             // Write the bytes of the bitmap to file
                             try {
                                 fos.write(bytes.toByteArray());
                             } catch (IOException e) {
-                                Log.e(TAG, "Error with writing the bytes of the bitmap to file: " + e);
+                                e.printStackTrace();
                             }
                             try {
                                 fos.close();
                             } catch (IOException e) {
-                                Log.e(TAG, "Error with closing: " + e);
+                                e.printStackTrace();
                             }
                             ivPhoto.setImageBitmap(BitmapFactory.decodeFile(resizedFile.getPath()));
 
@@ -311,20 +293,16 @@ public class ComposeFragment extends Fragment {
                 String description = etDescription.getText().toString();
                 float rating = rbPost.getRating();
                 ParseFile image = null;
-//                if (description.length() < MIN_DESCRIPTION_LEN) {
-//                    Toast.makeText(getContext(), "Your caption must be at least 90 characters.", Toast.LENGTH_LONG).show();
-//                    return;
-//                }
+                if (description.length() < MIN_DESCRIPTION_LEN) {
+                    Toast.makeText(getContext(), "Your caption must be at least 90 characters.", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 if (photoFile == null || ivPhoto.getDrawable() == null) {
                     image = null;
                 }
                 else if (photoFile != null && ivPhoto.getDrawable() != null) {
-                    Log.i(TAG, "photoFile is NOT null " + photoFile.toString() + ", " + ivPhoto.toString());
                     image = new ParseFile(photoFile);
                 }
-//                else {
-//                    image = new ParseFile(photoFile);
-//                }
                 ParseUser currentUser = ParseUser.getCurrentUser();
                 try {
                     savePost(currentUser, description, rating, image, latlong, hashtags);
@@ -361,8 +339,6 @@ public class ComposeFragment extends Fragment {
         photoFile = getPhotoFileUri(photoFileName);
 
         // wrap File object into a content provider
-        // required for API >= 24
-        // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
         Uri fileProvider = FileProvider.getUriForFile(getContext(), "com.codepath.capstone.fileprovider", photoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
@@ -390,30 +366,23 @@ public class ComposeFragment extends Fragment {
         return new File(mediaStorageDir.getPath() + File.separator + fileName);
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-//            if (resultCode == RESULT_OK) {
-//                // by this point we have the camera photo on disk
-//                Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-//                // RESIZE BITMAP, see section below
-//                // Load the taken image into a preview
-//
-//                ivPhoto.setImageBitmap(takenImage);
-//            } else { // Result was a failure
-//                Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//    }
-
     private void savePost(ParseUser currentUser, String description, Float rating, ParseFile image, LatLng latlong, ArrayList<String> hashtagList) throws ParseException {
         Post post = new Post();
         post.setDescription(description);
         post.setUser(currentUser);
-        post.setRating(rating);
-        post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
-        post.setLocationString(location);
+        if (rating != null && rating != 0) {
+            post.setRating(rating);
+        } else {
+            Toast.makeText(getContext(), "You must enter a rating greater than 0!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (latlong != null) {
+            post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
+            post.setLocationString(location);
+        } else {
+            Toast.makeText(getContext(), "Please enter a location!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         post.setVisibility(visibility);
 
         ArrayList<Hashtag> hashtagArrayList = new ArrayList<>();
@@ -425,21 +394,8 @@ public class ComposeFragment extends Fragment {
                 if (!matchesAnotherTag(tag)) {
                     Hashtag currTag = new Hashtag();
                     currTag.setHashtag(tag);
-                    Log.i(TAG, "success1");
                     currTag.save();
                     hashtagArrayList.add(currTag);
-//                currTag.saveInBackground(new SaveCallback() {
-//                    @Override
-//                    public void done(ParseException e) {
-//                        if (e != null) {
-//                            Log.e(TAG, "Issue with saving hashtag " + e);
-//                            Toast.makeText(getContext(), "Issue with saving hashtag!", Toast.LENGTH_SHORT).show();
-//                        } else {
-//                            Log.i(TAG, "Hashtag has been saved");
-//                            hashtagArrayList.add(currTag);
-//                        }
-//                    }
-//                });
                     post.setHashtag(currTag);
                 } else {
                     hashtagArrayList.add(matchingTag);
@@ -450,32 +406,26 @@ public class ComposeFragment extends Fragment {
         }
 
         if (image != null) {
-            Log.i(TAG, "setting image: " + image);
             post.setImage(image);
         }
         else {
-//            post.setImage(ContextCompat.getDrawable(getContext(), R.drawable.transparent));
-            // TODO: set image of post as something
-            ivPhoto.setVisibility(View.INVISIBLE);
+            Toast.makeText(getContext(), "You must add an image!", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         post.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with saving post " + e);
                     Toast.makeText(getContext(), "Issue with saving post!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.i(TAG, "Post has been saved");
                     Toast.makeText(getContext(), "Success!", Toast.LENGTH_SHORT).show();
                     etDescription.setText("");
                     rbPost.setRating(0);
-                    ivPhoto.setVisibility(View.INVISIBLE);
+                    ivPhoto.setVisibility(View.GONE);
                     autocompleteFragment.setText("");
-//                    etHashtags.setText("");
                     tvHashtags.setText("");
                     for (Hashtag tag : hashtagArrayList) {
-                        Log.i(TAG, "following post: " + post);
                         tag.setFollowing(post);
                         tag.saveInBackground();
                     }
@@ -489,7 +439,6 @@ public class ComposeFragment extends Fragment {
         ParseQuery<Hashtag> query = ParseQuery.getQuery(Hashtag.class);
         query.include(Hashtag.KEY_HASHTAG);
         List<Hashtag> mTags = query.find();
-        Log.i(TAG, "tags: " + mTags);
         for (Hashtag mTag : mTags) {
             if (mTag.getHashtag().equalsIgnoreCase(tag)) {
                 matchingTag = mTag;
@@ -509,7 +458,6 @@ public class ComposeFragment extends Fragment {
         // So as long as the result is not null, it's safe to use the intent.
         if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
             // Bring up gallery to select a photo
-//            galleryResultLauncher.launch(intent);
             startActivityForResult(intent, PICK_PHOTO_CODE);
         }
     }
@@ -532,40 +480,6 @@ public class ComposeFragment extends Fragment {
         return image;
     }
 
-    public void noPhoto() throws IOException, ParseException {
-
-        Bitmap bm = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.transparent);
-//        Log.i()
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 100 /*ignored for PNG*/, bos);
-        byte[] image = bos.toByteArray();
-
-        Log.i(TAG, "inside noPhoto");
-
-        // create the ParseFile
-        noPhotoFile = new ParseFile("nophotofile.png", image);
-        Log.i(TAG, "noPhotoFile: " + noPhotoFile);
-        // upload image into Parse Cloud
-        noPhotoFile.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    ivPhoto.setImageBitmap(bm);
-                }
-            }
-        });
-        photoFile = noPhotoFile.getFile();
-//        noPhotoFile.saveInBackground();
-//        try {
-//            photoFile = noPhotoFile.getFile();
-//            Log.i(TAG, "success with noPhoto " + photoFile);
-//        } catch (ParseException e) {
-//            Log.e(TAG, "error with noPhoto func: " + e);
-//            e.printStackTrace();
-//        }
-        Log.i(TAG, "success with noPhoto " + photoFile);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((data != null) && requestCode == PICK_PHOTO_CODE) {
@@ -578,8 +492,6 @@ public class ComposeFragment extends Fragment {
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
             int width = displaymetrics.widthPixels;
             Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(selectedImage, width);
-
-            // start: upload gallery image to parse
 
             Bitmap bitmap = selectedImage;
             // Convert it to byte
@@ -597,8 +509,6 @@ public class ComposeFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
-            Log.i(TAG, "photoFile for chosen picture: " + photoFile);
 
             // Load the selected image into a preview
             ivPhoto = getView().findViewById(R.id.ivPhoto);

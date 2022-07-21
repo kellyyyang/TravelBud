@@ -101,7 +101,6 @@ public class SearchFragment extends Fragment {
         ivSearchIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked searched icon");
                 toggleToolBarState();
             }
         });
@@ -109,7 +108,6 @@ public class SearchFragment extends Fragment {
         ivExploreIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked explore icon");
                 Fragment fragment = new ExploreFragment();
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -122,9 +120,7 @@ public class SearchFragment extends Fragment {
         ivBackArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: clicked back arrow.");
                 toggleToolBarState();
-
             }
         });
 
