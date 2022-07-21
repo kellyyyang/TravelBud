@@ -41,9 +41,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.codepath.travelbud.helper_classes.BitmapScaler;
-import com.codepath.travelbud.parse_classes.Hashtag;
-import com.codepath.travelbud.parse_classes.Post;
+import com.codepath.travelbud.utils.BitmapScaler;
+import com.codepath.travelbud.models.Hashtag;
+import com.codepath.travelbud.models.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.model.LatLng;

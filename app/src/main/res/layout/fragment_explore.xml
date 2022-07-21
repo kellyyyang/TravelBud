@@ -3,11 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.search_and_explore.ExploreFragment">
+    tools:context=".fragments.search.ExploreFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvExplore"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeContainerExplore"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvExplore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 </FrameLayout>

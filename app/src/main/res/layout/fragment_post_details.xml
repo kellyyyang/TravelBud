@@ -6,7 +6,7 @@ xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:padding="8dp"
-tools:context=".fragments.search_and_explore.PostDetailsFragment">
+tools:context=".fragments.search.PostDetailsFragment">
 
 <androidx.cardview.widget.CardView
     android:id="@+id/cvProfilePicPD"

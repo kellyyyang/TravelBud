@@ -23,10 +23,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.codepath.travelbud.LocationPostsActivity;
-import com.codepath.travelbud.helper_classes.LocationTag;
-import com.codepath.travelbud.helper_classes.PermissionUtils;
-import com.codepath.travelbud.parse_classes.Post;
+import com.codepath.travelbud.activities.LocationPostsActivity;
+import com.codepath.travelbud.utils.LocationTag;
+import com.codepath.travelbud.utils.PermissionUtils;
+import com.codepath.travelbud.models.Post;
 import com.codepath.travelbud.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
