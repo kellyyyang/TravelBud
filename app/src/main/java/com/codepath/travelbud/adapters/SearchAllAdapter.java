@@ -38,7 +38,7 @@ public class SearchAllAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     public SearchAllAdapter(Context context, List<UserPostArray> usersPosts, SearchAdapterToFragment communicator) {
         this.context = context;
-        this.usersPosts = usersPosts;
+        this.usersPosts = usersPosts; // an array of users and posts combined as a UserPostArray object
         this.mCommunicator = communicator;
         arrayList = new ArrayList<>();
         this.arrayList.addAll(usersPosts);
@@ -46,7 +46,6 @@ public class SearchAllAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public int getItemViewType(int position) {
-//        return super.getItemViewType(position);
         if (usersPosts.get(position).getUser() != null) {
             return 0;
         } else {
@@ -58,6 +57,8 @@ public class SearchAllAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
+            // case 0: the clicked item is a user
+            // case 2: the clicked item is a post
             case 0:
                 View view0 = LayoutInflater.from(context).inflate(R.layout.item_user_search, parent, false);
                 return new SearchAllAdapter.ViewHolder0(view0, mCommunicator);
@@ -72,13 +73,11 @@ public class SearchAllAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
             case 0:
-                Log.i(TAG, "case user");
                 SearchAllAdapter.ViewHolder0 viewHolder0 = (SearchAllAdapter.ViewHolder0) holder;
                 ParseUser user = usersPosts.get(position).getUser();
                 viewHolder0.bindUser(user);
                 break;
             case 2:
-                Log.i(TAG, "case post");
                 SearchAllAdapter.ViewHolder2 viewHolder2 = (SearchAllAdapter.ViewHolder2) holder;
                 Post post = usersPosts.get(position).getPost();
                 viewHolder2.bindPost(post);

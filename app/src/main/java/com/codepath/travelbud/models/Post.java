@@ -14,9 +14,6 @@ import java.util.Date;
 @ParseClassName("Post")
 public class Post extends ParseObject {
 
-//    @PrimaryKey(autoGenerate = true)
-//    public int uid;
-
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_USER = "user";
@@ -26,17 +23,6 @@ public class Post extends ParseObject {
     public static final String KEY_LOCATION_STRING = "location_string";
     public static final String KEY_HASHTAGS = "hashtags";
     public static final String KEY_VISIBILITY = "visibility";
-
-//    @ColumnInfo(name = "description")
-//    private String description;
-//
-//    @ColumnInfo(name = "location_string")
-//    private String location_string;
-//
-//    public Post() {
-//        this.description = getString(KEY_DESCRIPTION);
-//        this.location_string = getString(KEY_LOCATION_STRING);
-//    }
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
@@ -77,10 +63,6 @@ public class Post extends ParseObject {
     public int getVisibility() { return getInt(KEY_VISIBILITY); }
 
     public void setVisibility(int visibility) { put(KEY_VISIBILITY, visibility); }
-
-    public String getImageUrl() { return getString(KEY_IMAGE_URL); }
-
-    public void setImageUrl(String imageUrl) {put(KEY_IMAGE_URL, imageUrl); }
 
     public ParseRelation getHashtags() { return getRelation(KEY_HASHTAGS); }
 
