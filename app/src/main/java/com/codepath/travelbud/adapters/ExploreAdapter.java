@@ -44,8 +44,6 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-//        return super.getItemViewType(position);
-        Log.i(TAG, "position: " + position);
         int posMod5 = position % 5;
         if (posMod5 == 0) {
             return 0;
@@ -71,15 +69,15 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
+            // case 0: user
+            // case 2: post
             case 0:
-                Log.i(TAG, "case user");
                 ViewHolder0 viewHolder0 = (ViewHolder0) holder;
                 int iterationUser = position / 5;
                 ParseUser user = users.get(iterationUser);
                 viewHolder0.bindUser(user);
                 break;
             case 2:
-                Log.i(TAG, "case post");
                 ViewHolder2 viewHolder2 = (ViewHolder2) holder;
                 int iterationPost = position / 5;
 
