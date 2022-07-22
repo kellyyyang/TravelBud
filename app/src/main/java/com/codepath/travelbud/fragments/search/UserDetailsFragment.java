@@ -221,11 +221,6 @@ public class UserDetailsFragment extends Fragment {
                 // else: check if the searched-up user is private and adjust accordingly
                 if (isFollowing) {
                     unfollowUserBoth(currentUser, user);
-                    // change the number of users the currentUser is following
-                    int prevNumFollowing = currentUser.getInt("numFollowing");
-                    currentUser.put("numFollowing", prevNumFollowing - 1);
-                    // change the number of users that follow the user
-                    addOrSubOneFollower(false);
                 } else {
                     try {
                         if (user.getBoolean(KEY_IS_PRIVATE) && hasRequested()) {
@@ -238,7 +233,6 @@ public class UserDetailsFragment extends Fragment {
                         else {
                             // follow the user
                             followUserBoth(currentUser, user);
-                            addOrSubOneFollower(true);
                         }
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -324,7 +318,7 @@ public class UserDetailsFragment extends Fragment {
      * Adds or removes currentUser as a follower of the searched-up user via Parse Cloud Code.
      * @param isAdd A boolean that tells us whether or not we're adding currentUser as a follower.
      */
-    private void addOrRemoveFollower(boolean isAdd) {
+    protected void addOrRemoveFollower(boolean isAdd) {
         // Use this map to send parameters to your Cloud Code function
         // Just push the parameters you want into it
         Map<String, String> parameters = new HashMap<String, String>();
@@ -412,11 +406,15 @@ public class UserDetailsFragment extends Fragment {
     private void followUserBoth(ParseUser userA, ParseUser userB) {
         ParseRelation<ParseUser> relationA = userA.getRelation(KEY_FOLLOWING);
         relationA.add(userB);
+        int numFollowing = (int) userA.getInt("numFollowing");
+        userA.put("numFollowing", numFollowing + 1);
+
         userA.saveInBackground();
         setBtnUnfollowColor();
         isFollowing = true;
 
         addOrRemoveFollower(true);
+        addOrSubOneFollower(true);
     }
 
     /**
@@ -427,11 +425,14 @@ public class UserDetailsFragment extends Fragment {
     private void unfollowUserBoth(ParseUser userA, ParseUser userB) {
         ParseRelation<ParseUser> relationA = userA.getRelation(KEY_FOLLOWING);
         relationA.remove(userB);
+        int numFollowing = userA.getInt("numFollowing");
+        userA.put("numFollowing", numFollowing - 1);
         userA.saveInBackground();
         setBtnFollowColor();
         isFollowing = false;
 
         addOrRemoveFollower(false);
+        addOrSubOneFollower(false);
     }
 
     /**

@@ -10,18 +10,25 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.codepath.travelbud.R;
+import com.codepath.travelbud.fragments.search.UserDetailsFragment;
 import com.codepath.travelbud.models.Follow;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FollowRequestsAdapter extends RecyclerView.Adapter<FollowRequestsAdapter.ViewHolder> {
 
@@ -108,10 +115,13 @@ public class FollowRequestsAdapter extends RecyclerView.Adapter<FollowRequestsAd
         }
 
         private void acceptFollowRequest(ParseUser user) {
-            Follow newFollow = new Follow();
-            newFollow.setFollower(user);
-            newFollow.setFollowing(currentUser);
-            newFollow.saveInBackground();
+            ParseRelation<ParseUser> followersRelation = currentUser.getRelation("followers");
+            followersRelation.add(user);
+            addFollowing(currentUser, user);
+            int prevFollowers = currentUser.getInt("numFollowers");
+            addOneFollowing(user);
+            currentUser.put("numFollowers", prevFollowers + 1);
+            currentUser.saveInBackground();
         }
 
         private void removeFollowRequest(ParseUser user) {
@@ -128,6 +138,44 @@ public class FollowRequestsAdapter extends RecyclerView.Adapter<FollowRequestsAd
             if (image != null) {
                 Glide.with(context).load(image.getUrl()).into(ivProPicFR);
             }
+        }
+
+        /**
+         * Adds userA as someone userB is following.
+         * @param userA A ParseUser that is to be followed.
+         * @param userB A ParseUser that is to do the following.
+         */
+        protected void addFollowing(ParseUser userA, ParseUser userB) {
+            // Use this map to send parameters to your Cloud Code function
+            // Just push the parameters you want into it
+            Map<String, String> parameters = new HashMap<>();
+            parameters.put("userA", userA.getObjectId());
+            parameters.put("userB", userB.getObjectId());
+
+            ParseCloud.callFunctionInBackground("addFollowing", parameters, new FunctionCallback<String>() {
+                @Override
+                public void done(String object, ParseException e) {
+                    if (e == null) {
+                        // Everything is alright
+                        Toast.makeText(btnAccept.getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
+        private void addOneFollowing(ParseUser user) {
+            Map<String, String> parameters = new HashMap<String, String>();
+            parameters.put("userB", user.getObjectId());
+
+            ParseCloud.callFunctionInBackground("addOneFollowing", parameters, new FunctionCallback<String>() {
+                @Override
+                public void done(String object, ParseException e) {
+                    if (e == null) {
+                        // Everything is alright
+                        Toast.makeText(btnAccept.getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
         }
     }
 }

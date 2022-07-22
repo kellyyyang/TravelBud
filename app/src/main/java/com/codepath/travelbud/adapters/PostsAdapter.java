@@ -136,17 +136,14 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             ParseQuery<Hashtag> hashtagParseQuery = hashtagParseRelation.getQuery();
             hashtagParseQuery.include("hashtags");
             List<Hashtag> hashtags = hashtagParseQuery.find();
-            Log.i(TAG, "hashtags: " + hashtags);
             String hashtagStr = "";
             if (hashtags.size() == 0) {
                 tvHashtagsOnPost.setVisibility(GONE);
             }
             else {
                 for (Hashtag tag : hashtags) {
-                    Log.i(TAG, "adding hashtag: " + tag.getHashtag() + " " + post.getLocationString());
                     hashtagStr = hashtagStr.concat("#" + tag.getHashtag() + " ");
                 }
-                Log.i(TAG, "hashtagStr: " + hashtagStr);
                 tvHashtagsOnPost.setText(hashtagStr);
             }
 
@@ -178,7 +175,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                         .onlyScaleDown() // the image will only be resized if it's bigger than 6000x2000 pixels.
                         .centerCrop()
                         .into(ivPostProfile);
-//                Glide.with(context).load(post.getImage().getUrl()).into(ivPostProfile);
             }
         }
     }
