@@ -90,12 +90,11 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemCount() {
-//        return 11;
         if (users.size()*5 < allPosts.size()) {
-            return users.size() + (allPosts.size() / 4) * 4;
+            return users.size() + (allPosts.size() / 5) * 4;
         }
         else {
-            return allPosts.size() + (allPosts.size() / 4) + 1;
+            return allPosts.size() + (allPosts.size() / 5) + 1;
         }
     }
 
@@ -161,8 +160,7 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ParseGeoPoint mLocation = currentUser.getParseGeoPoint("last_location");
             double mLat = mLocation.getLatitude();
             double mLong = mLocation.getLongitude();
-            double distBetween = ExploreFragment.haversine(userLat, mLat, userLong, mLong);
-            return distBetween;
+            return ExploreFragment.haversine(userLat, mLat, userLong, mLong);
         }
     }
 

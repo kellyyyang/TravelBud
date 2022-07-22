@@ -57,7 +57,7 @@ public class ExploreFragment extends Fragment {
     private int totalInterests;
 
     private List<Post> rankedPosts;
-    private Map<Post, Float> postTreeMap; // ranking map for posts
+    private Map<Post, Float> rankPostsMap;
     private List<String> myHashtagString;
     private Map<String, Integer> hMap;
     private Map<ParseGeoPoint, Double> myLocations;
@@ -68,7 +68,6 @@ public class ExploreFragment extends Fragment {
 
     private ParseUser currentUser;
     private SwipeRefreshLayout swipeContainerExplore;
-    private int SWIPE_REFRESH; // whether or not the user has swipe refreshed
 
     public ExploreFragment() {
         // Required empty public constructor
@@ -85,8 +84,6 @@ public class ExploreFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SWIPE_REFRESH = 0;
-
         currentUser = ParseUser.getCurrentUser();
         swipeContainerExplore = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainerExplore);
 
@@ -100,7 +97,7 @@ public class ExploreFragment extends Fragment {
         totalInterests = 0;
 
         rankedPosts = new ArrayList<>();
-        postTreeMap = new HashMap<>();
+        rankPostsMap = new HashMap<>();
         myHashtagString = new ArrayList<>();
         hMap = new HashMap<String, Integer>();
         myLocations = new HashMap<>();
@@ -118,15 +115,24 @@ public class ExploreFragment extends Fragment {
         swipeContainerExplore.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                SWIPE_REFRESH = 1;
                 adapter.clear();
+
+                rankedUsers.clear();
+                rankedPosts.clear();
+                
+                users.clear();
+                myPosts.clear();
+                postHashtags.clear();
+                myHashtagString.clear();
+                hMap.clear();
+
                 try {
-                    queryUsers();
+                    queryPosts();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
                 try {
-                    queryPosts();
+                    queryUsers();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -136,7 +142,9 @@ public class ExploreFragment extends Fragment {
                     e.printStackTrace();
                 }
                 queryInterests();
+                rankUsers();
                 adapter.notifyDataSetChanged();
+                swipeContainerExplore.setRefreshing(false);
             }
         });
 
@@ -156,6 +164,12 @@ public class ExploreFragment extends Fragment {
             e.printStackTrace();
         }
         queryInterests();
+
+        loadUserData();
+
+        if (rankedUsers.size() == 0) {
+            rankUsers();
+        }
         adapter.notifyDataSetChanged();
     }
 
@@ -187,7 +201,7 @@ public class ExploreFragment extends Fragment {
         postHashtags.clear();
         myHashtagString.clear();
         hMap.clear();
-        postTreeMap.clear();
+        rankPostsMap.clear();
 
         queryMyPosts();
         findMyHashtags();
@@ -200,32 +214,21 @@ public class ExploreFragment extends Fragment {
         allPosts.addAll(query.find());
 
         loadPostData();
-
-        if (SWIPE_REFRESH == 1) {
+        if (rankedPosts.size() == 0) {
             rankPosts(allPosts);
-            SWIPE_REFRESH = 0;
         }
     }
 
     // find the users that currentUser is following
-
-    /**
-     * Find the users that the currentUser is following
-     * @throws ParseException
-     */
     private void queryGetFollowing() throws ParseException {
 
         ParseRelation<ParseUser> relation = ParseUser.getCurrentUser().getRelation(KEY_FOLLOWING);
         ParseQuery<ParseUser> followingQuery = relation.getQuery();
         List<ParseUser> followingL = followingQuery.find();
-        for (ParseUser pUser : followingL) {
-            followingUsers.add(pUser);
-        }
+        followingUsers.addAll(followingL);
     }
 
-    /**
-     * Get the interests of the users that the currentUser is following
-     */
+    // get the interests of those currentUser is following
     private void queryInterests() {
         // fill interestsMap with key:value pairs of interest:count
         for (ParseUser user : followingUsers) {
@@ -246,22 +249,13 @@ public class ExploreFragment extends Fragment {
         for (Map.Entry<String, MutableFloat> entry : interestsMap.entrySet()) {
             entry.getValue().divideBy(totalInterests);
         }
-
-        // local caching for faster loading
-        loadUserData();
-
-        if (SWIPE_REFRESH == 1) {
-            rankUsers();
-            SWIPE_REFRESH = 0;
-        }
     }
 
-    /**
-     * Rank unfollowed users by their interests and location from the currentUser.
-     */
     public void rankUsers() {
         // fill rankingMap with key:value pairs of ParseUser:score, where score is calculated by
         // the weights of the interests the user has in common with the currentUser's following
+        rankedUsers.clear();
+
         for (ParseUser pUser : users) {
             if (!containsName(followingUsers, pUser.getObjectId())) {
                 List<String> pInts = new ArrayList<>(Objects.requireNonNull(pUser.getList("interests")));
@@ -286,7 +280,8 @@ public class ExploreFragment extends Fragment {
                 double mLat = mLocation.getLatitude();
                 double mLong = mLocation.getLongitude();
                 float distBetween = haversine(userLat, mLat, userLong, mLong);
-                rankingMap.put(entry.getKey(), entry.getValue() + 1/(distBetween + 5)); // scale the second val to be 0.2 when distBetween == 0
+                // scale the second val to be 0.2 when distBetween == 0
+                rankingMap.put(entry.getKey(), entry.getValue() + 1/(distBetween + 5));
             }
         }
 
@@ -303,15 +298,16 @@ public class ExploreFragment extends Fragment {
      * @param allPosts The list of all posts
      */
     private void rankPosts(List<Post> allPosts) throws ParseException {
+        rankedPosts.clear();
         int MAX_TAGS = findMaxHashtags();
         int MAX_INTS = findMaxInterests();
         for (Post post : allPosts) {
             double score = calculateScore(MAX_TAGS, MAX_INTS, post);
             // the higher (10 - score) -> the lower the "rank", i.e., if (10 - score) is high, then this post is not very relevant
-            postTreeMap.put(post, (float) (10 - score));
+            rankPostsMap.put(post, (float) (10 - score));
         }
-        postTreeMap = MapUtil.sortByValue(postTreeMap);
-        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
+        rankPostsMap = MapUtil.sortByValue(rankPostsMap);
+        for (Map.Entry<Post, Float> entry : rankPostsMap.entrySet()) {
             rankedPosts.add(entry.getKey());
         }
     }
@@ -400,7 +396,6 @@ public class ExploreFragment extends Fragment {
      */
     private void setMyLocations() {
         for (Post mPost : myPosts) {
-            // TODO: maybe someone has two instances of the same location
             myLocations.put(mPost.getLocation(), (double) mPost.getRating());
         }
     }
@@ -455,11 +450,6 @@ public class ExploreFragment extends Fragment {
         return maxInts;
     }
 
-    /**
-     * Find the maximum number of hashtags that any single post has in common with the currentUser's hashtags.
-     * @return The maximum number of hashtags in common.
-     * @throws ParseException
-     */
     private int findMaxHashtags() throws ParseException {
         int maxTags = 0;
         for (Post mPost : allPosts) {
@@ -478,11 +468,6 @@ public class ExploreFragment extends Fragment {
         return maxTags;
     }
 
-    /**
-     * Gets the hashtags of a post.
-     * @param thisPost The post whose hashtags will be added to an instance variable list of hashtags.
-     * @throws ParseException
-     */
     private void getPostHashtags(Post thisPost) throws ParseException {
         ParseRelation<Hashtag> relation = thisPost.getRelation(KEY_HASHTAGS);
         ParseQuery<Hashtag> query = relation.getQuery();
@@ -498,40 +483,34 @@ public class ExploreFragment extends Fragment {
         query.whereEqualTo(Post.KEY_USER, ParseUser.getCurrentUser());
         query.addDescendingOrder("createdAt");
         List<Post> myPostsL = query.find();
-        for (Post mPost : myPostsL) {
-            myPosts.add(mPost);
-        }
+        myPosts.addAll(myPostsL);
     }
 
-    /**
-     * Retrieves post ranking data from SharedPreferences for faster loading.
-     */
     public void loadPostData() {
-        SharedPreferences sh = requireActivity().getSharedPreferences("MyPostPref", Context.MODE_PRIVATE);
+        SharedPreferences sh = requireContext().getSharedPreferences("MyPostPref", Context.MODE_PRIVATE);
 
         rankedPosts.clear();
-        postTreeMap.clear();
+        rankPostsMap.clear();
 
         for (Post post : allPosts) {
             if (sh.contains(post.getObjectId())) {
                 float s1 = sh.getFloat(post.getObjectId(), 0);
-                postTreeMap.put(post, s1);
+                rankPostsMap.put(post, s1);
             }
         }
 
-        postTreeMap = MapUtil.sortByValue(postTreeMap);
-        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
+        rankPostsMap = MapUtil.sortByValue(rankPostsMap);
+        for (Map.Entry<Post, Float> entry : rankPostsMap.entrySet()) {
             rankedPosts.add(entry.getKey());
         }
-        adapter.notifyDataSetChanged();
     }
 
     public void savePostData() {
-        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPostPref", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("MyPostPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
         // write all the data entered by the user in SharedPreference and apply
-        for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
+        for (Map.Entry<Post, Float> entry : rankPostsMap.entrySet()) {
             myEdit.putFloat(entry.getKey().getObjectId(), entry.getValue());
         }
         myEdit.apply();
@@ -540,6 +519,9 @@ public class ExploreFragment extends Fragment {
 
     public void loadUserData() {
         SharedPreferences sh = requireActivity().getSharedPreferences("MyUserPref", Context.MODE_PRIVATE);
+
+        rankedUsers.clear();
+        rankingMap.clear();
 
         for (ParseUser user : users) {
             float s1 = sh.getFloat(user.getObjectId(), 0);
@@ -550,6 +532,7 @@ public class ExploreFragment extends Fragment {
         for (Map.Entry<ParseUser, Float> entry : rankingMap.entrySet()) {
             rankedUsers.add(entry.getKey());
         }
+        Collections.reverse(rankedUsers);
     }
 
     public void saveUserData() {

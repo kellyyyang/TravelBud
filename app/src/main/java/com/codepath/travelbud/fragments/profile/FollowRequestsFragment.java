@@ -74,11 +74,7 @@ public class FollowRequestsFragment extends Fragment {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with getting posts", e);
                     return;
-                }
-                for (ParseUser user : objects) {
-                    Log.i(TAG, "User: " + user.getUsername());
                 }
                 users.addAll(objects);
                 adapter.notifyDataSetChanged();

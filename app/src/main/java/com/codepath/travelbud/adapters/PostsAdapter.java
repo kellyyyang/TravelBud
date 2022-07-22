@@ -75,15 +75,15 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
 
     // Clean all elements of the recycler
     public void clear() {
-        posts.clear();
+        this.posts.clear();
         notifyDataSetChanged();
     }
 
     // Add a list of items
-    public void addAll(List<Post> list) {
-        posts.addAll(list);
-        notifyDataSetChanged();
-    }
+//    public void addAll(List<Post> list) {
+//        posts.addAll(list);
+//        notifyDataSetChanged();
+//    }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -110,8 +110,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             tvHashtagsOnPost = itemView.findViewById(R.id.tvHashtagsOnPost);
 
             ivPostProfile = itemView.findViewById(R.id.ivPostProfile);
-
-//            setIsRecyclable(false);
         }
 
         /**

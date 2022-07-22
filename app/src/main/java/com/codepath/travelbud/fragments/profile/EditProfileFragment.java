@@ -26,6 +26,8 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.util.Objects;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -123,7 +125,6 @@ public class EditProfileFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with edit profile", e);
                     Toast.makeText(getContext(), "Issue with edit profile", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
@@ -136,7 +137,7 @@ public class EditProfileFragment extends Fragment {
 
     private void goProfileFragment() {
         Fragment fragment = new ProfileFragment();
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.flContainer, fragment);
         fragmentTransaction.addToBackStack(null);

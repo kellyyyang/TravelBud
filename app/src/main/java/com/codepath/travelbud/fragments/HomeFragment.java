@@ -43,9 +43,12 @@ import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,7 +76,6 @@ public class HomeFragment extends Fragment {
     private Map<Post, Float> postTreeMap;
     private Map<ParseGeoPoint, Double> myLocations;  // location, rating
     private int SWIPE_REFRESH;
-//    PostDatabase db;
 
     private SwipeRefreshLayout swipeContainer;
     private double RADIUS = 6371;
@@ -103,7 +105,7 @@ public class HomeFragment extends Fragment {
         swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
 
         myLocations = new HashMap<>();
-        postTreeMap = new HashMap<>();
+        postTreeMap = new LinkedHashMap<>();
         hMap = new HashMap<String, Integer>();
         myPosts = new ArrayList<>();
         myHashtags = new ArrayList<>();
@@ -162,13 +164,11 @@ public class HomeFragment extends Fragment {
             @Override
             public void onRefresh() {
                 SWIPE_REFRESH = 1;  // completely re-query posts
-                adapter.clear();
                 try {
                     queryPostsHT();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                swipeContainer.setRefreshing(false);
             }
         });
 
@@ -207,7 +207,7 @@ public class HomeFragment extends Fragment {
         try {
             queryPostsHT();
         } catch (ParseException e) {
-            Log.e(TAG, "exception with queryPosts: " + e);
+            e.printStackTrace();
         }
     }
 
@@ -215,7 +215,7 @@ public class HomeFragment extends Fragment {
      * Gets posts and their scores from local cache SharedPreferences and loads them.
      */
     public void loadData() {
-        SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sh = getContext().getSharedPreferences("HomeFragment", Context.MODE_PRIVATE);
 
         for (Post post : allPosts) {
             float s1 = sh.getFloat(post.getObjectId(), 0);
@@ -226,6 +226,8 @@ public class HomeFragment extends Fragment {
         for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
         }
+        Collections.reverse(rankedPosts);
+
         adapter.notifyDataSetChanged();
     }
 
@@ -233,7 +235,7 @@ public class HomeFragment extends Fragment {
      * Saves the current posts and their scores
      */
     public void saveData() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("HomeFragment", Context.MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
         // write all the data entered by the user in SharedPreference and apply
@@ -260,7 +262,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void done(List<Hashtag> objects, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with getting hashtags", e);
                     return;
                 }
                 for (Hashtag tag : objects) {
@@ -342,19 +343,29 @@ public class HomeFragment extends Fragment {
             @Override
             public void done(List<Post> posts, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with getting posts", e);
                     return;
                 }
 
                 allPosts.addAll(posts);
 
-                loadData();
+                if (rankedPosts.size() == 0) {
+                    loadData();
+                } else {
+                    try {
+                        rankPosts(allPosts);
+                    } catch (ParseException ex) {
+                        ex.printStackTrace();
+                    }
+                }
 
                 if (SWIPE_REFRESH == 1) {
                     try {
+                        // clear the adapter
+                        adapter.clear();
                         // rank the posts based on the ranking algorithm
                         rankPosts(allPosts);
                         adapter.notifyDataSetChanged();
+                        swipeContainer.setRefreshing(false);
                     } catch (ParseException ex) {
                         ex.printStackTrace();
                     }
@@ -376,14 +387,13 @@ public class HomeFragment extends Fragment {
         int MAX_INTS = findMaxInterests();
         for (Post post : allPosts) {
             float score = (float) calculateScore(MAX_TAGS, MAX_INTS, post);
-            // higher (10 - score) = the lower the "rank", i.e., if (10 - score) is high,
-            // then this post is not very relevant
-            postTreeMap.put(post, 10 - score);
+            postTreeMap.put(post, score);
         }
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
         }
+        Collections.reverse(rankedPosts);
     }
 
     /**
@@ -499,7 +509,8 @@ public class HomeFragment extends Fragment {
         // iterate through allPosts and find the number of interests the post's user has in
         // common with currentUser
         for (Post mPost : allPosts) {
-            int currMax = 0;  // the current, updating maximum number of interests
+            // the current, updating maximum number of interests
+            int currMax = 0;
             ParseUser mUser = mPost.getUser();
 
             List<String> userInterests = mUser.getList(KEY_INTERESTS);

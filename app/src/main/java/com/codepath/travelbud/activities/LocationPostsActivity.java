@@ -53,7 +53,6 @@ public class LocationPostsActivity extends AppCompatActivity {
         allLocationPosts = new ArrayList<>();
         adapter = new PostsAdapter(this, allLocationPosts, false);
         tvLocationMarker.setText(locationString);
-//        Log.i(TAG, locationString);
 
         rvLocationPosts.setAdapter(adapter);
         rvLocationPosts.setLayoutManager(new LinearLayoutManager(this));
