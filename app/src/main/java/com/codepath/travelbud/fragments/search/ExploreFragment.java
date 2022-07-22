@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -209,6 +208,11 @@ public class ExploreFragment extends Fragment {
     }
 
     // find the users that currentUser is following
+
+    /**
+     * Find the users that the currentUser is following
+     * @throws ParseException
+     */
     private void queryGetFollowing() throws ParseException {
 
         ParseRelation<ParseUser> relation = ParseUser.getCurrentUser().getRelation(KEY_FOLLOWING);
@@ -219,7 +223,9 @@ public class ExploreFragment extends Fragment {
         }
     }
 
-    // get the interests of those currentUser is following
+    /**
+     * Get the interests of the users that the currentUser is following
+     */
     private void queryInterests() {
         // fill interestsMap with key:value pairs of interest:count
         for (ParseUser user : followingUsers) {
@@ -241,6 +247,7 @@ public class ExploreFragment extends Fragment {
             entry.getValue().divideBy(totalInterests);
         }
 
+        // local caching for faster loading
         loadUserData();
 
         if (SWIPE_REFRESH == 1) {
@@ -249,6 +256,9 @@ public class ExploreFragment extends Fragment {
         }
     }
 
+    /**
+     * Rank unfollowed users by their interests and location from the currentUser.
+     */
     public void rankUsers() {
         // fill rankingMap with key:value pairs of ParseUser:score, where score is calculated by
         // the weights of the interests the user has in common with the currentUser's following
@@ -445,6 +455,11 @@ public class ExploreFragment extends Fragment {
         return maxInts;
     }
 
+    /**
+     * Find the maximum number of hashtags that any single post has in common with the currentUser's hashtags.
+     * @return The maximum number of hashtags in common.
+     * @throws ParseException
+     */
     private int findMaxHashtags() throws ParseException {
         int maxTags = 0;
         for (Post mPost : allPosts) {
@@ -463,6 +478,11 @@ public class ExploreFragment extends Fragment {
         return maxTags;
     }
 
+    /**
+     * Gets the hashtags of a post.
+     * @param thisPost The post whose hashtags will be added to an instance variable list of hashtags.
+     * @throws ParseException
+     */
     private void getPostHashtags(Post thisPost) throws ParseException {
         ParseRelation<Hashtag> relation = thisPost.getRelation(KEY_HASHTAGS);
         ParseQuery<Hashtag> query = relation.getQuery();
@@ -483,8 +503,10 @@ public class ExploreFragment extends Fragment {
         }
     }
 
+    /**
+     * Retrieves post ranking data from SharedPreferences for faster loading.
+     */
     public void loadPostData() {
-//        SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences sh = requireActivity().getSharedPreferences("MyPostPref", Context.MODE_PRIVATE);
 
         rankedPosts.clear();
@@ -493,7 +515,6 @@ public class ExploreFragment extends Fragment {
         for (Post post : allPosts) {
             if (sh.contains(post.getObjectId())) {
                 float s1 = sh.getFloat(post.getObjectId(), 0);
-                Log.i(TAG, "in loadData loop: " + post.getLocationString() + ", " + s1);
                 postTreeMap.put(post, s1);
             }
         }
@@ -501,13 +522,11 @@ public class ExploreFragment extends Fragment {
         postTreeMap = MapUtil.sortByValue(postTreeMap);
         for (Map.Entry<Post, Float> entry : postTreeMap.entrySet()) {
             rankedPosts.add(entry.getKey());
-            Log.i(TAG, "ranked post load: " + entry.getKey() + ", " + entry.getKey().getUser().getUsername() + ", " + entry.getValue());
         }
         adapter.notifyDataSetChanged();
     }
 
     public void savePostData() {
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext()); // TODO: maybe change to Activity.getApplicationContext()
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyPostPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
@@ -520,24 +539,20 @@ public class ExploreFragment extends Fragment {
     }
 
     public void loadUserData() {
-//        SharedPreferences sh = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences sh = requireActivity().getSharedPreferences("MyUserPref", Context.MODE_PRIVATE);
 
         for (ParseUser user : users) {
             float s1 = sh.getFloat(user.getObjectId(), 0);
-            Log.i(TAG, "in loadData loop: " + user.getUsername() + ", " + s1);
             rankingMap.put(user, s1);
         }
 
         rankingMap = MapUtil.sortByValue(rankingMap);
         for (Map.Entry<ParseUser, Float> entry : rankingMap.entrySet()) {
             rankedUsers.add(entry.getKey());
-            Log.i(TAG, "ranked user load: " + entry.getKey() + ", " + entry.getKey().getUsername() + ", " + entry.getValue());
         }
     }
 
     public void saveUserData() {
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext()); // TODO: maybe change to Activity.getApplicationContext()
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences("MyUserPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
@@ -550,12 +565,10 @@ public class ExploreFragment extends Fragment {
     }
 
     private void findMyHashtags() throws ParseException {
-//        Log.i(TAG, "myPosts: " + myPosts);
         for (Post mPost : myPosts) {
             ParseRelation<Hashtag> relation = mPost.getRelation(KEY_HASHTAGS);
             ParseQuery<Hashtag> query = relation.getQuery();
             List<Hashtag> myHashtagsL = query.find();
-//            Log.i(TAG, "inFindMyHTs: " + myHashtagsL);
             for (Hashtag tag : myHashtagsL) {
                 myHashtagString.add(tag.getHashtag());
             }
