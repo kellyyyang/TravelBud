@@ -170,11 +170,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void done(List<Post> posts, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with getting posts", e);
                     return;
-                }
-                for (Post post : posts) {
-                        Log.i(TAG, "Post: " + post.getDescription() + ", username: " + post.getUser().getUsername());
                 }
                 allPosts.addAll(posts);
                 adapter.notifyDataSetChanged();
@@ -187,12 +183,10 @@ public class ProfileFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "Issue with logout ", e);
                     Toast.makeText(getContext(), "Issue with logout!", Toast.LENGTH_SHORT);
                     return;
                 } else {
                     goLoginActivity();
-                    Log.i(TAG, "Going to login activity.");
                     Toast.makeText(getContext(), "Success!", Toast.LENGTH_SHORT);
                 }
             }

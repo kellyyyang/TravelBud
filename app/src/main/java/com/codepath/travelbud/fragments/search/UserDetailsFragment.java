@@ -456,6 +456,11 @@ public class UserDetailsFragment extends Fragment {
         }
     }
 
+    /**
+     * Checks if the currentUser has already requested to follow the searched-up user.
+     * @return True, if the currentUser has already requested to follow,
+     *         False, otherwise.
+     */
     private boolean inRequestedFollowers() {
         for (ParseUser pUser : requestedFollowers) {
             if (pUser.getObjectId().equals(currentUser.getObjectId())) {

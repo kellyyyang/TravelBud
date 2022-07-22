@@ -97,7 +97,6 @@ public class PostDetailsFragment extends Fragment {
             @Override
             public void done(List<Hashtag> objects, ParseException e) {
                 if (e != null) {
-                    Log.e(TAG, "ParseException: " + e);
                     return;
                 }
                 hashtags.addAll(objects);
@@ -107,7 +106,6 @@ public class PostDetailsFragment extends Fragment {
                     tvHashtagsOnPostPD.setVisibility(GONE);
                 } else {
                     for (Hashtag tag : hashtags) {
-                        Log.i(TAG, "adding hashtag: " + tag.getHashtag() + " " + post.getLocationString());
                         hashtagStr = hashtagStr.concat("#" + tag.getHashtag() + " ");
                     }
                     tvHashtagsOnPostPD.setText(hashtagStr);
@@ -138,6 +136,12 @@ public class PostDetailsFragment extends Fragment {
         rbRatingBarPD.setRating(post.getRating());
     }
 
+    /**
+     * Converts units of dp to pixels according to the screen size.
+     * @param dp The number of dp to be converted.
+     * @param context The context of the application.
+     * @return The number of pixels equivalent to the number of dp entered, depending on screen size.
+     */
     public float convertDpToPixel(float dp, Context context){
         return Math.round(dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
     }

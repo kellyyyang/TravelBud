@@ -294,7 +294,7 @@ public class ComposeFragment extends Fragment {
                 float rating = rbPost.getRating();
                 ParseFile image = null;
                 if (description.length() < MIN_DESCRIPTION_LEN) {
-                    Toast.makeText(getContext(), "Your caption must be at least 90 characters.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Your caption must be at least 90 characters long.", Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (photoFile == null || ivPhoto.getDrawable() == null) {
@@ -342,12 +342,9 @@ public class ComposeFragment extends Fragment {
         Uri fileProvider = FileProvider.getUriForFile(getContext(), "com.codepath.capstone.fileprovider", photoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
-        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
-        // So as long as the result is not null, it's safe to use the intent.
         if (intent.resolveActivity(getContext().getPackageManager()) != null) {
             // Start the image capture intent to take photo
             cameraResultLauncher.launch(intent);
-//            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
         }
     }
 
@@ -360,7 +357,6 @@ public class ComposeFragment extends Fragment {
 
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
-            Log.d(TAG, "failed to create directory");
         }
         // Return the file target for the photo based on filename
         return new File(mediaStorageDir.getPath() + File.separator + fileName);
@@ -370,12 +366,14 @@ public class ComposeFragment extends Fragment {
         Post post = new Post();
         post.setDescription(description);
         post.setUser(currentUser);
+        // check if the user has entered in a rating
         if (rating != null && rating != 0) {
             post.setRating(rating);
         } else {
             Toast.makeText(getContext(), "You must enter a rating greater than 0!", Toast.LENGTH_SHORT).show();
             return;
         }
+        // check if the user has entered in a location
         if (latlong != null) {
             post.setLocation(new ParseGeoPoint(latlong.latitude, latlong.longitude));
             post.setLocationString(location);
@@ -383,6 +381,7 @@ public class ComposeFragment extends Fragment {
             Toast.makeText(getContext(), "Please enter a location!", Toast.LENGTH_SHORT).show();
             return;
         }
+        // sets the visibility of the post
         post.setVisibility(visibility);
 
         ArrayList<Hashtag> hashtagArrayList = new ArrayList<>();
@@ -453,9 +452,6 @@ public class ComposeFragment extends Fragment {
         // Create intent for picking a photo from the gallery
         Intent intent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
-        // So as long as the result is not null, it's safe to use the intent.
         if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
             // Bring up gallery to select a photo
             startActivityForResult(intent, PICK_PHOTO_CODE);
@@ -497,7 +493,7 @@ public class ComposeFragment extends Fragment {
             // Convert it to byte
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             // Compress image to lower quality scale 1 - 100
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 40, stream);
             byte[] image = stream.toByteArray();
 
             // Create the ParseFile
@@ -513,9 +509,6 @@ public class ComposeFragment extends Fragment {
             // Load the selected image into a preview
             ivPhoto = getView().findViewById(R.id.ivPhoto);
             ivPhoto.setImageBitmap(resizedBitmap);
-
-
-
         }
     }
 }

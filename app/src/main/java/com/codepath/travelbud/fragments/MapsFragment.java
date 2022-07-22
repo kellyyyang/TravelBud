@@ -100,7 +100,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             double longitude = post.getLocation().getLongitude();
             ParseGeoPoint geoPoint = post.getLocation();
             String positionTitle = post.getLocationString();
-            Log.i(TAG, "loc string: " + positionTitle);
             LatLng latLng = new LatLng(latitude, longitude);
             LocationTag locationTag = new LocationTag();
             locationTag.setGeoPoint(geoPoint);
@@ -143,7 +142,6 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
                 allPostsList = result.getParcelableArrayList("home_post_bundleKey");
-                Log.i(TAG, "allPostsList: " + allPostsList);
             }
         });
     }
@@ -160,7 +158,7 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
             try {
                 appInfo = getApplicationContext().getPackageManager().getApplicationInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
             } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Error with getting meta data: ", e);
+                e.printStackTrace();
             }
             if (appInfo != null) {
                 apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY");
@@ -178,12 +176,11 @@ public class MapsFragment extends Fragment implements ActivityCompat.OnRequestPe
         autocompleteSupportFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onError(@NonNull Status status) {
-                Log.i(TAG, "An error occurred: " + status);
+                return;
             }
 
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 LatLng placeLatLng = place.getLatLng();
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(placeLatLng));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(placeLatLng, 10));
