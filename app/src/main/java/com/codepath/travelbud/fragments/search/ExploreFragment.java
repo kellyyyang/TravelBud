@@ -117,14 +117,20 @@ public class ExploreFragment extends Fragment {
             public void onRefresh() {
                 adapter.clear();
 
-                rankedUsers.clear();
-                rankedPosts.clear();
-                
+                allPosts.clear();
                 users.clear();
-                myPosts.clear();
-                postHashtags.clear();
+                rankedUsers.clear();
+                followingUsers.clear();
+                interestsMap.clear();
+                rankingMap.clear();
+                rankedPosts.clear();
+                rankPostsMap.clear();
                 myHashtagString.clear();
                 hMap.clear();
+                myLocations.clear();
+                mInterests.clear();
+                myPosts.clear();
+                postHashtags.clear();
 
                 try {
                     queryPosts();
@@ -195,14 +201,6 @@ public class ExploreFragment extends Fragment {
     }
 
     private void queryPosts() throws ParseException {
-        rankedPosts.clear();
-
-        myPosts.clear();
-        postHashtags.clear();
-        myHashtagString.clear();
-        hMap.clear();
-        rankPostsMap.clear();
-
         queryMyPosts();
         findMyHashtags();
 
