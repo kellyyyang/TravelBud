@@ -183,14 +183,14 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                     ParseRelation<ParseUser> relation = post.getRelation("downvoters");
                     int previousDownvotes = post.getNumDownvotes();
                     if (!hasDisliked) {
-                        btnUpvote.setImageResource(R.drawable.filled_thumb_down);
-                        post.setNumUpvotes(previousDownvotes + 1);
+                        btnDownvote.setImageResource(R.drawable.filled_thumb_down);
+                        post.setNumDownvotes(previousDownvotes + 1);
                         relation.add(ParseUser.getCurrentUser());
                         ParseUser.getCurrentUser().saveInBackground();
                         post.saveInBackground();
                     } else {
-                        btnUpvote.setImageResource(R.drawable.ic_outline_thumb_down_alt_24);
-                        post.setNumUpvotes(previousDownvotes - 1);
+                        btnDownvote.setImageResource(R.drawable.ic_outline_thumb_down_alt_24);
+                        post.setNumDownvotes(previousDownvotes - 1);
                         relation.remove(ParseUser.getCurrentUser());
                         ParseUser.getCurrentUser().saveInBackground();
                         post.saveInBackground();

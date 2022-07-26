@@ -358,7 +358,8 @@ public class UserDetailsFragment extends Fragment {
             public void done(String object, ParseException e) {
                 if (e == null) {
                     // Everything is alright
-                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                    tvNumFollowersSearch.setText(String.valueOf(user.getInt("numFollowers")));
+                    Toast.makeText(getContext(), "Done!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -427,6 +428,7 @@ public class UserDetailsFragment extends Fragment {
         relationA.remove(userB);
         int numFollowing = userA.getInt("numFollowing");
         userA.put("numFollowing", numFollowing - 1);
+
         userA.saveInBackground();
         setBtnFollowColor();
         isFollowing = false;
