@@ -80,11 +80,7 @@ public class ExploreAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             case 2:
                 ViewHolder2 viewHolder2 = (ViewHolder2) holder;
                 int iterationPost = position / 5;
-                Post post = allPosts.get(position - iterationPost - 1); // these numbers aren't working out well, so it's grabbing the same post sometimes
-                // as i use breakpoints to see which post is in the variable above, I see Lake Tahoe came out twice
-                // therefore, it displays twice on the emulator screen
-                // can you backtrack iterationPost to figure out what the numbers are, and whether the math is correct as you intended?
-                // see if you can add more breakpoints and closely track the math, and I'll keep your name on the support queue so someone can check in with you again
+                Post post = allPosts.get(position - iterationPost - 1);
                 viewHolder2.bindPost(post);
                 break;
 
