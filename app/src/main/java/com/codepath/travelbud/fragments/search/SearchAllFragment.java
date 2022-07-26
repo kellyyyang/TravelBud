@@ -91,8 +91,6 @@ public class SearchAllFragment extends Fragment {
         etSearchUsers = view.findViewById(R.id.etSearchUsers);
         ivExploreIcon = view.findViewById(R.id.ivExploreIcon);
 
-
-
         currentUser = ParseUser.getCurrentUser();
 
         allUsersPosts = new ArrayList<>();
@@ -197,19 +195,13 @@ public class SearchAllFragment extends Fragment {
                             UserPostArray mPost = new UserPostArray();
                             mPost.setPost(post);
                             allUsersPosts.add(mPost);
+                        } else if (post.getVisibility() != 2 || !post.getUser().getBoolean("isPrivate")) {
+                                UserPostArray mPost = new UserPostArray();
+                                mPost.setPost(post);
+                                allUsersPosts.add(mPost);
                         }
                     } catch (ParseException ex) {
                         ex.printStackTrace();
-                    }
-                    if (post.getVisibility() != 2) {
-                        UserPostArray mPost = new UserPostArray();
-                        mPost.setPost(post);
-                        allUsersPosts.add(mPost);
-                    }
-                    else if (!post.getUser().getBoolean("isPrivate")) {
-                        UserPostArray mPost = new UserPostArray();
-                        mPost.setPost(post);
-                        allUsersPosts.add(mPost);
                     }
                 }
 
