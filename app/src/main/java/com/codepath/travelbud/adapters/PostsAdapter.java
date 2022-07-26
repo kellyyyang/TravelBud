@@ -10,9 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,10 +23,12 @@ import com.bumptech.glide.Glide;
 import com.codepath.travelbud.R;
 import com.codepath.travelbud.models.Hashtag;
 import com.codepath.travelbud.models.Post;
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
+import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
 import java.util.Date;
@@ -79,12 +83,6 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
-    // Add a list of items
-//    public void addAll(List<Post> list) {
-//        posts.addAll(list);
-//        notifyDataSetChanged();
-//    }
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvUsernameFeed;
@@ -95,6 +93,10 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
         private ImageView ivPhotoFeed;
         private ImageView ivProfilePicFeed;
         private TextView tvHashtagsOnPost;
+        private ImageButton btnUpvote;
+        private ImageButton btnDownvote;
+        private TextView tvNumUps;
+        private TextView tvNumDowns;
 
         private ImageView ivPostProfile;
 
@@ -110,6 +112,11 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             tvHashtagsOnPost = itemView.findViewById(R.id.tvHashtagsOnPost);
 
             ivPostProfile = itemView.findViewById(R.id.ivPostProfile);
+
+            btnUpvote = itemView.findViewById(R.id.btnUpvote);
+            btnDownvote = itemView.findViewById(R.id.btnDownvote);
+            tvNumUps = itemView.findViewById(R.id.tvNumUps);
+            tvNumDowns = itemView.findViewById(R.id.tvNumDowns);
         }
 
         /**
@@ -128,8 +135,71 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             tvUsernameFeed.setText(post.getUser().getUsername());
             tvDescriptionFeed.setText(post.getDescription());
             tvLocationFeed.setText(post.getLocationString());
+            tvNumUps.setText(String.valueOf(post.getNumUpvotes()));
+            tvNumDowns.setText(String.valueOf(post.getNumDownvotes()));
 
-//             set hashtags
+            // check if the currentUser has already upvoted/liked this post
+            boolean hasLiked = alreadyLiked(ParseUser.getCurrentUser(), post);
+            boolean hasDisliked = alreadyDisliked(ParseUser.getCurrentUser(), post);
+            if (hasLiked) {
+                btnUpvote.setImageResource(R.drawable.filled_thumb_up);
+            } else if (hasDisliked) {
+                btnDownvote.setImageResource(R.drawable.filled_thumb_down);
+            }
+
+            btnUpvote.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean hasLiked = false;
+                    try {
+                        hasLiked = alreadyLiked(ParseUser.getCurrentUser(), post);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    ParseRelation<ParseUser> relation = post.getRelation("upvoters");
+                    int previousUpvotes = post.getNumUpvotes();
+                    if (!hasLiked) {
+                        btnUpvote.setImageResource(R.drawable.filled_thumb_up);
+                        post.setNumUpvotes(previousUpvotes + 1);
+                        relation.add(ParseUser.getCurrentUser());
+                        ParseUser.getCurrentUser().saveInBackground();
+                        post.saveInBackground();
+                        Log.i(TAG, "upvoted!");
+                    } else {
+                        btnUpvote.setImageResource(R.drawable.ic_outline_thumb_up_alt_24);
+                        post.setNumUpvotes(previousUpvotes - 1);
+                        relation.remove(ParseUser.getCurrentUser());
+                        ParseUser.getCurrentUser().saveInBackground();
+                        post.saveInBackground();
+                    }
+                    tvNumUps.setText(String.valueOf(post.getNumUpvotes()));
+                }
+            });
+
+            btnDownvote.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean hasDisliked = alreadyDisliked(ParseUser.getCurrentUser(), post);
+                    ParseRelation<ParseUser> relation = post.getRelation("downvoters");
+                    int previousDownvotes = post.getNumDownvotes();
+                    if (!hasDisliked) {
+                        btnUpvote.setImageResource(R.drawable.filled_thumb_down);
+                        post.setNumUpvotes(previousDownvotes + 1);
+                        relation.add(ParseUser.getCurrentUser());
+                        ParseUser.getCurrentUser().saveInBackground();
+                        post.saveInBackground();
+                    } else {
+                        btnUpvote.setImageResource(R.drawable.ic_outline_thumb_down_alt_24);
+                        post.setNumUpvotes(previousDownvotes - 1);
+                        relation.remove(ParseUser.getCurrentUser());
+                        ParseUser.getCurrentUser().saveInBackground();
+                        post.saveInBackground();
+                    }
+                    tvNumDowns.setText(String.valueOf(post.getNumDownvotes()));
+                }
+            });
+
+            // set hashtags
             ParseRelation<Hashtag> hashtagParseRelation = post.getRelation(KEY_HASHTAGS);
             ParseQuery<Hashtag> hashtagParseQuery = hashtagParseRelation.getQuery();
             hashtagParseQuery.include("hashtags");
@@ -160,6 +230,34 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             String timeAgo = Post.calculateTimeAgo(createdAt);
             tvTimeAgo.setText(timeAgo);
             rbRatingBarFeed.setRating(post.getRating());
+        }
+
+        public boolean alreadyLiked(ParseUser aUser, Post aPost) throws ParseException {
+            ParseRelation<ParseUser> likes = aPost.getRelation("upvoters");
+            ParseQuery<ParseUser> userLikes = likes.getQuery();
+            for (ParseUser pUser : userLikes.find()) {
+                if (pUser.getObjectId().equals(aUser.getObjectId())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public boolean alreadyDisliked(ParseUser aUser, Post aPost) {
+            ParseRelation<ParseUser> downs = aPost.getRelation("downvoters");
+            ParseQuery<ParseUser> userDowns = downs.getQuery();
+            final boolean[] hasLiked = {false};
+            userDowns.findInBackground(new FindCallback<ParseUser>() {
+                @Override
+                public void done(List<ParseUser> objects, ParseException e) {
+                    for (ParseUser pUser : objects) {
+                        if (pUser.getObjectId().equals(aUser.getObjectId())) {
+                            hasLiked[0] = true;
+                        }
+                    }
+                }
+            });
+            return hasLiked[0];
         }
 
         public void bindProfile(Post post) {

@@ -23,6 +23,8 @@ public class Post extends ParseObject {
     public static final String KEY_LOCATION_STRING = "location_string";
     public static final String KEY_HASHTAGS = "hashtags";
     public static final String KEY_VISIBILITY = "visibility";
+    public static final String KEY_UPVOTES = "numUpvotes";
+    public static final String KEY_DOWNVOTES = "numDownvotes";
 
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
@@ -65,6 +67,14 @@ public class Post extends ParseObject {
     public void setVisibility(int visibility) { put(KEY_VISIBILITY, visibility); }
 
     public ParseRelation getHashtags() { return getRelation(KEY_HASHTAGS); }
+
+    public void setNumUpvotes(int numUpvotes) { put(KEY_UPVOTES, numUpvotes); }
+
+    public int getNumUpvotes() { return getInt(KEY_UPVOTES); }
+
+    public void setNumDownvotes(int numDownvotes) { put(KEY_DOWNVOTES, numDownvotes); }
+
+    public int getNumDownvotes() { return getInt(KEY_DOWNVOTES); }
 
     public void setHashtag(Hashtag hashtag) {
         ParseRelation<Hashtag> relation = this.getRelation(KEY_HASHTAGS);
