@@ -117,7 +117,7 @@
         android:id="@+id/divider4"
         android:layout_width="409dp"
         android:layout_height="1dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="55dp"
         android:background="?android:attr/listDivider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -133,5 +133,65 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvDescriptionFeed"
         tools:text="#hashtags #are #here" />
+
+    <TextView
+        android:id="@+id/tvUpvote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Upvote"
+        app:layout_constraintStart_toEndOf="@+id/btnUpvote"
+        app:layout_constraintTop_toBottomOf="@+id/ivPhotoFeed" />
+
+    <TextView
+        android:id="@+id/tvDownvote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="40dp"
+        android:text="Downvote"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivPhotoFeed" />
+
+    <ImageButton
+        android:id="@+id/btnUpvote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-5dp"
+        android:layout_marginTop="2dp"
+        android:backgroundTint="@color/white"
+        app:layout_constraintStart_toEndOf="@+id/tvNumUps"
+        app:layout_constraintTop_toBottomOf="@+id/ivPhotoFeed"
+        app:srcCompat="@drawable/ic_outline_thumb_up_alt_24" />
+
+    <ImageButton
+        android:id="@+id/btnDownvote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:backgroundTint="@color/white"
+        app:layout_constraintEnd_toStartOf="@+id/tvDownvote"
+        app:layout_constraintTop_toBottomOf="@+id/ivPhotoFeed"
+        app:srcCompat="@drawable/ic_outline_thumb_down_alt_24" />
+
+    <TextView
+        android:id="@+id/tvNumDowns"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="-5dp"
+        app:layout_constraintEnd_toStartOf="@+id/btnDownvote"
+        app:layout_constraintTop_toBottomOf="@+id/ivPhotoFeed"
+        tools:text="15" />
+
+    <TextView
+        android:id="@+id/tvNumUps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivPhotoFeed"
+        tools:text="24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
