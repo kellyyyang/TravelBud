@@ -61,7 +61,7 @@
         android:id="@+id/tvNumFollowers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
+        android:layout_marginStart="70dp"
         android:layout_marginTop="10dp"
         android:textSize="16dp"
         android:textStyle="bold"
@@ -73,7 +73,7 @@
         android:id="@+id/tvFollowers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="50dp"
         android:layout_marginTop="5dp"
         android:text="followers"
         app:layout_constraintStart_toEndOf="@+id/cvProfilePicProfile"
@@ -83,13 +83,11 @@
         android:id="@+id/tvNumFollowing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
         android:layout_marginTop="10dp"
-        android:layout_marginEnd="40dp"
+        android:layout_marginEnd="85dp"
         android:textSize="16dp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/tvNumPlaces"
-        app:layout_constraintStart_toEndOf="@+id/tvNumFollowers"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tbProfile"
         tools:text="129" />
 
@@ -97,42 +95,18 @@
         android:id="@+id/tvFollowing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
         android:layout_marginTop="5dp"
-        android:layout_marginEnd="15dp"
+        android:layout_marginEnd="60dp"
         android:text="following"
-        app:layout_constraintEnd_toStartOf="@+id/tvPlaces"
-        app:layout_constraintStart_toEndOf="@+id/tvFollowers"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvNumFollowing" />
-
-    <TextView
-        android:id="@+id/tvNumPlaces"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="40dp"
-        android:textSize="16dp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tbProfile"
-        tools:text="15" />
-
-    <TextView
-        android:id="@+id/tvPlaces"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="30dp"
-        android:text="places"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvNumPlaces" />
 
     <Button
         android:id="@+id/action_logout"
-        android:layout_width="241dp"
-        android:layout_height="38dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="217dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="18dp"
         android:text="Logout"
         app:layout_constraintStart_toEndOf="@+id/cvProfilePicProfile"
         app:layout_constraintTop_toBottomOf="@+id/tvFollowing" />
