@@ -16,11 +16,6 @@ public class SplashScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        // TODO: is this the correct way? If I do it this way, you don't even see the splash screen??
-//        Intent intent = new Intent(SplashScreen.this, LoginActivity.class);
-//        startActivity(intent);
-//        finish();
-
         timer = new Thread() {
             @Override
             public void run() {
