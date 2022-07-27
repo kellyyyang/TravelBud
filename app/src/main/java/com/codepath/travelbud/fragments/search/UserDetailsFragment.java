@@ -188,7 +188,7 @@ public class UserDetailsFragment extends Fragment {
                         }
                         try {
                             if (isFollowingFunc(user, currentUser)) {
-                                forceUnfollow(user, currentUser); // TODO: subtract one following + follower
+                                forceUnfollow(user, currentUser);
                                 int prevNumFollowers = currentUser.getInt("numFollowers");
                                 currentUser.put("numFollowers", prevNumFollowers - 1);
                                 currentUser.saveInBackground();
@@ -492,7 +492,6 @@ public class UserDetailsFragment extends Fragment {
 
     /**
      * Sets the appearance of the un/follow button
-     * @throws ParseException
      */
     private void setButtonAppearance() throws ParseException {
         try {
@@ -527,7 +526,6 @@ public class UserDetailsFragment extends Fragment {
 
     /**
      * Gets the list of users that want to follow the searched-up user.
-     * @throws ParseException
      */
     private void getRequestedFollowers() throws ParseException {
         requestedFollowers.clear();
@@ -554,7 +552,6 @@ public class UserDetailsFragment extends Fragment {
      * @param userB The user that could be followed by another user.
      * @return True, if userA is following userB.
      *         False, otherwise.
-     * @throws ParseException
      */
     private boolean isFollowingFunc(ParseUser userA, ParseUser userB) throws ParseException {
         ParseRelation<ParseUser> relation = userA.getRelation(KEY_FOLLOWING);
@@ -571,7 +568,6 @@ public class UserDetailsFragment extends Fragment {
      * Sets an instance variable that checks if userA is following userB.
      * @param userA The user that could be following another user.
      * @param userB The user that could be followed by another user.
-     * @throws ParseException
      */
     private void setIsFollowing(ParseUser userA, ParseUser userB) throws ParseException {
         ParseRelation<ParseUser> relation = userA.getRelation(KEY_FOLLOWING);
