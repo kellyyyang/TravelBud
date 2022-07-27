@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,6 +45,7 @@ import java.util.List;
 // Parse Dependencies
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;
+import com.parse.SaveCallback;
 // Java Dependencies
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,6 @@ public class UserDetailsFragment extends Fragment {
 
     public static final String TAG = "UserDetailsFragment";
     public static final String KEY_BLOCKEDUSERS = "blockedUsers";
-    public static final String KEY_FOLLOWERS = "followers";
 
     ParseUser user;
     private ImageView ivProfilePicSearch;
@@ -189,9 +188,11 @@ public class UserDetailsFragment extends Fragment {
                         }
                         try {
                             if (isFollowingFunc(user, currentUser)) {
-                                boolean prevIsFollowing = isFollowing;
-                                unfollowUserBoth(user, currentUser);
-                                isFollowing = prevIsFollowing;
+                                forceUnfollow(user, currentUser); // TODO: subtract one following + follower
+                                int prevNumFollowers = currentUser.getInt("numFollowers");
+                                currentUser.put("numFollowers", prevNumFollowers - 1);
+                                currentUser.saveInBackground();
+
                             }
                         } catch (ParseException e) {
                             e.printStackTrace();
@@ -316,14 +317,16 @@ public class UserDetailsFragment extends Fragment {
 
     /**
      * Adds or removes currentUser as a follower of the searched-up user via Parse Cloud Code.
-     * @param isAdd A boolean that tells us whether or not we're adding currentUser as a follower.
+     * @param isAdd A boolean that tells us whether or not we're adding currentUser (userA) as a follower.
+     * @param userA The user being added/removed as a follower.
+     * @param userB The user doing the adding/removing
      */
-    protected void addOrRemoveFollower(boolean isAdd) {
+    protected void addOrRemoveFollower(boolean isAdd, ParseUser userA, ParseUser userB) {
         // Use this map to send parameters to your Cloud Code function
         // Just push the parameters you want into it
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("userA", currentUser.getObjectId());
-        parameters.put("userB", user.getObjectId());
+        parameters.put("userA", userA.getObjectId());
+        parameters.put("userB", userB.getObjectId());
 
         String funcName = "addFollower";
 
@@ -344,7 +347,7 @@ public class UserDetailsFragment extends Fragment {
     /**
      * Adds or subtracts one from the column "numFollowers" of the user that the currentUser just unfollowed.
      */
-    private void addOrSubOneFollower(boolean isAdd) {
+    private void addOrSubOneFollower(boolean isAdd, ParseUser userB) {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("userB", user.getObjectId());
         String funcName = "subOneFollower";
@@ -414,27 +417,77 @@ public class UserDetailsFragment extends Fragment {
         setBtnUnfollowColor();
         isFollowing = true;
 
-        addOrRemoveFollower(true);
-        addOrSubOneFollower(true);
+        addOrRemoveFollower(true, userA, userB);
+        addOrSubOneFollower(true, userB);
     }
 
     /**
      * Unfollows a user.
      * @param userA The user doing the unfollowing.
-     * @param userB The user being followed.
+     * @param userB The user being unfollowed.
      */
     private void unfollowUserBoth(ParseUser userA, ParseUser userB) {
         ParseRelation<ParseUser> relationA = userA.getRelation(KEY_FOLLOWING);
         relationA.remove(userB);
-        int numFollowing = userA.getInt("numFollowing");
-        userA.put("numFollowing", numFollowing - 1);
+        userA.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                int numFollowing = userA.getInt("numFollowing");
+                userA.put("numFollowing", numFollowing - 1);
+            }
+        });
 
-        userA.saveInBackground();
         setBtnFollowColor();
         isFollowing = false;
 
-        addOrRemoveFollower(false);
-        addOrSubOneFollower(false);
+        addOrRemoveFollower(false, userA, userB);
+        addOrSubOneFollower(false, userB);
+    }
+
+    /**
+     * Forces userA to unfollow userB (i.e., we're logged in as userB).
+     * @param userA The user doing the unfollowing.
+     * @param userB The user being unfollowed. userA = user, userB = currentUser
+     */
+    private void forceUnfollow(ParseUser userA, ParseUser userB) {
+        // Use this map to send parameters to your Cloud Code function
+        // Just push the parameters you want into it
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("userA", userA.getObjectId());
+        parameters.put("userB", userB.getObjectId());
+
+        String funcName = "removeFollowing";
+
+        ParseCloud.callFunctionInBackground(funcName, parameters, new FunctionCallback<String>() {
+            @Override
+            public void done(String object, ParseException e) {
+                if (e == null) {
+                    // Everything is alright
+                    addOrRemoveFollower(false, userA, userB);
+                    subOneFollowing(userA);
+                    Toast.makeText(getContext(), "Done!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    /**
+     * Subtracts one from "numFollowing" column of userA
+     * @param userA The user who unfollowed another user.
+     */
+    private void subOneFollowing(ParseUser userA) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("userB", userA.getObjectId());
+
+        ParseCloud.callFunctionInBackground("subOneFollowing", parameters, new FunctionCallback<String>() {
+            @Override
+            public void done(String object, ParseException e) {
+                if (e == null) {
+                    // Everything is alright
+                    Toast.makeText(getContext(), "Done!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     /**
