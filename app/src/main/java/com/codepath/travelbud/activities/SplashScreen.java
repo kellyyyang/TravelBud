@@ -7,6 +7,8 @@ import android.os.Bundle;
 
 import com.codepath.travelbud.R;
 
+import java.util.Objects;
+
 public class SplashScreen extends AppCompatActivity {
 
     Thread timer;
@@ -15,6 +17,8 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         timer = new Thread() {
             @Override
