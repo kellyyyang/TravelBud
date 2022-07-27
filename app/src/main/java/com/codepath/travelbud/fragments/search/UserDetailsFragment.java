@@ -309,7 +309,7 @@ public class UserDetailsFragment extends Fragment {
             public void done(String object, ParseException e) {
                 if (e == null) {
                     // Everything is alright
-                    Toast.makeText(getContext(), "Answer = " + object, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Done!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -338,7 +338,7 @@ public class UserDetailsFragment extends Fragment {
             public void done(String object, ParseException e) {
                 if (e == null) {
                     // Everything is alright
-                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Done!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -383,7 +383,7 @@ public class UserDetailsFragment extends Fragment {
             public void done(String object, ParseException e) {
                 if (e == null) {
                     // Everything is alright
-                    Toast.makeText(getContext(), "Answer = " + object.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Done!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
