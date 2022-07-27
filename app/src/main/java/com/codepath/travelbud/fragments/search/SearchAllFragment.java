@@ -191,11 +191,7 @@ public class SearchAllFragment extends Fragment {
                                 break;
                             }
                         }
-                        if (!currUserIsBlocked) {
-                            UserPostArray mPost = new UserPostArray();
-                            mPost.setPost(post);
-                            allUsersPosts.add(mPost);
-                        } else if (post.getVisibility() != 2 || !post.getUser().getBoolean("isPrivate")) {
+                        if (!currUserIsBlocked && (post.getVisibility() != 2 || !post.getUser().getBoolean("isPrivate"))) {
                                 UserPostArray mPost = new UserPostArray();
                                 mPost.setPost(post);
                                 allUsersPosts.add(mPost);
