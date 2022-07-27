@@ -162,16 +162,13 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
                         btnUpvote.setImageResource(R.drawable.filled_thumb_up);
                         post.setNumUpvotes(previousUpvotes + 1);
                         relation.add(ParseUser.getCurrentUser());
-                        ParseUser.getCurrentUser().saveInBackground();
-                        post.saveInBackground();
-                        Log.i(TAG, "upvoted!");
                     } else {
                         btnUpvote.setImageResource(R.drawable.ic_outline_thumb_up_alt_24);
                         post.setNumUpvotes(previousUpvotes - 1);
                         relation.remove(ParseUser.getCurrentUser());
-                        ParseUser.getCurrentUser().saveInBackground();
-                        post.saveInBackground();
                     }
+                    ParseUser.getCurrentUser().saveInBackground();
+                    post.saveInBackground();
                     tvNumUps.setText(String.valueOf(post.getNumUpvotes()));
                 }
             });
@@ -179,22 +176,25 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             btnDownvote.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    boolean hasDisliked = alreadyDisliked(ParseUser.getCurrentUser(), post);
+                    boolean hasDisliked = false;
+                    try {
+                        hasDisliked = alreadyDisliked(ParseUser.getCurrentUser(), post);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                     ParseRelation<ParseUser> relation = post.getRelation("downvoters");
                     int previousDownvotes = post.getNumDownvotes();
                     if (!hasDisliked) {
                         btnDownvote.setImageResource(R.drawable.filled_thumb_down);
                         post.setNumDownvotes(previousDownvotes + 1);
                         relation.add(ParseUser.getCurrentUser());
-                        ParseUser.getCurrentUser().saveInBackground();
-                        post.saveInBackground();
                     } else {
                         btnDownvote.setImageResource(R.drawable.ic_outline_thumb_down_alt_24);
                         post.setNumDownvotes(previousDownvotes - 1);
                         relation.remove(ParseUser.getCurrentUser());
-                        ParseUser.getCurrentUser().saveInBackground();
-                        post.saveInBackground();
                     }
+                    ParseUser.getCurrentUser().saveInBackground();
+                    post.saveInBackground();
                     tvNumDowns.setText(String.valueOf(post.getNumDownvotes()));
                 }
             });
@@ -243,21 +243,15 @@ public class PostsAdapter extends RecyclerView.Adapter<PostsAdapter.ViewHolder> 
             return false;
         }
 
-        public boolean alreadyDisliked(ParseUser aUser, Post aPost) {
+        public boolean alreadyDisliked(ParseUser aUser, Post aPost) throws ParseException {
             ParseRelation<ParseUser> downs = aPost.getRelation("downvoters");
             ParseQuery<ParseUser> userDowns = downs.getQuery();
-            final boolean[] hasLiked = {false};
-            userDowns.findInBackground(new FindCallback<ParseUser>() {
-                @Override
-                public void done(List<ParseUser> objects, ParseException e) {
-                    for (ParseUser pUser : objects) {
-                        if (pUser.getObjectId().equals(aUser.getObjectId())) {
-                            hasLiked[0] = true;
-                        }
-                    }
+            for (ParseUser pUser : userDowns.find()) {
+                if (pUser.getObjectId().equals(aUser.getObjectId())) {
+                    return true;
                 }
-            });
-            return hasLiked[0];
+            }
+            return false;
         }
 
         public void bindProfile(Post post) {
