@@ -13,10 +13,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.codepath.travelbud.fragments.profile.EditProfileFragment;
 import com.codepath.travelbud.models.Post;
 import com.codepath.travelbud.adapters.PostsAdapter;
 import com.codepath.travelbud.R;
@@ -49,6 +57,7 @@ import com.parse.SaveCallback;
 // Java Dependencies
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,6 +84,8 @@ public class UserDetailsFragment extends Fragment {
     private PostsAdapter adapter;
     private List<Post> allPosts;
     private List<ParseUser> requestedFollowers;
+
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     private boolean isFollowing;
     private List<String> followingUsers;
@@ -112,6 +123,8 @@ public class UserDetailsFragment extends Fragment {
         tbUserDetails = view.findViewById(R.id.tbUserDetails);
         tbUserDetails.getMenu().clear();
         tbUserDetails.inflateMenu(R.menu.menu_user_details);
+
+        swipeRefreshLayout = view.findViewById(R.id.swipeContainerUD);
 
         allPosts = new ArrayList<>();
         requestedFollowers = new ArrayList<>();
@@ -157,6 +170,27 @@ public class UserDetailsFragment extends Fragment {
             e.printStackTrace();
         }
 
+//        final Handler refreshHandler = new Handler();
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                // do updates
+//                Fragment currentFragment = requireActivity().getSupportFragmentManager().findFragmentByTag("FRAGMENT_USER_DETAILS");
+//                Log.i(TAG, "in run()");
+//                FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
+//                assert currentFragment != null;
+////                        fragmentTransaction.detach(currentFragment).attach(currentFragment).commit();
+////                        fragmentTransaction.detach(currentFragment);
+//                fragmentTransaction.replace(R.id.flContainer, currentFragment);
+//                fragmentTransaction.commit();
+////                        fragmentTransaction.attach(currentFragment);
+////                        fragmentTransaction.commit();
+//
+//                refreshHandler.postDelayed(this, 3 * 1000);
+//            }
+//        };
+//        refreshHandler.postDelayed(runnable, 3 * 1000);
+
         if (isFollowing || !user.getBoolean(KEY_IS_PRIVATE)) {
             ivLock.setVisibility(View.GONE);
             tvPrivateP.setVisibility(View.GONE);
@@ -169,6 +203,7 @@ public class UserDetailsFragment extends Fragment {
         tbUserDetails.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                Log.i(TAG, "Clicked!");
                 if (item.getItemId() == R.id.action_block) {
                     // boolean showing whether currentUser has blocked the searched-up user
                     boolean userIsBlocked = false;
@@ -244,6 +279,36 @@ public class UserDetailsFragment extends Fragment {
 
         rvPostsSearch.setAdapter(adapter);
         rvPostsSearch.setLayoutManager(new GridLayoutManager(getContext(), 3));
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                adapter.clear();
+
+                // set number of following and followers
+                tvNumFollowingSearch.setText(String.valueOf(user.getInt("numFollowing")));
+                tvNumFollowersSearch.setText(String.valueOf(user.getInt("numFollowers")));
+
+                queryPosts();
+                try {
+                    setButtonAppearance();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Log.i(TAG, "isFollowing: " + isFollowing);
+                if (isFollowing || !user.getBoolean(KEY_IS_PRIVATE)) {
+                    ivLock.setVisibility(View.GONE);
+                    rvPostsSearch.setVisibility(View.VISIBLE);
+                    tvPrivateP.setVisibility(View.GONE);
+                    divPrivate.setVisibility(View.GONE);
+                } else {
+                    ivLock.setVisibility(View.VISIBLE);
+                    tvPrivateP.setVisibility(View.VISIBLE);
+                    divPrivate.setVisibility(View.VISIBLE);
+                    rvPostsSearch.setVisibility(View.GONE);
+                }
+            }
+        });
 
         queryPosts();
     }
@@ -602,6 +667,7 @@ public class UserDetailsFragment extends Fragment {
                 }
                 allPosts.addAll(posts);
                 adapter.notifyDataSetChanged();
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }

@@ -141,7 +141,7 @@ public class SearchAllFragment extends Fragment {
             userDetailsFragment.setArguments(bundle);
             FragmentManager manager=getFragmentManager();
             FragmentTransaction transaction=manager.beginTransaction();
-            transaction.replace(R.id.flContainer, userDetailsFragment).commit();
+            transaction.replace(R.id.flContainer, userDetailsFragment, "FRAGMENT_USER_DETAILS").commit();
         }
 
         @Override
