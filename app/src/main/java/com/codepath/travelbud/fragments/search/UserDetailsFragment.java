@@ -170,27 +170,6 @@ public class UserDetailsFragment extends Fragment {
             e.printStackTrace();
         }
 
-//        final Handler refreshHandler = new Handler();
-//        Runnable runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                // do updates
-//                Fragment currentFragment = requireActivity().getSupportFragmentManager().findFragmentByTag("FRAGMENT_USER_DETAILS");
-//                Log.i(TAG, "in run()");
-//                FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
-//                assert currentFragment != null;
-////                        fragmentTransaction.detach(currentFragment).attach(currentFragment).commit();
-////                        fragmentTransaction.detach(currentFragment);
-//                fragmentTransaction.replace(R.id.flContainer, currentFragment);
-//                fragmentTransaction.commit();
-////                        fragmentTransaction.attach(currentFragment);
-////                        fragmentTransaction.commit();
-//
-//                refreshHandler.postDelayed(this, 3 * 1000);
-//            }
-//        };
-//        refreshHandler.postDelayed(runnable, 3 * 1000);
-
         if (isFollowing || !user.getBoolean(KEY_IS_PRIVATE)) {
             ivLock.setVisibility(View.GONE);
             tvPrivateP.setVisibility(View.GONE);
