@@ -109,7 +109,7 @@ public class ComposeFragment extends Fragment {
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public final static int PICK_PHOTO_CODE = 1046;
 
-    public static final Integer MIN_DESCRIPTION_LEN = 90;
+    public static final Integer MIN_DESCRIPTION_LEN = 0;
 
     Activity activity = new Activity();
 
